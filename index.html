@@ -2,447 +2,115 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
-    <title>두바이 쫀득 쿠키 타이쿤 - Dubai Cookie Tycoon</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2D1B0E">
+    <title>두바이 쫀득 쿠키 타이쿤 - Mobile Premium Edition</title>
     <style>
         /* ========================================
-           CSS RESET & BASE STYLES
+           PREMIUM MOBILE-FIRST DESIGN SYSTEM
            ======================================== */
+
+        /* CSS Variables - Dubai Cookie Color Palette */
+        :root {
+            /* Chocolate Coating */
+            --chocolate-dark: #2D1B0E;
+            --chocolate-mid: #5D4037;
+            --chocolate-light: #8D6E63;
+
+            /* Kataifi (Golden Strands) */
+            --kataifi-gold: #FFD54F;
+            --kataifi-bright: #FFC107;
+            --kataifi-shadow: #FFA000;
+
+            /* Pistachio Filling */
+            --pistachio-main: #7CB342;
+            --pistachio-dark: #558B2F;
+            --pistachio-light: #C5E1A5;
+            --pistachio-glow: #AED581;
+
+            /* Cookie Dough */
+            --dough-base: #D7C49E;
+            --dough-dark: #A89C7E;
+            --dough-light: #F5E6D3;
+
+            /* UI Colors */
+            --ui-bg: #1A0F0A;
+            --ui-panel: rgba(26, 15, 10, 0.95);
+            --ui-accent: #FF6B6B;
+            --ui-success: #51CF66;
+            --ui-warning: #FFD93D;
+            --ui-text: #F8F9FA;
+            --ui-text-dim: #ADB5BD;
+
+            /* Shadows & Glows */
+            --shadow-hard: 0 4px 0 rgba(0,0,0,0.5);
+            --shadow-soft: 0 8px 16px rgba(0,0,0,0.3);
+            --glow-pistachio: 0 0 20px rgba(124,179,66,0.6);
+            --glow-gold: 0 0 20px rgba(255,193,7,0.6);
+        }
+
+        /* Reset & Base */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            user-select: none;
         }
 
         html, body {
             width: 100%;
             height: 100%;
             overflow: hidden;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            color: #fff;
-            touch-action: none;
+            background: var(--chocolate-dark);
+            color: var(--ui-text);
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            touch-action: manipulation;
+            overscroll-behavior: none;
+        }
+
+        /* Safe Area for Notches */
+        body {
+            padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
         }
 
         /* ========================================
-           GAME CONTAINER
+           MAIN GAME CONTAINER
            ======================================== */
         #game-container {
             width: 100%;
             height: 100%;
+            max-width: 480px;
+            margin: 0 auto;
+            position: relative;
             display: flex;
             flex-direction: column;
-            position: relative;
-            max-width: 1200px;
-            margin: 0 auto;
-            background: linear-gradient(180deg, #0f3460 0%, #16213e 100%);
-        }
-
-        /* ========================================
-           HEADER SECTION
-           ======================================== */
-        #game-header {
-            flex: 0 0 80px;
-            background: linear-gradient(135deg, #e94560 0%, #d63447 100%);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 20px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-            position: relative;
-            z-index: 100;
-        }
-
-        #game-title {
-            font-size: 28px;
-            font-weight: bold;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
-            letter-spacing: 1px;
-        }
-
-        #money-display {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 24px;
-            font-weight: bold;
-            background: rgba(0,0,0,0.3);
-            padding: 10px 20px;
-            border-radius: 20px;
-            box-shadow: inset 0 2px 4px rgba(0,0,0,0.3);
-        }
-
-        #money-icon {
-            width: 32px;
-            height: 32px;
-            background: gold;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-        }
-
-        /* ========================================
-           MAIN GAME AREA
-           ======================================== */
-        #game-main {
-            flex: 1;
-            display: flex;
-            position: relative;
+            background: linear-gradient(180deg, var(--chocolate-mid) 0%, var(--chocolate-dark) 100%);
             overflow: hidden;
         }
 
-        #canvas-container {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-        }
-
+        /* ========================================
+           CANVAS LAYER (Main Game Render)
+           ======================================== */
         #game-canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
             width: 100%;
             height: 100%;
             image-rendering: pixelated;
             image-rendering: -moz-crisp-edges;
             image-rendering: crisp-edges;
             cursor: pointer;
+            touch-action: none;
         }
 
-        /* ========================================
-           SIDE PANEL
-           ======================================== */
-        #side-panel {
-            flex: 0 0 350px;
-            background: linear-gradient(180deg, #1a1a2e 0%, #0f1419 100%);
-            border-left: 3px solid #e94560;
-            display: flex;
-            flex-direction: column;
-            overflow-y: auto;
-            box-shadow: -4px 0 12px rgba(0,0,0,0.3);
-        }
-
-        .panel-section {
-            padding: 20px;
-            border-bottom: 2px solid rgba(233,69,96,0.3);
-        }
-
-        .panel-section h2 {
-            font-size: 20px;
-            margin-bottom: 15px;
-            color: #e94560;
-            text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        }
-
-        /* ========================================
-           RESOURCE DISPLAY
-           ======================================== */
-        .resource-item {
-            background: rgba(255,255,255,0.05);
-            padding: 12px;
-            margin-bottom: 10px;
-            border-radius: 8px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border-left: 4px solid #4ecca3;
-            transition: all 0.3s ease;
-        }
-
-        .resource-item:hover {
-            background: rgba(255,255,255,0.1);
-            transform: translateX(4px);
-        }
-
-        .resource-name {
-            font-size: 14px;
-            color: #bbb;
-        }
-
-        .resource-amount {
-            font-size: 18px;
-            font-weight: bold;
-            color: #4ecca3;
-        }
-
-        /* ========================================
-           UPGRADE BUTTONS
-           ======================================== */
-        .upgrade-btn {
-            width: 100%;
-            background: linear-gradient(135deg, #4ecca3 0%, #3ba77e 100%);
-            border: none;
-            border-radius: 10px;
-            padding: 15px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            color: white;
-            font-size: 14px;
-            font-weight: bold;
-            text-align: left;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-            transition: all 0.2s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .upgrade-btn:hover:not(:disabled) {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
-        }
-
-        .upgrade-btn:active:not(:disabled) {
-            transform: translateY(0);
-            box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-        }
-
-        .upgrade-btn:disabled {
-            background: linear-gradient(135deg, #555 0%, #333 100%);
-            cursor: not-allowed;
-            opacity: 0.5;
-        }
-
-        .upgrade-title {
-            display: block;
-            font-size: 16px;
-            margin-bottom: 5px;
-        }
-
-        .upgrade-desc {
-            display: block;
-            font-size: 12px;
-            opacity: 0.9;
-            margin-bottom: 5px;
-        }
-
-        .upgrade-cost {
-            display: block;
-            font-size: 14px;
-            color: #ffeb3b;
-            font-weight: bold;
-        }
-
-        .upgrade-level {
-            position: absolute;
-            top: 10px;
-            right: 15px;
-            background: rgba(0,0,0,0.3);
-            padding: 5px 10px;
-            border-radius: 12px;
-            font-size: 12px;
-        }
-
-        /* ========================================
-           MINIGAME MODAL
-           ======================================== */
-        .modal {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        .modal-content {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
-            padding: 30px;
-            border-radius: 20px;
-            border: 3px solid #e94560;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            min-width: 400px;
-            max-width: 90%;
-            animation: slideUp 0.3s ease;
-        }
-
-        @keyframes slideUp {
-            from { transform: translateY(50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .modal-header {
-            font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #e94560;
-            text-align: center;
-        }
-
-        .modal-body {
-            margin-bottom: 20px;
-        }
-
-        .modal-footer {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-
-        .modal-btn {
-            padding: 12px 24px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
-            cursor: pointer;
-            transition: all 0.2s ease;
-        }
-
-        .modal-btn-primary {
-            background: linear-gradient(135deg, #e94560 0%, #d63447 100%);
-            color: white;
-        }
-
-        .modal-btn-secondary {
-            background: linear-gradient(135deg, #4ecca3 0%, #3ba77e 100%);
-            color: white;
-        }
-
-        .modal-btn:hover {
-            transform: scale(1.05);
-        }
-
-        /* ========================================
-           MINIGAME CANVAS
-           ======================================== */
-        #minigame-canvas {
-            width: 100%;
-            height: 300px;
-            background: #0f3460;
-            border-radius: 10px;
-            margin-bottom: 15px;
-            border: 2px solid #4ecca3;
-        }
-
-        .minigame-instruction {
-            text-align: center;
-            font-size: 16px;
-            color: #bbb;
-            margin-bottom: 15px;
-        }
-
-        .minigame-progress {
-            width: 100%;
-            height: 30px;
-            background: rgba(0,0,0,0.3);
-            border-radius: 15px;
-            overflow: hidden;
-            margin-bottom: 15px;
-        }
-
-        .minigame-progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #4ecca3 0%, #3ba77e 100%);
-            transition: width 0.3s ease;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        /* ========================================
-           CUSTOMER QUEUE DISPLAY
-           ======================================== */
-        #customer-queue {
-            padding: 15px;
-            background: rgba(0,0,0,0.2);
-            border-radius: 10px;
-        }
-
-        .customer-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding: 10px;
-            margin-bottom: 8px;
-            background: rgba(255,255,255,0.05);
-            border-radius: 8px;
-            border-left: 3px solid #ffd700;
-        }
-
-        .customer-emotion {
-            font-size: 24px;
-        }
-
-        .customer-info {
-            flex: 1;
-        }
-
-        .customer-name {
-            font-size: 14px;
-            font-weight: bold;
-        }
-
-        .customer-patience {
-            width: 100%;
-            height: 4px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 2px;
-            margin-top: 5px;
-            overflow: hidden;
-        }
-
-        .customer-patience-bar {
-            height: 100%;
-            background: linear-gradient(90deg, #ff4444 0%, #ffd700 50%, #4ecca3 100%);
-            transition: width 0.3s ease;
-        }
-
-        /* ========================================
-           NOTIFICATION SYSTEM
-           ======================================== */
-        #notification-container {
-            position: fixed;
-            top: 100px;
-            right: 20px;
-            z-index: 2000;
-            pointer-events: none;
-        }
-
-        .notification {
-            background: linear-gradient(135deg, #e94560 0%, #d63447 100%);
-            color: white;
-            padding: 15px 20px;
-            border-radius: 10px;
-            margin-bottom: 10px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.4);
-            animation: slideInRight 0.3s ease;
-            pointer-events: all;
-            max-width: 300px;
-        }
-
-        @keyframes slideInRight {
-            from { transform: translateX(400px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        .notification.success {
-            background: linear-gradient(135deg, #4ecca3 0%, #3ba77e 100%);
-        }
-
-        .notification.warning {
-            background: linear-gradient(135deg, #ffd700 0%, #ffb700 100%);
-            color: #333;
-        }
-
-        /* ========================================
-           PARTICLE SYSTEM
-           ======================================== */
+        /* Particle Canvas (Overlay) */
         #particle-canvas {
             position: absolute;
             top: 0;
@@ -454,123 +122,290 @@
         }
 
         /* ========================================
-           BOTTOM AD BANNER
+           UI LAYER (HUD & Controls)
            ======================================== */
-        #ad-banner {
-            flex: 0 0 60px;
-            background: linear-gradient(135deg, #333 0%, #222 100%);
+        .ui-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
             display: flex;
-            align-items: center;
-            justify-content: center;
-            border-top: 2px solid #444;
-            color: #888;
-            font-size: 12px;
+            flex-direction: column;
+            justify-content: space-between;
+            z-index: 20;
         }
 
-        /* ========================================
-           REWARD AD BUTTON
-           ======================================== */
-        .reward-ad-btn {
-            background: linear-gradient(135deg, #9c27b0 0%, #7b1fa2 100%);
-            border: none;
-            border-radius: 8px;
-            padding: 12px 20px;
-            color: white;
-            font-size: 14px;
+        /* Top HUD */
+        .hud-top {
+            background: linear-gradient(180deg, rgba(26,15,10,0.95) 0%, transparent 100%);
+            padding: 16px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 24px;
             font-weight: bold;
-            cursor: pointer;
+            text-shadow: 2px 2px 0 rgba(0,0,0,0.8);
+            pointer-events: auto;
+        }
+
+        .currency-display {
             display: flex;
             align-items: center;
             gap: 8px;
-            margin: 10px 0;
-            width: 100%;
-            justify-content: center;
-            transition: all 0.2s ease;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            color: var(--kataifi-gold);
+            animation: pulse 2s ease-in-out infinite;
         }
 
-        .reward-ad-btn:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
         }
 
-        .reward-ad-btn:active {
-            transform: translateY(0);
+        .currency-icon {
+            font-size: 28px;
+            filter: drop-shadow(var(--glow-gold));
         }
 
-        .reward-ad-btn::before {
-            content: "📺";
+        .level-display {
+            background: var(--pistachio-main);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 20px;
+            box-shadow: var(--shadow-hard);
             font-size: 18px;
         }
 
-        /* ========================================
-           TABS SYSTEM
-           ======================================== */
-        .tab-buttons {
+        /* Bottom Controls (Thumb Zone) */
+        .controls-bottom {
+            background: linear-gradient(0deg, rgba(26,15,10,0.98) 0%, transparent 100%);
+            padding: 20px 16px 32px 16px;
             display: flex;
-            gap: 5px;
-            margin-bottom: 15px;
+            flex-direction: column;
+            gap: 12px;
+            pointer-events: auto;
         }
 
-        .tab-btn {
-            flex: 1;
-            padding: 10px;
-            background: rgba(255,255,255,0.1);
+        /* Action Buttons */
+        .action-btn {
+            background: linear-gradient(135deg, var(--pistachio-main) 0%, var(--pistachio-dark) 100%);
             border: none;
-            border-radius: 6px;
+            border-radius: 16px;
+            padding: 20px;
             color: white;
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            box-shadow: var(--shadow-hard);
+            transition: all 0.1s cubic-bezier(0.4, 0, 0.2, 1);
             cursor: pointer;
-            transition: all 0.2s ease;
+            touch-action: manipulation;
+            position: relative;
+            overflow: hidden;
         }
 
-        .tab-btn.active {
-            background: linear-gradient(135deg, #e94560 0%, #d63447 100%);
+        .action-btn:active {
+            transform: translateY(4px);
+            box-shadow: 0 0 0 rgba(0,0,0,0.5);
         }
 
-        .tab-content {
-            display: none;
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
         }
 
-        .tab-content.active {
-            display: block;
+        .action-btn:active::before {
+            left: 100%;
+        }
+
+        .action-btn.primary {
+            background: linear-gradient(135deg, var(--kataifi-gold) 0%, var(--kataifi-bright) 100%);
+            color: var(--chocolate-dark);
+            font-size: 24px;
+            animation: glow-pulse 2s ease-in-out infinite;
+        }
+
+        @keyframes glow-pulse {
+            0%, 100% { box-shadow: var(--shadow-hard); }
+            50% { box-shadow: var(--shadow-hard), var(--glow-gold); }
+        }
+
+        .action-btn.secondary {
+            background: linear-gradient(135deg, var(--chocolate-mid) 0%, var(--chocolate-dark) 100%);
+            color: var(--kataifi-gold);
+        }
+
+        .action-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            animation: none;
+        }
+
+        /* Resource Bar */
+        .resource-bar {
+            display: flex;
+            gap: 8px;
+            padding: 12px;
+            background: var(--ui-panel);
+            border-radius: 12px;
+            justify-content: space-around;
+        }
+
+        .resource-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            font-size: 14px;
+        }
+
+        .resource-icon {
+            font-size: 32px;
+            filter: drop-shadow(2px 2px 0 rgba(0,0,0,0.5));
+        }
+
+        .resource-count {
+            font-weight: bold;
+            color: var(--kataifi-gold);
         }
 
         /* ========================================
-           STATS DISPLAY
+           FLOATING TEXT ANIMATIONS
            ======================================== */
-        .stat-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .stat-label {
-            color: #bbb;
-            font-size: 13px;
-        }
-
-        .stat-value {
-            color: #4ecca3;
+        .floating-text {
+            position: absolute;
+            font-size: 32px;
             font-weight: bold;
-            font-size: 13px;
+            pointer-events: none;
+            z-index: 100;
+            text-shadow: 3px 3px 0 rgba(0,0,0,0.8);
+            animation: float-up 1.5s cubic-bezier(0.4, 0, 0.2, 1) forwards;
+        }
+
+        @keyframes float-up {
+            0% {
+                transform: translateY(0) scale(0.5);
+                opacity: 0;
+            }
+            20% {
+                opacity: 1;
+                transform: translateY(-20px) scale(1.2);
+            }
+            100% {
+                transform: translateY(-100px) scale(1);
+                opacity: 0;
+            }
+        }
+
+        /* ========================================
+           MODAL SYSTEM
+           ======================================== */
+        .modal-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 200;
+            pointer-events: auto;
+            animation: fade-in 0.3s ease;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        @keyframes fade-in {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: var(--ui-panel);
+            border: 4px solid var(--kataifi-gold);
+            border-radius: 24px;
+            padding: 32px;
+            max-width: 90%;
+            text-align: center;
+            box-shadow: var(--shadow-soft), var(--glow-gold);
+            animation: slide-up 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+        }
+
+        @keyframes slide-up {
+            from {
+                transform: translateY(100px) scale(0.8);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+        }
+
+        .modal-title {
+            font-size: 32px;
+            color: var(--kataifi-gold);
+            margin-bottom: 16px;
+            text-shadow: 2px 2px 0 var(--chocolate-dark);
+        }
+
+        .modal-text {
+            font-size: 20px;
+            color: var(--ui-text);
+            margin-bottom: 24px;
+            line-height: 1.5;
+        }
+
+        .modal-cookie {
+            font-size: 80px;
+            margin: 20px 0;
+            animation: bounce 1s ease-in-out infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        /* ========================================
+           SCREEN SHAKE EFFECT
+           ======================================== */
+        .shake {
+            animation: shake 0.3s cubic-bezier(0.36, 0.07, 0.19, 0.97);
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
+            20%, 40%, 60%, 80% { transform: translateX(8px); }
         }
 
         /* ========================================
            LOADING SCREEN
            ======================================== */
         #loading-screen {
-            position: fixed;
+            position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+            background: var(--chocolate-dark);
             display: flex;
             flex-direction: column;
-            align-items: center;
             justify-content: center;
-            z-index: 10000;
+            align-items: center;
+            z-index: 1000;
             transition: opacity 0.5s ease;
         }
 
@@ -579,174 +414,105 @@
             pointer-events: none;
         }
 
-        .loading-logo {
-            font-size: 48px;
-            margin-bottom: 30px;
-            animation: bounce 1s infinite;
+        .loading-cookie {
+            font-size: 100px;
+            animation: spin 2s linear infinite;
         }
 
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
         }
 
         .loading-text {
             font-size: 24px;
-            font-weight: bold;
-            margin-bottom: 20px;
-            color: #e94560;
+            color: var(--kataifi-gold);
+            margin-top: 20px;
+            animation: pulse 1.5s ease-in-out infinite;
         }
 
         .loading-bar {
-            width: 300px;
-            height: 20px;
+            width: 80%;
+            max-width: 300px;
+            height: 8px;
             background: rgba(255,255,255,0.1);
-            border-radius: 10px;
+            border-radius: 4px;
+            margin-top: 20px;
             overflow: hidden;
         }
 
         .loading-bar-fill {
             height: 100%;
-            background: linear-gradient(90deg, #e94560 0%, #4ecca3 100%);
+            background: linear-gradient(90deg, var(--pistachio-main), var(--kataifi-gold));
             width: 0%;
             transition: width 0.3s ease;
+            box-shadow: var(--glow-pistachio);
         }
 
         /* ========================================
-           RESPONSIVE DESIGN
+           AD BANNER
            ======================================== */
-        @media (max-width: 768px) {
-            #side-panel {
-                flex: 0 0 100%;
-                position: absolute;
-                top: 0;
-                right: -100%;
-                height: 100%;
-                transition: right 0.3s ease;
-                z-index: 500;
-            }
-
-            #side-panel.open {
-                right: 0;
-            }
-
-            #toggle-panel-btn {
-                position: absolute;
-                top: 50%;
-                left: 10px;
-                transform: translateY(-50%);
-                background: linear-gradient(135deg, #e94560 0%, #d63447 100%);
-                border: none;
-                border-radius: 8px;
-                padding: 10px 15px;
-                color: white;
-                font-weight: bold;
-                cursor: pointer;
-                z-index: 200;
-                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
-            }
-
-            .modal-content {
-                min-width: 300px;
-                padding: 20px;
-            }
-        }
-
-        /* ========================================
-           SPECIAL EFFECTS
-           ======================================== */
-        .shake {
-            animation: shake 0.5s;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-10px); }
-            20%, 40%, 60%, 80% { transform: translateX(10px); }
-        }
-
-        .pulse {
-            animation: pulse 0.5s;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.1); }
-        }
-
-        .glow {
-            box-shadow: 0 0 20px rgba(78, 204, 163, 0.8);
-        }
-
-        /* ========================================
-           SCROLLBAR STYLING
-           ======================================== */
-        #side-panel::-webkit-scrollbar {
-            width: 8px;
-        }
-
-        #side-panel::-webkit-scrollbar-track {
-            background: rgba(0,0,0,0.2);
-        }
-
-        #side-panel::-webkit-scrollbar-thumb {
-            background: #e94560;
-            border-radius: 4px;
-        }
-
-        #side-panel::-webkit-scrollbar-thumb:hover {
-            background: #d63447;
-        }
-
-        /* ========================================
-           ACHIEVEMENT BADGE
-           ======================================== */
-        .achievement-badge {
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            background: linear-gradient(135deg, #ffd700 0%, #ffb700 100%);
-            padding: 30px;
-            border-radius: 20px;
-            border: 4px solid #fff;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
-            z-index: 3000;
+        .ad-banner {
+            background: var(--chocolate-mid);
+            color: var(--ui-text-dim);
+            padding: 12px;
             text-align: center;
-            animation: achievementPop 2s ease;
-        }
-
-        @keyframes achievementPop {
-            0% { transform: translate(-50%, -50%) scale(0); }
-            10% { transform: translate(-50%, -50%) scale(1.2); }
-            20% { transform: translate(-50%, -50%) scale(1); }
-            90% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
-            100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
-        }
-
-        .achievement-icon {
-            font-size: 64px;
-            margin-bottom: 10px;
-        }
-
-        .achievement-title {
-            font-size: 24px;
-            font-weight: bold;
-            color: #333;
-            margin-bottom: 5px;
-        }
-
-        .achievement-desc {
             font-size: 14px;
-            color: #666;
+            border-top: 2px solid var(--kataifi-gold);
+            pointer-events: auto;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .ad-banner:active {
+            background: var(--chocolate-light);
+        }
+
+        /* ========================================
+           RESPONSIVE ADJUSTMENTS
+           ======================================== */
+        @media (max-height: 600px) {
+            .action-btn {
+                padding: 16px;
+                font-size: 18px;
+            }
+
+            .hud-top {
+                padding: 12px;
+                font-size: 20px;
+            }
+        }
+
+        /* ========================================
+           ACCESSIBILITY
+           ======================================== */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+
+        /* ========================================
+           HAPTIC FEEDBACK SIMULATION
+           ======================================== */
+        .haptic-light {
+            animation: haptic-vibrate 0.1s;
+        }
+
+        @keyframes haptic-vibrate {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-2px); }
+            75% { transform: translateX(2px); }
         }
     </style>
 </head>
 <body>
     <!-- LOADING SCREEN -->
     <div id="loading-screen">
-        <div class="loading-logo">🍪</div>
-        <div class="loading-text">두바이 쫀득 쿠키 타이쿤</div>
+        <div class="loading-cookie">🍪</div>
+        <div class="loading-text">두바이 쫀득 쿠키 로딩 중...</div>
         <div class="loading-bar">
             <div class="loading-bar-fill" id="loading-bar-fill"></div>
         </div>
@@ -754,815 +520,567 @@
 
     <!-- MAIN GAME CONTAINER -->
     <div id="game-container">
-        <!-- HEADER -->
-        <header id="game-header">
-            <div id="game-title">🍪 두쫀쿠 타이쿤</div>
-            <div id="money-display">
-                <div id="money-icon">₩</div>
-                <span id="money-value">0</span>
-            </div>
-        </header>
+        <!-- Canvas Layers -->
+        <canvas id="game-canvas"></canvas>
+        <canvas id="particle-canvas"></canvas>
 
-        <!-- MAIN GAME AREA -->
-        <main id="game-main">
-            <!-- CANVAS CONTAINER -->
-            <div id="canvas-container">
-                <canvas id="game-canvas"></canvas>
-                <canvas id="particle-canvas"></canvas>
-                <button id="toggle-panel-btn" style="display: none;">메뉴</button>
+        <!-- UI Layer -->
+        <div class="ui-layer">
+            <!-- Top HUD -->
+            <div class="hud-top">
+                <div class="currency-display">
+                    <span class="currency-icon">💰</span>
+                    <span id="money-amount">0</span>
+                </div>
+                <div class="level-display">
+                    Lv. <span id="level-num">1</span>
+                </div>
             </div>
 
-            <!-- SIDE PANEL -->
-            <aside id="side-panel">
-                <!-- RESOURCES -->
-                <div class="panel-section">
-                    <h2>📦 재료 보관함</h2>
+            <!-- Bottom Controls (Thumb Zone) -->
+            <div class="controls-bottom">
+                <!-- Resource Bar -->
+                <div class="resource-bar">
                     <div class="resource-item">
-                        <span class="resource-name">카다이프면</span>
-                        <span class="resource-amount" id="kadayif-amount">0</span>
+                        <div class="resource-icon">🌾</div>
+                        <div class="resource-count" id="kataifi-count">0</div>
                     </div>
                     <div class="resource-item">
-                        <span class="resource-name">피스타치오</span>
-                        <span class="resource-amount" id="pistachio-amount">0</span>
+                        <div class="resource-icon">🥜</div>
+                        <div class="resource-count" id="pistachio-count">0</div>
                     </div>
                     <div class="resource-item">
-                        <span class="resource-name">두바이 필링</span>
-                        <span class="resource-amount" id="filling-amount">0</span>
+                        <div class="resource-icon">🍯</div>
+                        <div class="resource-count" id="filling-count">0</div>
                     </div>
                     <div class="resource-item">
-                        <span class="resource-name">쿠키 도우</span>
-                        <span class="resource-amount" id="dough-amount">0</span>
-                    </div>
-                    <div class="resource-item">
-                        <span class="resource-name">완성 쿠키</span>
-                        <span class="resource-amount" id="cookie-amount">0</span>
+                        <div class="resource-icon">🍪</div>
+                        <div class="resource-count" id="cookie-count">0</div>
                     </div>
                 </div>
 
-                <!-- TABS -->
-                <div class="panel-section">
-                    <div class="tab-buttons">
-                        <button class="tab-btn active" onclick="switchTab('production')">생산</button>
-                        <button class="tab-btn" onclick="switchTab('upgrades')">업그레이드</button>
-                        <button class="tab-btn" onclick="switchTab('stats')">통계</button>
-                    </div>
-
-                    <!-- PRODUCTION TAB -->
-                    <div id="production-tab" class="tab-content active">
-                        <button class="upgrade-btn" onclick="startKadayifMinigame()">
-                            <span class="upgrade-title">🔥 카다이프면 볶기</span>
-                            <span class="upgrade-desc">타이밍 미니게임으로 바삭하게!</span>
-                        </button>
-                        <button class="upgrade-btn" onclick="startPistachioMinigame()">
-                            <span class="upgrade-title">🥜 피스타치오 분쇄</span>
-                            <span class="upgrade-desc">클릭으로 고운 가루로!</span>
-                        </button>
-                        <button class="upgrade-btn" onclick="mergeFilling()" id="merge-filling-btn">
-                            <span class="upgrade-title">🍯 두바이 필링 합성</span>
-                            <span class="upgrade-desc">카다이프 5개 + 피스타치오 3개</span>
-                        </button>
-                        <button class="upgrade-btn" onclick="startBaking()" id="bake-btn">
-                            <span class="upgrade-title">🔥 쿠키 굽기</span>
-                            <span class="upgrade-desc">도우 1개 + 필링 1개</span>
-                        </button>
-                        <button class="upgrade-btn" onclick="buyDough()" id="buy-dough-btn">
-                            <span class="upgrade-title">🛒 쿠키 도우 구매</span>
-                            <span class="upgrade-cost">비용: ₩500</span>
-                        </button>
-
-                        <!-- REWARD AD -->
-                        <button class="reward-ad-btn" onclick="watchRewardAd('boost')">
-                            광고 보고 2배 부스트 받기!
-                        </button>
-                    </div>
-
-                    <!-- UPGRADES TAB -->
-                    <div id="upgrades-tab" class="tab-content">
-                        <button class="upgrade-btn" onclick="buyUpgrade('autoKadayif')" id="upgrade-auto-kadayif">
-                            <span class="upgrade-level">Lv <span id="level-auto-kadayif">0</span></span>
-                            <span class="upgrade-title">🤖 자동 카다이프 제조기</span>
-                            <span class="upgrade-desc">초당 자동 생산</span>
-                            <span class="upgrade-cost" id="cost-auto-kadayif">₩1,000</span>
-                        </button>
-                        <button class="upgrade-btn" onclick="buyUpgrade('autoPistachio')" id="upgrade-auto-pistachio">
-                            <span class="upgrade-level">Lv <span id="level-auto-pistachio">0</span></span>
-                            <span class="upgrade-title">🤖 자동 피스타치오 분쇄기</span>
-                            <span class="upgrade-desc">초당 자동 생산</span>
-                            <span class="upgrade-cost" id="cost-auto-pistachio">₩1,500</span>
-                        </button>
-                        <button class="upgrade-btn" onclick="buyUpgrade('autoOven')" id="upgrade-auto-oven">
-                            <span class="upgrade-level">Lv <span id="level-auto-oven">0</span></span>
-                            <span class="upgrade-title">🤖 자동 오븐</span>
-                            <span class="upgrade-desc">자동으로 쿠키 굽기</span>
-                            <span class="upgrade-cost" id="cost-auto-oven">₩5,000</span>
-                        </button>
-                        <button class="upgrade-btn" onclick="buyUpgrade('sellPrice')" id="upgrade-sell-price">
-                            <span class="upgrade-level">Lv <span id="level-sell-price">0</span></span>
-                            <span class="upgrade-title">💰 판매가 상승</span>
-                            <span class="upgrade-desc">쿠키 가격 +20%</span>
-                            <span class="upgrade-cost" id="cost-sell-price">₩2,000</span>
-                        </button>
-                        <button class="upgrade-btn" onclick="buyUpgrade('customerSpeed')" id="upgrade-customer-speed">
-                            <span class="upgrade-level">Lv <span id="level-customer-speed">0</span></span>
-                            <span class="upgrade-title">🏃 손님 속도 증가</span>
-                            <span class="upgrade-desc">손님이 더 빨리 옴</span>
-                            <span class="upgrade-cost" id="cost-customer-speed">₩3,000</span>
-                        </button>
-                    </div>
-
-                    <!-- STATS TAB -->
-                    <div id="stats-tab" class="tab-content">
-                        <div class="stat-row">
-                            <span class="stat-label">총 쿠키 판매</span>
-                            <span class="stat-value" id="stat-total-cookies">0</span>
-                        </div>
-                        <div class="stat-row">
-                            <span class="stat-label">총 수익</span>
-                            <span class="stat-value" id="stat-total-money">₩0</span>
-                        </div>
-                        <div class="stat-row">
-                            <span class="stat-label">만족한 손님</span>
-                            <span class="stat-value" id="stat-happy-customers">0</span>
-                        </div>
-                        <div class="stat-row">
-                            <span class="stat-label">화난 손님</span>
-                            <span class="stat-value" id="stat-angry-customers">0</span>
-                        </div>
-                        <div class="stat-row">
-                            <span class="stat-label">플레이 시간</span>
-                            <span class="stat-value" id="stat-playtime">0분</span>
-                        </div>
-                        <div class="stat-row">
-                            <span class="stat-label">초당 수익</span>
-                            <span class="stat-value" id="stat-money-per-sec">₩0</span>
-                        </div>
-
-                        <button class="upgrade-btn" onclick="resetGame()" style="background: linear-gradient(135deg, #ff4444 0%, #cc0000 100%); margin-top: 20px;">
-                            <span class="upgrade-title">🔄 게임 초기화</span>
-                            <span class="upgrade-desc">모든 진행 상황이 삭제됩니다!</span>
-                        </button>
-                    </div>
-                </div>
-
-                <!-- CUSTOMER QUEUE -->
-                <div class="panel-section">
-                    <h2>👥 손님 대기열</h2>
-                    <div id="customer-queue"></div>
-                </div>
-            </aside>
-        </main>
-
-        <!-- BOTTOM AD BANNER -->
-        <div id="ad-banner">
-            📢 [광고 배너 영역] - SDK 연동 시 활성화
-        </div>
-    </div>
-
-    <!-- MINIGAME MODAL -->
-    <div id="minigame-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header" id="minigame-title">미니게임</div>
-            <div class="modal-body">
-                <canvas id="minigame-canvas" width="400" height="300"></canvas>
-                <div class="minigame-instruction" id="minigame-instruction"></div>
-                <div class="minigame-progress">
-                    <div class="minigame-progress-bar" id="minigame-progress-bar">0%</div>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-btn modal-btn-primary" onclick="closeMinigame()">닫기</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- BAKING MODAL -->
-    <div id="baking-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">🔥 쿠키 굽는 중...</div>
-            <div class="modal-body">
-                <canvas id="baking-canvas" width="400" height="300"></canvas>
-                <div class="minigame-instruction">
-                    온도계를 보면서 완벽한 타이밍에 클릭하세요!<br>
-                    <span style="color: #4ecca3;">녹색 구간</span>에서 클릭하면 성공!
-                </div>
-                <div class="minigame-progress">
-                    <div class="minigame-progress-bar" id="baking-progress-bar">0%</div>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- OFFLINE EARNINGS MODAL -->
-    <div id="offline-modal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">💰 오프라인 수익!</div>
-            <div class="modal-body">
-                <p style="text-align: center; font-size: 18px; margin-bottom: 15px;">
-                    사장님이 쉬는 동안 알바생이 열심히 일했어요!
-                </p>
-                <div style="text-align: center; font-size: 32px; font-weight: bold; color: #4ecca3; margin: 20px 0;">
-                    + <span id="offline-earnings">0</span> 원
-                </div>
-                <p style="text-align: center; font-size: 14px; color: #bbb;">
-                    쉰 시간: <span id="offline-time">0</span>분
-                </p>
-            </div>
-            <div class="modal-footer">
-                <button class="modal-btn modal-btn-secondary" onclick="watchRewardAd('offline')">
-                    광고 보고 2배 받기!
+                <!-- Action Buttons -->
+                <button class="action-btn primary" id="btn-tap-cookie">
+                    🍪 쿠키 만들기
                 </button>
-                <button class="modal-btn modal-btn-primary" onclick="closeOfflineModal()">
-                    받기
+                <button class="action-btn secondary" id="btn-harvest-kataifi">
+                    🌾 카다이프 수확 (ASMR)
+                </button>
+                <button class="action-btn secondary" id="btn-crush-pistachio">
+                    🥜 피스타치오 분쇄
                 </button>
             </div>
         </div>
+
+        <!-- Ad Banner -->
+        <div class="ad-banner" id="ad-banner">
+            📺 광고 보고 보상 받기 (2배 부스트!)
+        </div>
     </div>
 
-    <!-- NOTIFICATION CONTAINER -->
-    <div id="notification-container"></div>
+    <!-- MODALS -->
 
-    <!-- JAVASCRIPT -->
+    <!-- Offline Earnings Modal -->
+    <div class="modal-overlay" id="offline-modal">
+        <div class="modal-content">
+            <div class="modal-title">💰 오프라인 수익</div>
+            <div class="modal-cookie">🍪</div>
+            <div class="modal-text">
+                사장님이 안 계신 동안<br>
+                알바생이 <span id="offline-earnings" style="color: var(--kataifi-gold); font-size: 28px;">0</span>원을<br>
+                벌었습니다!
+            </div>
+            <button class="action-btn primary" id="btn-claim-offline">
+                💰 수금하기
+            </button>
+        </div>
+    </div>
+
+    <!-- Achievement Modal -->
+    <div class="modal-overlay" id="achievement-modal">
+        <div class="modal-content">
+            <div class="modal-title">🏆 업적 달성!</div>
+            <div class="modal-cookie">🎉</div>
+            <div class="modal-text" id="achievement-text">
+                레벨업!
+            </div>
+            <button class="action-btn primary" id="btn-close-achievement">
+                확인
+            </button>
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT ENGINE -->
     <script>
         "use strict";
 
-        // ========================================
-        // GAME CONFIGURATION
-        // ========================================
-        const GameConfig = {
-            // Canvas settings
-            CANVAS_WIDTH: 800,
-            CANVAS_HEIGHT: 600,
-            PIXEL_SIZE: 4,
+        /**
+         * ============================================================================
+         * DUBAI COOKIE TYCOON - MOBILE PREMIUM EDITION
+         *
+         * Architecture:
+         * 1. Configuration & Constants
+         * 2. Audio Engine (ASMR System)
+         * 3. Pixel Art Renderer (High-Quality Sprites)
+         * 4. Particle System
+         * 5. Game State Manager
+         * 6. Touch Input Handler
+         * 7. Game Loop
+         * 8. UI Controller
+         * ============================================================================
+         */
 
-            // Game balance
-            INITIAL_MONEY: 0,
-            COOKIE_BASE_PRICE: 1000,
-            DOUGH_PRICE: 500,
-
-            // Resources needed
-            FILLING_KADAYIF_COST: 5,
-            FILLING_PISTACHIO_COST: 3,
-            BAKING_DOUGH_COST: 1,
-            BAKING_FILLING_COST: 1,
-
-            // Customer settings
-            CUSTOMER_SPAWN_INTERVAL: 5000, // ms
-            CUSTOMER_PATIENCE: 30000, // ms
-            CUSTOMER_NAMES: [
-                '김민수', '이영희', '박철수', '최지영', '정대호',
-                '강수진', '윤미래', '임하늘', '송별', '한강',
-                '신세계', '오늘', '배고픔', '류진', '황금'
-            ],
-
-            // Upgrade costs
-            UPGRADE_COSTS: {
-                autoKadayif: 1000,
-                autoPistachio: 1500,
-                autoOven: 5000,
-                sellPrice: 2000,
-                customerSpeed: 3000
+        // ============================================================================
+        // 1. GAME CONFIGURATION
+        // ============================================================================
+        const CONFIG = {
+            // Colors (Dubai Cookie Palette)
+            colors: {
+                chocolate: {
+                    dark: '#2D1B0E',
+                    mid: '#5D4037',
+                    light: '#8D6E63'
+                },
+                kataifi: {
+                    gold: '#FFD54F',
+                    bright: '#FFC107',
+                    shadow: '#FFA000'
+                },
+                pistachio: {
+                    main: '#7CB342',
+                    dark: '#558B2F',
+                    light: '#C5E1A5',
+                    glow: '#AED581'
+                },
+                dough: {
+                    base: '#D7C49E',
+                    dark: '#A89C7E',
+                    light: '#F5E6D3'
+                }
             },
 
-            // Upgrade multipliers
-            UPGRADE_MULTIPLIERS: {
-                autoKadayif: 1.5,
-                autoPistachio: 1.5,
-                autoOven: 1.8,
-                sellPrice: 1.3,
-                customerSpeed: 1.4
+            // Game Balance
+            balance: {
+                cookieBasePrice: 1000,
+                kataifiPerHarvest: 3,
+                pistachioPerCrush: 2,
+                fillingCost: { kataifi: 5, pistachio: 3 },
+                cookieCost: { filling: 1 },
+                offlineEarningsRate: 0.5,
+                maxOfflineTime: 86400000 // 24 hours
             },
 
-            // Color palette
-            COLORS: {
-                // Cookie colors
-                cookieDough: '#D2691E',
-                cookieCrust: '#8B4513',
-                pistachioFilling: '#90EE90',
-                pistachioDeep: '#228B22',
-                kadayif: '#FFD700',
-
-                // UI colors
-                background: '#0f3460',
-                backgroundDark: '#0a2540',
-                primary: '#e94560',
-                secondary: '#4ecca3',
-                accent: '#ffd700',
-
-                // Game objects
-                oven: '#555',
-                ovenFire: '#FF4500',
-                customer: '#FFE4B5',
-                money: '#FFD700',
-
-                // Effects
-                particle: '#FFFFFF',
-                particleGold: '#FFD700',
-                particleGreen: '#90EE90'
+            // Audio Settings
+            audio: {
+                masterVolume: 0.4,
+                enabled: true
             },
 
-            // Particle settings
-            PARTICLE_COUNT: 15,
-            PARTICLE_LIFETIME: 1000,
+            // Canvas Settings
+            canvas: {
+                pixelSize: 3,
+                cookieSize: 40
+            },
 
-            // Audio settings
-            AUDIO_ENABLED: true,
-            MASTER_VOLUME: 0.3,
-
-            // Save settings
-            SAVE_KEY: 'dujjonku_save_v1',
-            AUTO_SAVE_INTERVAL: 10000, // 10 seconds
-
-            // Offline earnings
-            OFFLINE_EARNINGS_RATE: 0.5, // 50% of online rate
-            MAX_OFFLINE_TIME: 86400000 // 24 hours in ms
+            // Save Settings
+            save: {
+                key: 'dubai_cookie_premium_v1',
+                interval: 5000 // Auto-save every 5 seconds
+            }
         };
 
-        // ========================================
-        // GAME STATE
-        // ========================================
-        const GameState = {
-            // Resources
-            money: GameConfig.INITIAL_MONEY,
-            kadayif: 0,
-            pistachio: 0,
-            filling: 0,
-            dough: 0,
-            cookies: 0,
-
-            // Upgrades
-            upgrades: {
-                autoKadayif: 0,
-                autoPistachio: 0,
-                autoOven: 0,
-                sellPrice: 0,
-                customerSpeed: 0
-            },
-
-            // Stats
-            stats: {
-                totalCookiesSold: 0,
-                totalMoneyEarned: 0,
-                happyCustomers: 0,
-                angryCustomers: 0,
-                playTime: 0,
-                sessionStartTime: Date.now()
-            },
-
-            // Game state
-            customers: [],
-            particles: [],
-            animations: [],
-
-            // Boost state
-            boostActive: false,
-            boostEndTime: 0,
-
-            // Last save time
-            lastSaveTime: Date.now(),
-
-            // Camera shake
-            shakeAmount: 0,
-            shakeDecay: 0.9
-        };
-
-        // ========================================
-        // SPRITE ENGINE - PIXEL ART DRAWING
-        // ========================================
-        class SpriteEngine {
-            constructor(ctx) {
-                this.ctx = ctx;
-            }
-
-            // Draw a pixel
-            pixel(x, y, color) {
-                const size = GameConfig.PIXEL_SIZE;
-                this.ctx.fillStyle = color;
-                this.ctx.fillRect(x * size, y * size, size, size);
-            }
-
-            // Draw a rectangle
-            rect(x, y, w, h, color) {
-                for (let i = 0; i < w; i++) {
-                    for (let j = 0; j < h; j++) {
-                        this.pixel(x + i, y + j, color);
-                    }
-                }
-            }
-
-            // Draw a circle
-            circle(cx, cy, radius, color) {
-                for (let x = -radius; x <= radius; x++) {
-                    for (let y = -radius; y <= radius; y++) {
-                        if (x * x + y * y <= radius * radius) {
-                            this.pixel(cx + x, cy + y, color);
-                        }
-                    }
-                }
-            }
-
-            // Draw Dubai Cookie
-            drawCookie(x, y, size = 10) {
-                // Outer dough
-                this.circle(x, y, size, GameConfig.COLORS.cookieDough);
-
-                // Crust details
-                for (let angle = 0; angle < Math.PI * 2; angle += Math.PI / 6) {
-                    const px = Math.cos(angle) * (size - 2);
-                    const py = Math.sin(angle) * (size - 2);
-                    this.circle(x + px, y + py, 2, GameConfig.COLORS.cookieCrust);
-                }
-
-                // Pistachio filling in center (oozing effect)
-                this.circle(x, y, size - 4, GameConfig.COLORS.pistachioFilling);
-
-                // Dark pistachio chunks
-                for (let i = 0; i < 5; i++) {
-                    const angle = (i / 5) * Math.PI * 2;
-                    const px = Math.cos(angle) * (size - 5);
-                    const py = Math.sin(angle) * (size - 5);
-                    this.pixel(x + px, y + py, GameConfig.COLORS.pistachioDeep);
-                }
-
-                // Kadayif strands on top
-                for (let i = 0; i < 8; i++) {
-                    const angle = (i / 8) * Math.PI * 2;
-                    const px = Math.cos(angle) * size;
-                    const py = Math.sin(angle) * size;
-                    this.pixel(x + px, y + py, GameConfig.COLORS.kadayif);
-                }
-            }
-
-            // Draw Oven
-            drawOven(x, y, isOn = false) {
-                // Oven body
-                this.rect(x, y, 20, 16, GameConfig.COLORS.oven);
-
-                // Window
-                this.rect(x + 4, y + 3, 12, 8, '#222');
-
-                // Fire glow if on
-                if (isOn) {
-                    this.rect(x + 5, y + 8, 10, 2, GameConfig.COLORS.ovenFire);
-                    this.rect(x + 6, y + 7, 8, 1, '#FF6347');
-                }
-
-                // Door handle
-                this.rect(x + 18, y + 7, 1, 3, '#888');
-
-                // Control knobs
-                this.pixel(x + 2, y + 14, '#444');
-                this.pixel(x + 6, y + 14, '#444');
-                this.pixel(x + 10, y + 14, '#444');
-            }
-
-            // Draw Customer
-            drawCustomer(x, y, emotion = 'neutral') {
-                // Body
-                this.rect(x, y + 6, 8, 10, '#4169E1'); // Shirt
-
-                // Head
-                this.circle(x + 4, y + 3, 4, GameConfig.COLORS.customer);
-
-                // Eyes
-                this.pixel(x + 2, y + 2, '#000');
-                this.pixel(x + 6, y + 2, '#000');
-
-                // Mouth based on emotion
-                if (emotion === 'happy') {
-                    this.pixel(x + 2, y + 5, '#000');
-                    this.pixel(x + 3, y + 6, '#000');
-                    this.pixel(x + 5, y + 6, '#000');
-                    this.pixel(x + 6, y + 5, '#000');
-                } else if (emotion === 'angry') {
-                    this.pixel(x + 2, y + 6, '#000');
-                    this.pixel(x + 3, y + 5, '#000');
-                    this.pixel(x + 5, y + 5, '#000');
-                    this.pixel(x + 6, y + 6, '#000');
-                } else {
-                    this.rect(x + 2, y + 5, 4, 1, '#000');
-                }
-
-                // Arms
-                this.rect(x - 1, y + 8, 2, 4, GameConfig.COLORS.customer);
-                this.rect(x + 7, y + 8, 2, 4, GameConfig.COLORS.customer);
-            }
-
-            // Draw Kadayif strands
-            drawKadayif(x, y) {
-                const strands = 8;
-                for (let i = 0; i < strands; i++) {
-                    const offset = Math.sin(Date.now() / 200 + i) * 2;
-                    this.rect(x + i * 2, y + offset, 1, 10, GameConfig.COLORS.kadayif);
-                }
-            }
-
-            // Draw Pistachio
-            drawPistachio(x, y) {
-                // Nut body
-                this.circle(x, y, 4, '#C4A35A');
-
-                // Green kernel
-                this.circle(x, y, 2, GameConfig.COLORS.pistachioFilling);
-
-                // Shell crack
-                this.rect(x - 1, y - 3, 1, 6, '#8B7355');
-            }
-
-            // Draw Filling bowl
-            drawFilling(x, y) {
-                // Bowl
-                this.rect(x, y + 4, 12, 6, '#8B4513');
-                this.rect(x + 1, y + 5, 10, 4, GameConfig.COLORS.pistachioFilling);
-
-                // Pistachio chunks
-                this.pixel(x + 3, y + 6, GameConfig.COLORS.pistachioDeep);
-                this.pixel(x + 6, y + 7, GameConfig.COLORS.pistachioDeep);
-                this.pixel(x + 9, y + 6, GameConfig.COLORS.pistachioDeep);
-            }
-
-            // Draw Dough
-            drawDough(x, y) {
-                // Dough ball
-                this.circle(x, y, 5, GameConfig.COLORS.cookieDough);
-
-                // Texture
-                this.pixel(x - 2, y - 1, GameConfig.COLORS.cookieCrust);
-                this.pixel(x + 1, y + 2, GameConfig.COLORS.cookieCrust);
-                this.pixel(x - 1, y + 1, GameConfig.COLORS.cookieCrust);
-            }
-
-            // Draw Money coin
-            drawMoney(x, y) {
-                // Coin
-                this.circle(x, y, 4, GameConfig.COLORS.money);
-
-                // Won symbol
-                this.pixel(x - 1, y - 1, '#DAA520');
-                this.pixel(x + 1, y - 1, '#DAA520');
-                this.pixel(x, y, '#DAA520');
-                this.pixel(x - 1, y + 1, '#DAA520');
-                this.pixel(x + 1, y + 1, '#DAA520');
-            }
-
-            // Draw background scene
-            drawBackground() {
-                const ctx = this.ctx;
-                const width = ctx.canvas.width / GameConfig.PIXEL_SIZE;
-                const height = ctx.canvas.height / GameConfig.PIXEL_SIZE;
-
-                // Sky gradient
-                for (let y = 0; y < height / 2; y++) {
-                    const ratio = y / (height / 2);
-                    const r = Math.floor(15 + ratio * 20);
-                    const g = Math.floor(52 + ratio * 30);
-                    const b = Math.floor(96 + ratio * 20);
-                    this.rect(0, y, width, 1, `rgb(${r},${g},${b})`);
-                }
-
-                // Floor
-                this.rect(0, height / 2, width, height / 2, '#2C1810');
-
-                // Floor tiles
-                for (let x = 0; x < width; x += 10) {
-                    for (let y = height / 2; y < height; y += 10) {
-                        if ((x + y) % 20 === 0) {
-                            this.rect(x, y, 10, 10, '#3D2817');
-                        }
-                    }
-                }
-            }
-
-            // Draw shop counter
-            drawCounter(x, y) {
-                // Counter surface
-                this.rect(x, y, 60, 8, '#8B4513');
-
-                // Counter front
-                this.rect(x, y + 8, 60, 12, '#654321');
-
-                // Decorative line
-                this.rect(x, y + 7, 60, 1, '#A0522D');
-
-                // Display case
-                this.rect(x + 5, y - 15, 20, 15, 'rgba(200,200,200,0.3)');
-                this.rect(x + 5, y - 15, 20, 1, '#888');
-                this.rect(x + 5, y - 1, 20, 1, '#888');
-            }
-        }
-
-        // ========================================
-        // AUDIO ENGINE - WEB AUDIO API
-        // ========================================
+        // ============================================================================
+        // 2. AUDIO ENGINE - ASMR SYSTEM
+        // ============================================================================
         class AudioEngine {
             constructor() {
-                this.audioContext = null;
+                this.ctx = null;
                 this.masterGain = null;
                 this.init();
             }
 
             init() {
                 try {
-                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                    this.masterGain = this.audioContext.createGain();
-                    this.masterGain.gain.value = GameConfig.MASTER_VOLUME;
-                    this.masterGain.connect(this.audioContext.destination);
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+
+                    this.masterGain = this.ctx.createGain();
+                    this.masterGain.gain.value = CONFIG.audio.masterVolume;
+                    this.masterGain.connect(this.ctx.destination);
                 } catch (e) {
-                    console.warn('Web Audio API not supported');
+                    console.warn('Web Audio API not supported:', e);
+                    CONFIG.audio.enabled = false;
                 }
             }
 
-            // Play click sound
-            playClick() {
-                if (!this.audioContext) return;
-
-                const osc = this.audioContext.createOscillator();
-                const gain = this.audioContext.createGain();
-
-                osc.connect(gain);
-                gain.connect(this.masterGain);
-
-                osc.frequency.value = 800;
-                gain.gain.value = 0.1;
-
-                osc.start();
-                gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.1);
-                osc.stop(this.audioContext.currentTime + 0.1);
+            // Resume audio context (browser autoplay policy)
+            resume() {
+                if (this.ctx && this.ctx.state === 'suspended') {
+                    this.ctx.resume();
+                }
             }
 
-            // Play money sound
-            playMoney() {
-                if (!this.audioContext) return;
+            // ASMR: Kataifi Crunch (바스락 소리)
+            playKataifiCrunch() {
+                if (!CONFIG.audio.enabled) return;
 
-                const osc = this.audioContext.createOscillator();
-                const gain = this.audioContext.createGain();
+                this.resume();
 
-                osc.connect(gain);
-                gain.connect(this.masterGain);
-
-                osc.frequency.value = 1200;
-                osc.type = 'sine';
-                gain.gain.value = 0.15;
-
-                osc.start();
-                osc.frequency.exponentialRampToValueAtTime(1500, this.audioContext.currentTime + 0.1);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.2);
-                osc.stop(this.audioContext.currentTime + 0.2);
-            }
-
-            // Play success sound
-            playSuccess() {
-                if (!this.audioContext) return;
-
-                const notes = [523, 659, 784]; // C, E, G
-                notes.forEach((freq, i) => {
-                    setTimeout(() => {
-                        const osc = this.audioContext.createOscillator();
-                        const gain = this.audioContext.createGain();
-
-                        osc.connect(gain);
-                        gain.connect(this.masterGain);
-
-                        osc.frequency.value = freq;
-                        osc.type = 'triangle';
-                        gain.gain.value = 0.1;
-
-                        osc.start();
-                        gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
-                        osc.stop(this.audioContext.currentTime + 0.3);
-                    }, i * 100);
-                });
-            }
-
-            // Play fail sound
-            playFail() {
-                if (!this.audioContext) return;
-
-                const osc = this.audioContext.createOscillator();
-                const gain = this.audioContext.createGain();
-
-                osc.connect(gain);
-                gain.connect(this.masterGain);
-
-                osc.frequency.value = 200;
-                osc.type = 'sawtooth';
-                gain.gain.value = 0.15;
-
-                osc.start();
-                osc.frequency.exponentialRampToValueAtTime(100, this.audioContext.currentTime + 0.3);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.3);
-                osc.stop(this.audioContext.currentTime + 0.3);
-            }
-
-            // Play baking sound (sizzle)
-            playBaking() {
-                if (!this.audioContext) return;
-
-                const bufferSize = this.audioContext.sampleRate * 0.5;
-                const buffer = this.audioContext.createBuffer(1, bufferSize, this.audioContext.sampleRate);
+                // Create white noise
+                const bufferSize = this.ctx.sampleRate * 0.3;
+                const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
                 const data = buffer.getChannelData(0);
 
                 for (let i = 0; i < bufferSize; i++) {
-                    data[i] = (Math.random() * 2 - 1) * 0.1 * (1 - i / bufferSize);
+                    // Crackling noise pattern
+                    if (Math.random() > 0.7) {
+                        data[i] = (Math.random() * 2 - 1) * (1 - i / bufferSize);
+                    }
                 }
 
-                const source = this.audioContext.createBufferSource();
-                const gain = this.audioContext.createGain();
-                const filter = this.audioContext.createBiquadFilter();
-
-                filter.type = 'lowpass';
-                filter.frequency.value = 2000;
-
+                const source = this.ctx.createBufferSource();
                 source.buffer = buffer;
+
+                // High-pass filter for crispy sound
+                const filter = this.ctx.createBiquadFilter();
+                filter.type = 'highpass';
+                filter.frequency.value = 2000;
+                filter.Q.value = 5;
+
+                const gain = this.ctx.createGain();
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+
                 source.connect(filter);
                 filter.connect(gain);
                 gain.connect(this.masterGain);
 
-                gain.gain.value = 0.05;
                 source.start();
+                source.stop(this.ctx.currentTime + 0.3);
             }
 
-            // Play level up sound
-            playLevelUp() {
-                if (!this.audioContext) return;
+            // Pistachio Crush (톡톡 부서지는 소리)
+            playPistachioCrush() {
+                if (!CONFIG.audio.enabled) return;
 
-                const notes = [523, 659, 784, 1047]; // C, E, G, C
+                this.resume();
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'triangle';
+                osc.frequency.setValueAtTime(150, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(80, this.ctx.currentTime + 0.15);
+
+                gain.gain.setValueAtTime(0.4, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+
+                osc.connect(gain);
+                gain.connect(this.masterGain);
+
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
+            }
+
+            // Cookie Tap (쫀득한 소리)
+            playCookieTap() {
+                if (!CONFIG.audio.enabled) return;
+
+                this.resume();
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(400, this.ctx.currentTime + 0.1);
+
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+
+                osc.connect(gain);
+                gain.connect(this.masterGain);
+
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.1);
+            }
+
+            // Money Earn (돈 버는 소리)
+            playMoneyEarn() {
+                if (!CONFIG.audio.enabled) return;
+
+                this.resume();
+
+                const notes = [1047, 1319, 1568]; // C, E, G
                 notes.forEach((freq, i) => {
                     setTimeout(() => {
-                        const osc = this.audioContext.createOscillator();
-                        const gain = this.audioContext.createGain();
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+
+                        osc.type = 'sine';
+                        osc.frequency.value = freq;
+
+                        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
 
                         osc.connect(gain);
                         gain.connect(this.masterGain);
 
-                        osc.frequency.value = freq;
-                        osc.type = 'square';
-                        gain.gain.value = 0.08;
-
                         osc.start();
-                        gain.gain.exponentialRampToValueAtTime(0.01, this.audioContext.currentTime + 0.2);
-                        osc.stop(this.audioContext.currentTime + 0.2);
+                        osc.stop(this.ctx.currentTime + 0.2);
                     }, i * 80);
                 });
             }
 
-            // Background music (simple ambient)
-            playBGM() {
-                if (!this.audioContext) return;
+            // Level Up (레벨업 팡파레)
+            playLevelUp() {
+                if (!CONFIG.audio.enabled) return;
 
-                // Simple ambient drone
-                const osc1 = this.audioContext.createOscillator();
-                const osc2 = this.audioContext.createOscillator();
-                const gain = this.audioContext.createGain();
+                this.resume();
 
-                osc1.connect(gain);
-                osc2.connect(gain);
+                const melody = [523, 659, 784, 1047]; // C, E, G, C
+                melody.forEach((freq, i) => {
+                    setTimeout(() => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+
+                        osc.type = 'square';
+                        osc.frequency.value = freq;
+
+                        gain.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+
+                        osc.connect(gain);
+                        gain.connect(this.masterGain);
+
+                        osc.start();
+                        osc.stop(this.ctx.currentTime + 0.3);
+                    }, i * 120);
+                });
+            }
+
+            // Success (성공 효과음)
+            playSuccess() {
+                if (!CONFIG.audio.enabled) return;
+
+                this.resume();
+
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(1200, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1800, this.ctx.currentTime + 0.15);
+
+                gain.gain.setValueAtTime(0.25, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+
+                osc.connect(gain);
                 gain.connect(this.masterGain);
 
-                osc1.frequency.value = 110; // A
-                osc2.frequency.value = 165; // E
-                osc1.type = 'sine';
-                osc2.type = 'sine';
-                gain.gain.value = 0.02;
-
-                osc1.start();
-                osc2.start();
-
-                // Stop after a while (would loop in real implementation)
-                setTimeout(() => {
-                    gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + 2);
-                    osc1.stop(this.audioContext.currentTime + 2);
-                    osc2.stop(this.audioContext.currentTime + 2);
-                }, 10000);
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
             }
         }
 
-        // ========================================
-        // PARTICLE SYSTEM
-        // ========================================
-        class Particle {
-            constructor(x, y, color, vx, vy, lifetime = 1000) {
-                this.x = x;
-                this.y = y;
-                this.color = color;
-                this.vx = vx;
-                this.vy = vy;
-                this.lifetime = lifetime;
-                this.age = 0;
-                this.size = Math.random() * 3 + 2;
+        // ============================================================================
+        // 3. PIXEL ART RENDERER - HIGH QUALITY SPRITES
+        // ============================================================================
+        class PixelArtRenderer {
+            constructor(ctx, pixelSize) {
+                this.ctx = ctx;
+                this.pixelSize = pixelSize;
             }
 
-            update(deltaTime) {
-                this.x += this.vx * deltaTime / 16;
-                this.y += this.vy * deltaTime / 16;
-                this.vy += 0.2; // Gravity
-                this.age += deltaTime;
+            // Draw single pixel
+            pixel(x, y, color) {
+                this.ctx.fillStyle = color;
+                this.ctx.fillRect(
+                    x * this.pixelSize,
+                    y * this.pixelSize,
+                    this.pixelSize,
+                    this.pixelSize
+                );
+            }
+
+            // Draw filled rectangle
+            rect(x, y, w, h, color) {
+                this.ctx.fillStyle = color;
+                this.ctx.fillRect(
+                    x * this.pixelSize,
+                    y * this.pixelSize,
+                    w * this.pixelSize,
+                    h * this.pixelSize
+                );
+            }
+
+            // Draw Dubai Cookie (High-Quality Layered)
+            drawDubaiCookie(centerX, centerY, size, state = 'normal') {
+                const cx = centerX;
+                const cy = centerY;
+                const r = size / 2;
+
+                // Layer 1: Base Cookie Dough (Outer)
+                this.drawCircle(cx, cy, r, CONFIG.colors.dough.base);
+                this.drawCircle(cx, cy, r - 1, CONFIG.colors.dough.dark);
+
+                // Layer 2: Chocolate Coating
+                this.drawCircle(cx, cy, r - 3, CONFIG.colors.chocolate.mid);
+                this.drawCircle(cx, cy, r - 4, CONFIG.colors.chocolate.dark);
+
+                // Layer 3: Kataifi Strands (Golden Threads)
+                for (let i = 0; i < 12; i++) {
+                    const angle = (i / 12) * Math.PI * 2;
+                    const x1 = cx + Math.cos(angle) * (r - 5);
+                    const y1 = cy + Math.sin(angle) * (r - 5);
+                    const x2 = cx + Math.cos(angle) * (r - 2);
+                    const y2 = cy + Math.sin(angle) * (r - 2);
+
+                    this.pixel(Math.floor(x1), Math.floor(y1), CONFIG.colors.kataifi.gold);
+                    this.pixel(Math.floor(x2), Math.floor(y2), CONFIG.colors.kataifi.bright);
+                }
+
+                // Layer 4: Pistachio Filling (Oozing Center)
+                this.drawIrregularCircle(cx, cy, r - 7, CONFIG.colors.pistachio.main);
+                this.drawCircle(cx, cy, r - 9, CONFIG.colors.pistachio.dark);
+
+                // Pistachio chunks (detail)
+                for (let i = 0; i < 6; i++) {
+                    const angle = (i / 6) * Math.PI * 2 + Math.PI / 6;
+                    const px = cx + Math.cos(angle) * (r - 8);
+                    const py = cy + Math.sin(angle) * (r - 8);
+                    this.pixel(Math.floor(px), Math.floor(py), CONFIG.colors.pistachio.light);
+                }
+
+                // Layer 5: Highlight (Glossy effect)
+                this.pixel(Math.floor(cx - r / 3), Math.floor(cy - r / 3), CONFIG.colors.dough.light);
+                this.pixel(Math.floor(cx - r / 3 + 1), Math.floor(cy - r / 3), CONFIG.colors.dough.light);
+                this.pixel(Math.floor(cx - r / 3), Math.floor(cy - r / 3 + 1), CONFIG.colors.dough.light);
+
+                // State-based effects
+                if (state === 'glow') {
+                    this.drawCircleOutline(cx, cy, r + 2, CONFIG.colors.pistachio.glow);
+                    this.drawCircleOutline(cx, cy, r + 3, CONFIG.colors.kataifi.gold);
+                }
+            }
+
+            // Draw circle (filled)
+            drawCircle(cx, cy, radius, color) {
+                for (let x = -radius; x <= radius; x++) {
+                    for (let y = -radius; y <= radius; y++) {
+                        if (x * x + y * y <= radius * radius) {
+                            this.pixel(Math.floor(cx + x), Math.floor(cy + y), color);
+                        }
+                    }
+                }
+            }
+
+            // Draw irregular circle (for organic filling look)
+            drawIrregularCircle(cx, cy, radius, color) {
+                for (let x = -radius; x <= radius; x++) {
+                    for (let y = -radius; y <= radius; y++) {
+                        const noise = Math.sin(x * 0.5) * Math.cos(y * 0.5) * 2;
+                        const adjustedRadius = radius + noise;
+                        if (x * x + y * y <= adjustedRadius * adjustedRadius) {
+                            this.pixel(Math.floor(cx + x), Math.floor(cy + y), color);
+                        }
+                    }
+                }
+            }
+
+            // Draw circle outline
+            drawCircleOutline(cx, cy, radius, color) {
+                const points = 32;
+                for (let i = 0; i < points; i++) {
+                    const angle = (i / points) * Math.PI * 2;
+                    const x = cx + Math.cos(angle) * radius;
+                    const y = cy + Math.sin(angle) * radius;
+                    this.pixel(Math.floor(x), Math.floor(y), color);
+                }
+            }
+
+            // Draw Kataifi Strands
+            drawKataifi(x, y, count) {
+                for (let i = 0; i < count; i++) {
+                    const offsetX = i * 3;
+                    const wave = Math.sin(Date.now() / 200 + i) * 2;
+
+                    // Golden strand
+                    for (let j = 0; j < 8; j++) {
+                        this.pixel(
+                            Math.floor(x + offsetX),
+                            Math.floor(y + j + wave),
+                            j % 2 === 0 ? CONFIG.colors.kataifi.gold : CONFIG.colors.kataifi.bright
+                        );
+                    }
+                }
+            }
+
+            // Draw Pistachio
+            drawPistachio(x, y) {
+                // Nut shell
+                this.drawCircle(x, y, 4, CONFIG.colors.dough.dark);
+
+                // Green kernel
+                this.drawCircle(x, y, 3, CONFIG.colors.pistachio.main);
+                this.pixel(x - 1, y - 1, CONFIG.colors.pistachio.light);
+
+                // Shell crack
+                this.rect(x - 1, y - 3, 1, 6, CONFIG.colors.chocolate.dark);
+            }
+
+            // Draw Background
+            drawBackground(width, height) {
+                // Gradient effect
+                const steps = 50;
+                for (let i = 0; i < steps; i++) {
+                    const ratio = i / steps;
+                    const r = Math.floor(93 + (45 - 93) * ratio);
+                    const g = Math.floor(64 + (27 - 64) * ratio);
+                    const b = Math.floor(55 + (14 - 55) * ratio);
+
+                    const color = `rgb(${r}, ${g}, ${b})`;
+                    this.rect(0, Math.floor(i * height / steps), Math.floor(width), Math.ceil(height / steps), color);
+                }
+
+                // Subtle texture
+                for (let i = 0; i < 100; i++) {
+                    const x = Math.random() * width;
+                    const y = Math.random() * height;
+                    const brightness = Math.random() * 20;
+                    this.pixel(Math.floor(x), Math.floor(y), `rgba(255,255,255,${brightness / 100})`);
+                }
+            }
+        }
+
+        // ============================================================================
+        // 4. PARTICLE SYSTEM
+        // ============================================================================
+        class Particle {
+            constructor(x, y, vx, vy, color, lifetime) {
+                this.x = x;
+                this.y = y;
+                this.vx = vx;
+                this.vy = vy;
+                this.color = color;
+                this.lifetime = lifetime;
+                this.age = 0;
+                this.size = Math.random() * 4 + 2;
+            }
+
+            update(dt) {
+                this.x += this.vx * dt / 16;
+                this.y += this.vy * dt / 16;
+                this.vy += 0.3; // Gravity
+                this.vx *= 0.98; // Air resistance
+                this.age += dt;
             }
 
             draw(ctx) {
-                const alpha = 1 - (this.age / this.lifetime);
+                const alpha = Math.max(0, 1 - this.age / this.lifetime);
                 ctx.fillStyle = this.color;
                 ctx.globalAlpha = alpha;
-                ctx.fillRect(this.x, this.y, this.size, this.size);
+                ctx.fillRect(this.x - this.size / 2, this.y - this.size / 2, this.size, this.size);
                 ctx.globalAlpha = 1;
             }
 
@@ -1578,19 +1096,19 @@
                 this.particles = [];
             }
 
-            emit(x, y, count, color) {
+            emit(x, y, count, color, spread = 10) {
                 for (let i = 0; i < count; i++) {
                     const angle = Math.random() * Math.PI * 2;
-                    const speed = Math.random() * 5 + 2;
+                    const speed = Math.random() * spread + 2;
                     const vx = Math.cos(angle) * speed;
-                    const vy = Math.sin(angle) * speed - 3;
+                    const vy = Math.sin(angle) * speed - Math.random() * 5;
 
-                    this.particles.push(new Particle(x, y, color, vx, vy, GameConfig.PARTICLE_LIFETIME));
+                    this.particles.push(new Particle(x, y, vx, vy, color, 1000 + Math.random() * 500));
                 }
             }
 
-            update(deltaTime) {
-                this.particles.forEach(p => p.update(deltaTime));
+            update(dt) {
+                this.particles.forEach(p => p.update(dt));
                 this.particles = this.particles.filter(p => !p.isDead());
             }
 
@@ -1600,1236 +1118,516 @@
             }
         }
 
-        // ========================================
-        // CUSTOMER CLASS
-        // ========================================
-        class Customer {
-            constructor(id) {
-                this.id = id;
-                this.name = GameConfig.CUSTOMER_NAMES[Math.floor(Math.random() * GameConfig.CUSTOMER_NAMES.length)];
-                this.patience = GameConfig.CUSTOMER_PATIENCE;
-                this.maxPatience = GameConfig.CUSTOMER_PATIENCE;
-                this.emotion = 'neutral';
-                this.x = -20;
-                this.targetX = 50;
-                this.y = 80;
-                this.served = false;
-            }
-
-            update(deltaTime) {
-                // Move to counter
-                if (this.x < this.targetX) {
-                    this.x += 0.5;
-                }
-
-                // Decrease patience
-                if (!this.served && this.x >= this.targetX) {
-                    this.patience -= deltaTime;
-
-                    if (this.patience <= 0) {
-                        this.emotion = 'angry';
-                        return 'angry';
-                    } else if (this.patience < this.maxPatience * 0.3) {
-                        this.emotion = 'neutral';
-                    }
-                }
-
-                return 'waiting';
-            }
-
-            serve() {
-                this.served = true;
-                this.emotion = 'happy';
-                return 'served';
-            }
-
-            getpatienceRatio() {
-                return Math.max(0, this.patience / this.maxPatience);
-            }
-        }
-
-        // ========================================
-        // GAME LOGIC CORE
-        // ========================================
-        class GameLogic {
+        // ============================================================================
+        // 5. GAME STATE MANAGER
+        // ============================================================================
+        class GameState {
             constructor() {
-                this.lastUpdateTime = Date.now();
-                this.customerSpawnTimer = 0;
-                this.autoProductionTimer = 0;
-                this.nextCustomerId = 0;
-            }
-
-            // Calculate upgrade cost
-            getUpgradeCost(upgradeType) {
-                const level = GameState.upgrades[upgradeType];
-                const baseCost = GameConfig.UPGRADE_COSTS[upgradeType];
-                const multiplier = GameConfig.UPGRADE_MULTIPLIERS[upgradeType];
-                return Math.floor(baseCost * Math.pow(multiplier, level));
-            }
-
-            // Buy upgrade
-            buyUpgrade(upgradeType) {
-                const cost = this.getUpgradeCost(upgradeType);
-
-                if (GameState.money >= cost) {
-                    GameState.money -= cost;
-                    GameState.upgrades[upgradeType]++;
-
-                    audioEngine.playLevelUp();
-                    showNotification(`업그레이드 성공! ${upgradeType} Lv.${GameState.upgrades[upgradeType]}`, 'success');
-
-                    this.updateUI();
-                    return true;
-                }
-
-                audioEngine.playFail();
-                showNotification('돈이 부족합니다!', 'warning');
-                return false;
-            }
-
-            // Add money
-            addMoney(amount) {
-                const multiplier = GameState.boostActive ? 2 : 1;
-                const finalAmount = Math.floor(amount * multiplier);
-
-                GameState.money += finalAmount;
-                GameState.stats.totalMoneyEarned += finalAmount;
-
-                audioEngine.playMoney();
-                this.updateUI();
-            }
-
-            // Add resource
-            addResource(type, amount) {
-                const multiplier = GameState.boostActive ? 2 : 1;
-                const finalAmount = Math.floor(amount * multiplier);
-
-                GameState[type] += finalAmount;
-                this.updateUI();
-            }
-
-            // Merge filling
-            mergeFilling() {
-                if (GameState.kadayif >= GameConfig.FILLING_KADAYIF_COST &&
-                    GameState.pistachio >= GameConfig.FILLING_PISTACHIO_COST) {
-
-                    GameState.kadayif -= GameConfig.FILLING_KADAYIF_COST;
-                    GameState.pistachio -= GameConfig.FILLING_PISTACHIO_COST;
-                    this.addResource('filling', 1);
-
-                    audioEngine.playSuccess();
-                    showNotification('두바이 필링 완성!', 'success');
-
-                    // Particle effect
-                    particleSystem.emit(
-                        canvas.width / 2,
-                        canvas.height / 2,
-                        GameConfig.PARTICLE_COUNT,
-                        GameConfig.COLORS.particleGreen
-                    );
-
-                    return true;
-                }
-
-                audioEngine.playFail();
-                showNotification('재료가 부족합니다!', 'warning');
-                return false;
-            }
-
-            // Buy dough
-            buyDough() {
-                if (GameState.money >= GameConfig.DOUGH_PRICE) {
-                    GameState.money -= GameConfig.DOUGH_PRICE;
-                    this.addResource('dough', 1);
-
-                    audioEngine.playClick();
-                    showNotification('쿠키 도우 구매!', 'success');
-
-                    return true;
-                }
-
-                audioEngine.playFail();
-                showNotification('돈이 부족합니다!', 'warning');
-                return false;
-            }
-
-            // Spawn customer
-            spawnCustomer() {
-                const customer = new Customer(this.nextCustomerId++);
-                GameState.customers.push(customer);
-
-                this.updateCustomerQueue();
-            }
-
-            // Serve customer
-            serveCustomer(customer) {
-                if (GameState.cookies > 0) {
-                    GameState.cookies--;
-                    customer.serve();
-
-                    // Calculate price
-                    const basePrice = GameConfig.COOKIE_BASE_PRICE;
-                    const priceMultiplier = 1 + (GameState.upgrades.sellPrice * 0.2);
-                    const finalPrice = Math.floor(basePrice * priceMultiplier);
-
-                    this.addMoney(finalPrice);
-
-                    GameState.stats.totalCookiesSold++;
-                    GameState.stats.happyCustomers++;
-
-                    audioEngine.playSuccess();
-
-                    // Particle effect
-                    particleSystem.emit(
-                        canvas.width / 2,
-                        canvas.height / 2,
-                        GameConfig.PARTICLE_COUNT,
-                        GameConfig.COLORS.particleGold
-                    );
-
-                    // Screen shake
-                    GameState.shakeAmount = 5;
-
-                    // Remove customer after animation
-                    setTimeout(() => {
-                        const index = GameState.customers.indexOf(customer);
-                        if (index > -1) {
-                            GameState.customers.splice(index, 1);
-                            this.updateCustomerQueue();
-                        }
-                    }, 1000);
-
-                    return true;
-                }
-
-                return false;
-            }
-
-            // Update customers
-            updateCustomers(deltaTime) {
-                const toRemove = [];
-
-                GameState.customers.forEach(customer => {
-                    const status = customer.update(deltaTime);
-
-                    if (status === 'angry') {
-                        toRemove.push(customer);
-                        GameState.stats.angryCustomers++;
-                        audioEngine.playFail();
-                        showNotification(`${customer.name}님이 화나서 떠났어요!`, 'warning');
-                    }
-                });
-
-                // Remove angry customers
-                toRemove.forEach(customer => {
-                    const index = GameState.customers.indexOf(customer);
-                    if (index > -1) {
-                        GameState.customers.splice(index, 1);
-                    }
-                });
-
-                if (toRemove.length > 0) {
-                    this.updateCustomerQueue();
-                }
-            }
-
-            // Auto production
-            autoProduction(deltaTime) {
-                this.autoProductionTimer += deltaTime;
-
-                if (this.autoProductionTimer >= 1000) { // Every second
-                    this.autoProductionTimer = 0;
-
-                    // Auto kadayif
-                    if (GameState.upgrades.autoKadayif > 0) {
-                        this.addResource('kadayif', GameState.upgrades.autoKadayif);
-                    }
-
-                    // Auto pistachio
-                    if (GameState.upgrades.autoPistachio > 0) {
-                        this.addResource('pistachio', GameState.upgrades.autoPistachio);
-                    }
-
-                    // Auto oven
-                    if (GameState.upgrades.autoOven > 0) {
-                        if (GameState.dough >= GameConfig.BAKING_DOUGH_COST &&
-                            GameState.filling >= GameConfig.BAKING_FILLING_COST) {
-
-                            GameState.dough -= GameConfig.BAKING_DOUGH_COST;
-                            GameState.filling -= GameConfig.BAKING_FILLING_COST;
-                            this.addResource('cookies', 1);
-                        }
-                    }
-                }
-            }
-
-            // Update UI
-            updateUI() {
-                // Money
-                document.getElementById('money-value').textContent = formatNumber(GameState.money);
+                this.money = 0;
+                this.level = 1;
+                this.exp = 0;
+                this.expToNext = 100;
 
                 // Resources
-                document.getElementById('kadayif-amount').textContent = formatNumber(GameState.kadayif);
-                document.getElementById('pistachio-amount').textContent = formatNumber(GameState.pistachio);
-                document.getElementById('filling-amount').textContent = formatNumber(GameState.filling);
-                document.getElementById('dough-amount').textContent = formatNumber(GameState.dough);
-                document.getElementById('cookie-amount').textContent = formatNumber(GameState.cookies);
+                this.kataifi = 0;
+                this.pistachio = 0;
+                this.filling = 0;
+                this.cookies = 0;
 
-                // Upgrade buttons
-                Object.keys(GameState.upgrades).forEach(key => {
-                    const cost = this.getUpgradeCost(key);
-                    const level = GameState.upgrades[key];
-                    const canAfford = GameState.money >= cost;
+                // Upgrades
+                this.clickPower = 1;
+                this.autoProduction = 0;
 
-                    const btn = document.getElementById(`upgrade-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`);
-                    if (btn) {
-                        btn.disabled = !canAfford;
-                        document.getElementById(`cost-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`).textContent = `₩${formatNumber(cost)}`;
-                        document.getElementById(`level-${key.replace(/([A-Z])/g, '-$1').toLowerCase()}`).textContent = level;
-                    }
-                });
+                // Session
+                this.lastSaveTime = Date.now();
+                this.sessionStartTime = Date.now();
 
-                // Production buttons
-                document.getElementById('merge-filling-btn').disabled = !(
-                    GameState.kadayif >= GameConfig.FILLING_KADAYIF_COST &&
-                    GameState.pistachio >= GameConfig.FILLING_PISTACHIO_COST
-                );
-
-                document.getElementById('bake-btn').disabled = !(
-                    GameState.dough >= GameConfig.BAKING_DOUGH_COST &&
-                    GameState.filling >= GameConfig.BAKING_FILLING_COST
-                );
-
-                document.getElementById('buy-dough-btn').disabled = GameState.money < GameConfig.DOUGH_PRICE;
-
-                // Stats
-                document.getElementById('stat-total-cookies').textContent = formatNumber(GameState.stats.totalCookiesSold);
-                document.getElementById('stat-total-money').textContent = `₩${formatNumber(GameState.stats.totalMoneyEarned)}`;
-                document.getElementById('stat-happy-customers').textContent = formatNumber(GameState.stats.happyCustomers);
-                document.getElementById('stat-angry-customers').textContent = formatNumber(GameState.stats.angryCustomers);
-
-                const playMinutes = Math.floor((Date.now() - GameState.stats.sessionStartTime) / 60000);
-                document.getElementById('stat-playtime').textContent = `${playMinutes}분`;
-
-                // Money per second calculation
-                const priceMultiplier = 1 + (GameState.upgrades.sellPrice * 0.2);
-                const basePrice = GameConfig.COOKIE_BASE_PRICE * priceMultiplier;
-                const customerRate = 1 / (GameConfig.CUSTOMER_SPAWN_INTERVAL / 1000);
-                const moneyPerSec = Math.floor(basePrice * customerRate * 0.8); // Estimate
-                document.getElementById('stat-money-per-sec').textContent = `₩${formatNumber(moneyPerSec)}`;
+                // Load saved data
+                this.load();
             }
 
-            // Update customer queue UI
-            updateCustomerQueue() {
-                const container = document.getElementById('customer-queue');
-                container.innerHTML = '';
+            addMoney(amount) {
+                this.money += amount;
+                this.exp += amount * 0.05;
 
-                GameState.customers.slice(0, 5).forEach(customer => {
-                    const item = document.createElement('div');
-                    item.className = 'customer-item';
-                    item.innerHTML = `
-                        <div class="customer-emotion">${customer.emotion === 'happy' ? '😊' : customer.emotion === 'angry' ? '😠' : '😐'}</div>
-                        <div class="customer-info">
-                            <div class="customer-name">${customer.name}</div>
-                            <div class="customer-patience">
-                                <div class="customer-patience-bar" style="width: ${customer.getpatienceRatio() * 100}%"></div>
-                            </div>
-                        </div>
-                    `;
-                    item.onclick = () => this.serveCustomer(customer);
-                    container.appendChild(item);
-                });
+                // Check level up
+                if (this.exp >= this.expToNext) {
+                    this.levelUp();
+                }
+
+                this.updateUI();
             }
 
-            // Main update loop
-            update() {
-                const now = Date.now();
-                const deltaTime = now - this.lastUpdateTime;
-                this.lastUpdateTime = now;
+            levelUp() {
+                this.level++;
+                this.exp = 0;
+                this.expToNext = Math.floor(this.expToNext * 1.5);
+                this.clickPower++;
 
-                // Update customers
-                this.updateCustomers(deltaTime);
+                // Effects
+                AUDIO.playLevelUp();
+                showAchievement(`레벨 ${this.level} 달성!`);
+                screenShake();
 
-                // Spawn customers
-                const spawnInterval = GameConfig.CUSTOMER_SPAWN_INTERVAL / (1 + GameState.upgrades.customerSpeed * 0.2);
-                this.customerSpawnTimer += deltaTime;
+                this.updateUI();
+            }
 
-                if (this.customerSpawnTimer >= spawnInterval) {
-                    this.customerSpawnTimer = 0;
-                    if (GameState.customers.length < 10) {
-                        this.spawnCustomer();
-                    }
-                }
+            harvestKataifi() {
+                this.kataifi += CONFIG.balance.kataifiPerHarvest * this.clickPower;
+                AUDIO.playKataifiCrunch();
+                this.updateUI();
+            }
 
-                // Auto production
-                this.autoProduction(deltaTime);
+            crushPistachio() {
+                this.pistachio += CONFIG.balance.pistachioPerCrush * this.clickPower;
+                AUDIO.playPistachioCrush();
+                this.updateUI();
+            }
 
-                // Check boost expiration
-                if (GameState.boostActive && Date.now() > GameState.boostEndTime) {
-                    GameState.boostActive = false;
-                    showNotification('부스트 효과가 종료되었습니다', 'warning');
-                }
-
-                // Update shake
-                if (GameState.shakeAmount > 0) {
-                    GameState.shakeAmount *= GameState.shakeDecay;
-                    if (GameState.shakeAmount < 0.1) {
-                        GameState.shakeAmount = 0;
-                    }
-                }
-
-                // Update UI periodically
-                if (Math.floor(now / 100) !== Math.floor((now - deltaTime) / 100)) {
+            makeFilling() {
+                const cost = CONFIG.balance.fillingCost;
+                if (this.kataifi >= cost.kataifi && this.pistachio >= cost.pistachio) {
+                    this.kataifi -= cost.kataifi;
+                    this.pistachio -= cost.pistachio;
+                    this.filling++;
+                    AUDIO.playSuccess();
                     this.updateUI();
+                    return true;
                 }
+                return false;
             }
-        }
 
-        // ========================================
-        // SAVE/LOAD SYSTEM
-        // ========================================
-        class SaveSystem {
+            makeCookie() {
+                const cost = CONFIG.balance.cookieCost;
+                if (this.filling >= cost.filling) {
+                    this.filling -= cost.filling;
+                    this.cookies++;
+                    AUDIO.playCookieTap();
+                    this.updateUI();
+                    return true;
+                }
+                return false;
+            }
+
+            sellCookie() {
+                if (this.cookies > 0) {
+                    this.cookies--;
+                    const price = CONFIG.balance.cookieBasePrice * this.level;
+                    this.addMoney(price);
+                    AUDIO.playMoneyEarn();
+                    showFloatingText('+' + formatNumber(price) + '원', CONFIG.colors.kataifi.gold);
+                    return true;
+                }
+                return false;
+            }
+
+            updateUI() {
+                document.getElementById('money-amount').textContent = formatNumber(this.money);
+                document.getElementById('level-num').textContent = this.level;
+                document.getElementById('kataifi-count').textContent = this.kataifi;
+                document.getElementById('pistachio-count').textContent = this.pistachio;
+                document.getElementById('filling-count').textContent = this.filling;
+                document.getElementById('cookie-count').textContent = this.cookies;
+            }
+
             save() {
-                const saveData = {
-                    money: GameState.money,
-                    kadayif: GameState.kadayif,
-                    pistachio: GameState.pistachio,
-                    filling: GameState.filling,
-                    dough: GameState.dough,
-                    cookies: GameState.cookies,
-                    upgrades: GameState.upgrades,
-                    stats: GameState.stats,
+                const data = {
+                    money: this.money,
+                    level: this.level,
+                    exp: this.exp,
+                    expToNext: this.expToNext,
+                    kataifi: this.kataifi,
+                    pistachio: this.pistachio,
+                    filling: this.filling,
+                    cookies: this.cookies,
+                    clickPower: this.clickPower,
                     lastSaveTime: Date.now()
                 };
 
-                localStorage.setItem(GameConfig.SAVE_KEY, JSON.stringify(saveData));
+                localStorage.setItem(CONFIG.save.key, JSON.stringify(data));
             }
 
             load() {
-                const saveData = localStorage.getItem(GameConfig.SAVE_KEY);
+                const saved = localStorage.getItem(CONFIG.save.key);
+                if (!saved) return;
 
-                if (saveData) {
-                    try {
-                        const data = JSON.parse(saveData);
+                try {
+                    const data = JSON.parse(saved);
 
-                        GameState.money = data.money || 0;
-                        GameState.kadayif = data.kadayif || 0;
-                        GameState.pistachio = data.pistachio || 0;
-                        GameState.filling = data.filling || 0;
-                        GameState.dough = data.dough || 0;
-                        GameState.cookies = data.cookies || 0;
-                        GameState.upgrades = data.upgrades || GameState.upgrades;
-                        GameState.stats = data.stats || GameState.stats;
+                    this.money = data.money || 0;
+                    this.level = data.level || 1;
+                    this.exp = data.exp || 0;
+                    this.expToNext = data.expToNext || 100;
+                    this.kataifi = data.kataifi || 0;
+                    this.pistachio = data.pistachio || 0;
+                    this.filling = data.filling || 0;
+                    this.cookies = data.cookies || 0;
+                    this.clickPower = data.clickPower || 1;
 
-                        // Calculate offline earnings
-                        const offlineTime = Date.now() - (data.lastSaveTime || Date.now());
-                        const maxOfflineTime = Math.min(offlineTime, GameConfig.MAX_OFFLINE_TIME);
+                    // Calculate offline earnings
+                    const now = Date.now();
+                    const timeDiff = now - (data.lastSaveTime || now);
 
-                        if (maxOfflineTime > 60000) { // More than 1 minute
-                            this.calculateOfflineEarnings(maxOfflineTime);
+                    if (timeDiff > 60000) { // More than 1 minute
+                        const offlineMinutes = Math.min(timeDiff, CONFIG.balance.maxOfflineTime) / 60000;
+                        const offlineEarnings = Math.floor(
+                            offlineMinutes * this.level * 10 * CONFIG.balance.offlineEarningsRate
+                        );
+
+                        if (offlineEarnings > 0) {
+                            showOfflineEarnings(offlineEarnings);
                         }
-
-                        return true;
-                    } catch (e) {
-                        console.error('Failed to load save:', e);
-                        return false;
                     }
-                }
 
-                return false;
-            }
-
-            calculateOfflineEarnings(timeAway) {
-                const minutes = Math.floor(timeAway / 60000);
-
-                // Calculate earnings based on upgrades
-                const autoKadayifRate = GameState.upgrades.autoKadayif;
-                const autoPistachioRate = GameState.upgrades.autoPistachio;
-
-                // Estimate cookies produced
-                const fillingsProduced = Math.floor(minutes * Math.min(autoKadayifRate / 5, autoPistachioRate / 3));
-                const cookiesProduced = Math.min(fillingsProduced, GameState.dough);
-
-                // Calculate money earned
-                const priceMultiplier = 1 + (GameState.upgrades.sellPrice * 0.2);
-                const basePrice = GameConfig.COOKIE_BASE_PRICE * priceMultiplier;
-                const earnings = Math.floor(cookiesProduced * basePrice * GameConfig.OFFLINE_EARNINGS_RATE);
-
-                if (earnings > 0) {
-                    // Show offline earnings modal
-                    document.getElementById('offline-earnings').textContent = formatNumber(earnings);
-                    document.getElementById('offline-time').textContent = minutes;
-
-                    // Store earnings to be claimed
-                    GameState.pendingOfflineEarnings = earnings;
-
-                    document.getElementById('offline-modal').classList.add('active');
-                }
-            }
-
-            reset() {
-                if (confirm('정말로 게임을 초기화하시겠습니까? 모든 진행 상황이 삭제됩니다!')) {
-                    localStorage.removeItem(GameConfig.SAVE_KEY);
-                    location.reload();
+                    this.updateUI();
+                } catch (e) {
+                    console.error('Failed to load save:', e);
                 }
             }
         }
 
-        // ========================================
-        // MINIGAME CONTROLLERS
-        // ========================================
-        class KadayifMinigame {
-            constructor() {
-                this.canvas = document.getElementById('minigame-canvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.progress = 0;
-                this.targetZone = 0.5;
-                this.zoneSize = 0.2;
-                this.movingBar = 0;
-                this.direction = 1;
-                this.speed = 0.02;
-                this.active = false;
+        // ============================================================================
+        // 6. TOUCH INPUT HANDLER
+        // ============================================================================
+        class TouchHandler {
+            constructor(canvas) {
+                this.canvas = canvas;
+                this.touches = new Map();
+                this.setupEventListeners();
             }
 
-            start() {
-                this.active = true;
-                this.progress = 0;
-                this.movingBar = 0;
+            setupEventListeners() {
+                // Touch events
+                this.canvas.addEventListener('touchstart', (e) => this.handleTouchStart(e), { passive: false });
+                this.canvas.addEventListener('touchmove', (e) => this.handleTouchMove(e), { passive: false });
+                this.canvas.addEventListener('touchend', (e) => this.handleTouchEnd(e), { passive: false });
+                this.canvas.addEventListener('touchcancel', (e) => this.handleTouchEnd(e), { passive: false });
 
-                document.getElementById('minigame-title').textContent = '🔥 카다이프면 볶기';
-                document.getElementById('minigame-instruction').textContent = '녹색 구간에서 클릭하세요! (10번 성공)';
-                document.getElementById('minigame-modal').classList.add('active');
-
-                this.update();
+                // Mouse events (for desktop testing)
+                this.canvas.addEventListener('mousedown', (e) => this.handleMouseDown(e));
+                this.canvas.addEventListener('mouseup', (e) => this.handleMouseUp(e));
             }
 
-            update() {
-                if (!this.active) return;
+            handleTouchStart(e) {
+                e.preventDefault();
 
-                // Move bar
-                this.movingBar += this.direction * this.speed;
+                for (let touch of e.changedTouches) {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = touch.clientX - rect.left;
+                    const y = touch.clientY - rect.top;
 
-                if (this.movingBar >= 1 || this.movingBar <= 0) {
-                    this.direction *= -1;
-                    this.movingBar = Math.max(0, Math.min(1, this.movingBar));
-                }
-
-                // Draw
-                this.draw();
-
-                // Update progress bar
-                document.getElementById('minigame-progress-bar').style.width = `${this.progress * 10}%`;
-                document.getElementById('minigame-progress-bar').textContent = `${Math.floor(this.progress * 10)}%`;
-
-                if (this.active) {
-                    requestAnimationFrame(() => this.update());
+                    this.touches.set(touch.identifier, { x, y, startTime: Date.now() });
+                    this.onTap(x, y);
                 }
             }
 
-            draw() {
-                const ctx = this.ctx;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+            handleTouchMove(e) {
+                e.preventDefault();
 
-                // Clear
-                ctx.fillStyle = GameConfig.COLORS.background;
-                ctx.fillRect(0, 0, width, height);
+                for (let touch of e.changedTouches) {
+                    const rect = this.canvas.getBoundingClientRect();
+                    const x = touch.clientX - rect.left;
+                    const y = touch.clientY - rect.top;
 
-                // Draw pan
-                ctx.fillStyle = '#555';
-                ctx.fillRect(50, height - 100, width - 100, 80);
-
-                // Draw target zone (green)
-                const zoneStart = (this.targetZone - this.zoneSize / 2) * (width - 100) + 50;
-                const zoneWidth = this.zoneSize * (width - 100);
-                ctx.fillStyle = GameConfig.COLORS.secondary;
-                ctx.fillRect(zoneStart, height - 100, zoneWidth, 80);
-
-                // Draw moving bar (kadayif)
-                const barX = this.movingBar * (width - 100) + 50;
-                ctx.fillStyle = GameConfig.COLORS.kadayif;
-                ctx.fillRect(barX - 10, height - 120, 20, 100);
-
-                // Draw fire
-                for (let i = 0; i < 10; i++) {
-                    const x = 50 + i * (width - 100) / 10;
-                    const flicker = Math.random() * 10;
-                    ctx.fillStyle = GameConfig.COLORS.ovenFire;
-                    ctx.fillRect(x, height - 20 + flicker, 20, 20 - flicker);
-                }
-            }
-
-            click() {
-                if (!this.active) return;
-
-                const inZone = Math.abs(this.movingBar - this.targetZone) < this.zoneSize / 2;
-
-                if (inZone) {
-                    this.progress++;
-                    audioEngine.playSuccess();
-
-                    // Increase difficulty
-                    this.speed += 0.005;
-
-                    if (this.progress >= 10) {
-                        this.complete();
+                    if (this.touches.has(touch.identifier)) {
+                        this.touches.get(touch.identifier).x = x;
+                        this.touches.get(touch.identifier).y = y;
                     }
-                } else {
-                    this.progress = Math.max(0, this.progress - 0.5);
-                    audioEngine.playFail();
                 }
             }
 
-            complete() {
-                this.active = false;
-                gameLogic.addResource('kadayif', 5);
+            handleTouchEnd(e) {
+                e.preventDefault();
 
-                audioEngine.playLevelUp();
-                showNotification('카다이프면 5개 획득!', 'success');
-
-                document.getElementById('minigame-modal').classList.remove('active');
-            }
-
-            close() {
-                this.active = false;
-            }
-        }
-
-        class PistachioMinigame {
-            constructor() {
-                this.canvas = document.getElementById('minigame-canvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.progress = 0;
-                this.nuts = [];
-                this.active = false;
-            }
-
-            start() {
-                this.active = true;
-                this.progress = 0;
-                this.nuts = [];
-
-                // Spawn nuts
-                for (let i = 0; i < 20; i++) {
-                    this.nuts.push({
-                        x: Math.random() * (this.canvas.width - 40) + 20,
-                        y: Math.random() * (this.canvas.height - 40) + 20,
-                        crushed: false
-                    });
-                }
-
-                document.getElementById('minigame-title').textContent = '🥜 피스타치오 분쇄';
-                document.getElementById('minigame-instruction').textContent = '피스타치오를 클릭해서 분쇄하세요!';
-                document.getElementById('minigame-modal').classList.add('active');
-
-                this.canvas.onclick = (e) => this.click(e);
-
-                this.update();
-            }
-
-            update() {
-                if (!this.active) return;
-
-                this.draw();
-
-                // Update progress
-                const crushedCount = this.nuts.filter(n => n.crushed).length;
-                const progressPercent = (crushedCount / this.nuts.length) * 100;
-                document.getElementById('minigame-progress-bar').style.width = `${progressPercent}%`;
-                document.getElementById('minigame-progress-bar').textContent = `${Math.floor(progressPercent)}%`;
-
-                if (crushedCount >= this.nuts.length) {
-                    this.complete();
-                }
-
-                if (this.active) {
-                    requestAnimationFrame(() => this.update());
+                for (let touch of e.changedTouches) {
+                    this.touches.delete(touch.identifier);
                 }
             }
 
-            draw() {
-                const ctx = this.ctx;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
-
-                // Clear
-                ctx.fillStyle = GameConfig.COLORS.background;
-                ctx.fillRect(0, 0, width, height);
-
-                // Draw mortar
-                ctx.fillStyle = '#8B4513';
-                ctx.beginPath();
-                ctx.arc(width / 2, height / 2, 100, 0, Math.PI * 2);
-                ctx.fill();
-
-                // Draw nuts
-                this.nuts.forEach(nut => {
-                    if (!nut.crushed) {
-                        ctx.fillStyle = GameConfig.COLORS.pistachioFilling;
-                        ctx.beginPath();
-                        ctx.arc(nut.x, nut.y, 8, 0, Math.PI * 2);
-                        ctx.fill();
-                    } else {
-                        // Draw crushed particles
-                        ctx.fillStyle = GameConfig.COLORS.pistachioDeep;
-                        for (let i = 0; i < 5; i++) {
-                            const offsetX = (Math.random() - 0.5) * 10;
-                            const offsetY = (Math.random() - 0.5) * 10;
-                            ctx.fillRect(nut.x + offsetX, nut.y + offsetY, 2, 2);
-                        }
-                    }
-                });
-            }
-
-            click(e) {
-                if (!this.active) return;
-
+            handleMouseDown(e) {
                 const rect = this.canvas.getBoundingClientRect();
                 const x = e.clientX - rect.left;
                 const y = e.clientY - rect.top;
 
-                this.nuts.forEach(nut => {
-                    if (!nut.crushed) {
-                        const distance = Math.sqrt((nut.x - x) ** 2 + (nut.y - y) ** 2);
-                        if (distance < 10) {
-                            nut.crushed = true;
-                            audioEngine.playClick();
-                        }
-                    }
-                });
+                this.onTap(x, y);
             }
 
-            complete() {
-                this.active = false;
-                this.canvas.onclick = null;
-
-                gameLogic.addResource('pistachio', 3);
-
-                audioEngine.playLevelUp();
-                showNotification('피스타치오 3개 획득!', 'success');
-
-                document.getElementById('minigame-modal').classList.remove('active');
+            handleMouseUp(e) {
+                // Handle mouse up if needed
             }
 
-            close() {
-                this.active = false;
-                this.canvas.onclick = null;
-            }
-        }
+            onTap(x, y) {
+                // Emit particles at tap location
+                PARTICLES.emit(x, y, 15, CONFIG.colors.kataifi.gold, 15);
 
-        class BakingMinigame {
-            constructor() {
-                this.canvas = document.getElementById('baking-canvas');
-                this.ctx = this.canvas.getContext('2d');
-                this.temperature = 0;
-                this.targetTemp = 180;
-                this.tempRange = 20;
-                this.time = 0;
-                this.maxTime = 5000;
-                this.active = false;
-            }
+                // Screen shake
+                screenShake();
 
-            start() {
-                if (GameState.dough < GameConfig.BAKING_DOUGH_COST ||
-                    GameState.filling < GameConfig.BAKING_FILLING_COST) {
-                    audioEngine.playFail();
-                    showNotification('재료가 부족합니다!', 'warning');
-                    return false;
-                }
-
-                GameState.dough -= GameConfig.BAKING_DOUGH_COST;
-                GameState.filling -= GameConfig.BAKING_FILLING_COST;
-
-                this.active = true;
-                this.temperature = 0;
-                this.time = 0;
-
-                document.getElementById('baking-modal').classList.add('active');
-
-                this.canvas.onclick = () => this.click();
-
-                audioEngine.playBaking();
-
-                this.update();
-                return true;
-            }
-
-            update() {
-                if (!this.active) return;
-
-                // Increase temperature
-                this.temperature += Math.random() * 5;
-
-                // Time passes
-                this.time += 16;
-
-                this.draw();
-
-                // Update progress
-                const progress = (this.time / this.maxTime) * 100;
-                document.getElementById('baking-progress-bar').style.width = `${progress}%`;
-                document.getElementById('baking-progress-bar').textContent = `${Math.floor(progress)}%`;
-
-                if (this.time >= this.maxTime) {
-                    this.fail();
-                }
-
-                if (this.active) {
-                    requestAnimationFrame(() => this.update());
+                // Haptic feedback (if supported)
+                if (navigator.vibrate) {
+                    navigator.vibrate(10);
                 }
             }
+        }
 
-            draw() {
-                const ctx = this.ctx;
-                const width = this.canvas.width;
-                const height = this.canvas.height;
+        // ============================================================================
+        // 7. GAME LOOP
+        // ============================================================================
+        let lastFrameTime = 0;
+        let gameObjects = {
+            cookies: []
+        };
 
-                // Clear
-                ctx.fillStyle = GameConfig.COLORS.background;
-                ctx.fillRect(0, 0, width, height);
+        function gameLoop(timestamp) {
+            const dt = timestamp - lastFrameTime;
+            lastFrameTime = timestamp;
 
-                // Draw oven
-                ctx.fillStyle = '#555';
-                ctx.fillRect(50, 100, width - 100, 150);
+            // Update
+            PARTICLES.update(dt);
 
-                // Draw cookie inside
-                const sprite = new SpriteEngine(ctx);
-                const cookieSize = 15 + (this.time / this.maxTime) * 5;
-                sprite.drawCookie(width / 2 / GameConfig.PIXEL_SIZE, 175 / GameConfig.PIXEL_SIZE, cookieSize);
+            // Update game objects (e.g., floating cookies)
+            gameObjects.cookies.forEach((cookie, index) => {
+                cookie.y -= 0.5;
+                cookie.rotation += 0.02;
+                cookie.scale += 0.005;
+                cookie.life--;
 
-                // Draw thermometer
-                ctx.fillStyle = '#fff';
-                ctx.fillRect(width - 80, 50, 30, 200);
-
-                // Temperature bar
-                const tempHeight = (this.temperature / 250) * 180;
-                const inRange = Math.abs(this.temperature - this.targetTemp) < this.tempRange;
-                ctx.fillStyle = inRange ? GameConfig.COLORS.secondary : '#ff4444';
-                ctx.fillRect(width - 75, 230 - tempHeight, 20, tempHeight);
-
-                // Target zone
-                const targetY = 230 - (this.targetTemp / 250) * 180;
-                ctx.strokeStyle = GameConfig.COLORS.secondary;
-                ctx.lineWidth = 3;
-                ctx.strokeRect(width - 80, targetY - this.tempRange / 2, 30, this.tempRange);
-
-                // Temperature text
-                ctx.fillStyle = '#fff';
-                ctx.font = '16px Arial';
-                ctx.fillText(`${Math.floor(this.temperature)}°C`, width - 78, 40);
-            }
-
-            click() {
-                if (!this.active) return;
-
-                const inRange = Math.abs(this.temperature - this.targetTemp) < this.tempRange;
-
-                if (inRange) {
-                    this.complete();
-                } else {
-                    audioEngine.playFail();
-                    showNotification('타이밍을 잘 맞춰주세요!', 'warning');
+                if (cookie.life <= 0) {
+                    gameObjects.cookies.splice(index, 1);
                 }
-            }
-
-            complete() {
-                this.active = false;
-                this.canvas.onclick = null;
-
-                gameLogic.addResource('cookies', 1);
-
-                audioEngine.playLevelUp();
-                showNotification('완벽한 쿠키 완성!', 'success');
-
-                // Particle effect
-                particleSystem.emit(
-                    canvas.width / 2,
-                    canvas.height / 2,
-                    GameConfig.PARTICLE_COUNT * 2,
-                    GameConfig.COLORS.particleGold
-                );
-
-                document.getElementById('baking-modal').classList.remove('active');
-            }
-
-            fail() {
-                this.active = false;
-                this.canvas.onclick = null;
-
-                audioEngine.playFail();
-                showNotification('쿠키가 타버렸어요! 재료 손실...', 'warning');
-
-                document.getElementById('baking-modal').classList.remove('active');
-            }
-
-            close() {
-                this.active = false;
-                this.canvas.onclick = null;
-            }
-        }
-
-        // ========================================
-        // UTILITY FUNCTIONS
-        // ========================================
-        function formatNumber(num) {
-            if (num >= 1000000000) {
-                return (num / 1000000000).toFixed(1) + 'B';
-            } else if (num >= 1000000) {
-                return (num / 1000000).toFixed(1) + 'M';
-            } else if (num >= 1000) {
-                return (num / 1000).toFixed(1) + 'K';
-            }
-            return Math.floor(num).toString();
-        }
-
-        function showNotification(message, type = 'info') {
-            const container = document.getElementById('notification-container');
-            const notification = document.createElement('div');
-            notification.className = `notification ${type}`;
-            notification.textContent = message;
-
-            container.appendChild(notification);
-
-            setTimeout(() => {
-                notification.style.opacity = '0';
-                setTimeout(() => {
-                    container.removeChild(notification);
-                }, 300);
-            }, 3000);
-        }
-
-        function switchTab(tabName) {
-            // Update buttons
-            document.querySelectorAll('.tab-btn').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            event.target.classList.add('active');
-
-            // Update content
-            document.querySelectorAll('.tab-content').forEach(content => {
-                content.classList.remove('active');
-            });
-            document.getElementById(`${tabName}-tab`).classList.add('active');
-
-            audioEngine.playClick();
-        }
-
-        // ========================================
-        // AD SYSTEM (Placeholder)
-        // ========================================
-        function watchRewardAd(rewardType) {
-            audioEngine.playClick();
-
-            // In production, this would call actual ad SDK
-            // AdMob.showRewardedAd().then(() => { ... });
-
-            // Simulate ad watching
-            showNotification('광고를 시청하는 중...', 'info');
-
-            setTimeout(() => {
-                switch(rewardType) {
-                    case 'boost':
-                        GameState.boostActive = true;
-                        GameState.boostEndTime = Date.now() + 60000; // 1 minute
-                        audioEngine.playLevelUp();
-                        showNotification('1분간 2배 부스트 활성화!', 'success');
-                        break;
-
-                    case 'offline':
-                        const earnings = GameState.pendingOfflineEarnings * 2;
-                        GameState.money += earnings;
-                        GameState.pendingOfflineEarnings = 0;
-                        audioEngine.playMoney();
-                        showNotification(`${formatNumber(earnings)}원 획득!`, 'success');
-                        document.getElementById('offline-modal').classList.remove('active');
-                        gameLogic.updateUI();
-                        break;
-                }
-            }, 2000);
-        }
-
-        // ========================================
-        // GLOBAL FUNCTIONS (Called from HTML)
-        // ========================================
-        function startKadayifMinigame() {
-            audioEngine.playClick();
-            kadayifMinigame.start();
-        }
-
-        function startPistachioMinigame() {
-            audioEngine.playClick();
-            pistachioMinigame.start();
-        }
-
-        function mergeFilling() {
-            audioEngine.playClick();
-            gameLogic.mergeFilling();
-        }
-
-        function startBaking() {
-            audioEngine.playClick();
-            bakingMinigame.start();
-        }
-
-        function buyDough() {
-            audioEngine.playClick();
-            gameLogic.buyDough();
-        }
-
-        function buyUpgrade(type) {
-            audioEngine.playClick();
-            gameLogic.buyUpgrade(type);
-        }
-
-        function closeMinigame() {
-            audioEngine.playClick();
-            document.getElementById('minigame-modal').classList.remove('active');
-            kadayifMinigame.close();
-            pistachioMinigame.close();
-        }
-
-        function closeOfflineModal() {
-            audioEngine.playClick();
-
-            if (GameState.pendingOfflineEarnings) {
-                GameState.money += GameState.pendingOfflineEarnings;
-                GameState.pendingOfflineEarnings = 0;
-                gameLogic.updateUI();
-            }
-
-            document.getElementById('offline-modal').classList.remove('active');
-        }
-
-        function resetGame() {
-            saveSystem.reset();
-        }
-
-        // ========================================
-        // MAIN GAME LOOP & INITIALIZATION
-        // ========================================
-        let canvas, ctx, particleCanvas, particleSystem;
-        let audioEngine, gameLogic, saveSystem;
-        let kadayifMinigame, pistachioMinigame, bakingMinigame;
-        let spriteEngine;
-        let lastFrameTime = Date.now();
-
-        function initGame() {
-            // Initialize canvas
-            canvas = document.getElementById('game-canvas');
-            ctx = canvas.getContext('2d');
-
-            // Set canvas size
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
-
-            // Initialize particle system
-            particleCanvas = document.getElementById('particle-canvas');
-            particleSystem = new ParticleSystem(particleCanvas);
-            resizeParticleCanvas();
-
-            // Initialize engines
-            audioEngine = new AudioEngine();
-            spriteEngine = new SpriteEngine(ctx);
-            gameLogic = new GameLogic();
-            saveSystem = new SaveSystem();
-
-            // Initialize minigames
-            kadayifMinigame = new KadayifMinigame();
-            pistachioMinigame = new PistachioMinigame();
-            bakingMinigame = new BakingMinigame();
-
-            // Load save
-            saveSystem.load();
-
-            // Update UI
-            gameLogic.updateUI();
-
-            // Auto-save interval
-            setInterval(() => {
-                saveSystem.save();
-            }, GameConfig.AUTO_SAVE_INTERVAL);
-
-            // Mobile panel toggle
-            const toggleBtn = document.getElementById('toggle-panel-btn');
-            const sidePanel = document.getElementById('side-panel');
-
-            if (window.innerWidth <= 768) {
-                toggleBtn.style.display = 'block';
-                toggleBtn.onclick = () => {
-                    sidePanel.classList.toggle('open');
-                    audioEngine.playClick();
-                };
-            }
-
-            // Canvas click for main game interactions
-            canvas.addEventListener('click', (e) => {
-                const rect = canvas.getBoundingClientRect();
-                const x = (e.clientX - rect.left) * (canvas.width / rect.width);
-                const y = (e.clientY - rect.top) * (canvas.height / rect.height);
-
-                handleCanvasClick(x, y);
             });
 
-            // Hide loading screen
-            setTimeout(() => {
-                document.getElementById('loading-screen').classList.add('hidden');
-                audioEngine.playBGM();
-            }, 2000);
+            // Draw
+            draw();
 
-            // Start game loop
-            gameLoop();
-        }
-
-        function resizeCanvas() {
-            const container = document.getElementById('canvas-container');
-            canvas.width = container.clientWidth;
-            canvas.height = container.clientHeight;
-        }
-
-        function resizeParticleCanvas() {
-            const container = document.getElementById('canvas-container');
-            particleCanvas.width = container.clientWidth;
-            particleCanvas.height = container.clientHeight;
-        }
-
-        function handleCanvasClick(x, y) {
-            audioEngine.playClick();
-
-            // Emit particles at click position
-            particleSystem.emit(x, y, 5, GameConfig.COLORS.particle);
-        }
-
-        function gameLoop() {
-            const now = Date.now();
-            const deltaTime = now - lastFrameTime;
-            lastFrameTime = now;
-
-            // Update game logic
-            gameLogic.update();
-
-            // Update particles
-            particleSystem.update(deltaTime);
-
-            // Draw game
-            drawGame();
-
-            // Draw particles
-            particleSystem.draw();
-
-            // Continue loop
             requestAnimationFrame(gameLoop);
         }
 
-        function drawGame() {
-            // Apply screen shake
-            if (GameState.shakeAmount > 0) {
-                const shakeX = (Math.random() - 0.5) * GameState.shakeAmount;
-                const shakeY = (Math.random() - 0.5) * GameState.shakeAmount;
-                ctx.save();
-                ctx.translate(shakeX, shakeY);
-            }
-
-            // Clear canvas
-            ctx.fillStyle = GameConfig.COLORS.background;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
+        function draw() {
+            // Clear main canvas
+            GAME_CTX.fillStyle = CONFIG.colors.chocolate.dark;
+            GAME_CTX.fillRect(0, 0, GAME_CANVAS.width, GAME_CANVAS.height);
 
             // Draw background
-            spriteEngine.drawBackground();
+            PIXEL_ART.drawBackground(
+                Math.floor(GAME_CANVAS.width / CONFIG.canvas.pixelSize),
+                Math.floor(GAME_CANVAS.height / CONFIG.canvas.pixelSize)
+            );
 
-            // Draw counter
-            spriteEngine.drawCounter(50, 100);
+            // Draw game objects
+            gameObjects.cookies.forEach(cookie => {
+                GAME_CTX.save();
+                GAME_CTX.translate(cookie.x, cookie.y);
+                GAME_CTX.rotate(cookie.rotation);
+                GAME_CTX.scale(cookie.scale, cookie.scale);
+                GAME_CTX.globalAlpha = cookie.life / 60;
 
-            // Draw cookies on display
-            if (GameState.cookies > 0) {
-                const displayCookies = Math.min(GameState.cookies, 5);
-                for (let i = 0; i < displayCookies; i++) {
-                    spriteEngine.drawCookie(
-                        15 + i * 5,
-                        20,
-                        8
-                    );
-                }
-            }
+                PIXEL_ART.drawDubaiCookie(0, 0, CONFIG.canvas.cookieSize, 'glow');
 
-            // Draw oven
-            const ovenActive = GameState.upgrades.autoOven > 0;
-            spriteEngine.drawOven(120, 50, ovenActive);
-
-            // Draw customers
-            GameState.customers.slice(0, 5).forEach((customer, index) => {
-                spriteEngine.drawCustomer(
-                    Math.floor(customer.x),
-                    Math.floor(customer.y + index * 20),
-                    customer.emotion
-                );
+                GAME_CTX.restore();
             });
 
-            // Draw resource indicators
-            const resourceY = 30;
+            // Draw center cookie (main interaction)
+            const centerX = Math.floor(GAME_CANVAS.width / CONFIG.canvas.pixelSize / 2);
+            const centerY = Math.floor(GAME_CANVAS.height / CONFIG.canvas.pixelSize / 2.5);
+            PIXEL_ART.drawDubaiCookie(centerX, centerY, CONFIG.canvas.cookieSize);
 
-            // Kadayif
-            if (GameState.kadayif > 0) {
-                spriteEngine.drawKadayif(5, resourceY);
-                ctx.fillStyle = '#fff';
-                ctx.font = '12px Arial';
-                ctx.fillText(`x${GameState.kadayif}`, 25, resourceY * GameConfig.PIXEL_SIZE + 8);
-            }
-
-            // Pistachio
-            if (GameState.pistachio > 0) {
-                spriteEngine.drawPistachio(15, resourceY);
-                ctx.fillStyle = '#fff';
-                ctx.font = '12px Arial';
-                ctx.fillText(`x${GameState.pistachio}`, 65, resourceY * GameConfig.PIXEL_SIZE + 8);
-            }
-
-            // Filling
-            if (GameState.filling > 0) {
-                spriteEngine.drawFilling(25, resourceY);
-                ctx.fillStyle = '#fff';
-                ctx.font = '12px Arial';
-                ctx.fillText(`x${GameState.filling}`, 105, resourceY * GameConfig.PIXEL_SIZE + 8);
-            }
-
-            // Boost indicator
-            if (GameState.boostActive) {
-                const timeLeft = Math.ceil((GameState.boostEndTime - Date.now()) / 1000);
-                ctx.fillStyle = GameConfig.COLORS.accent;
-                ctx.font = 'bold 24px Arial';
-                ctx.fillText(`⚡ 2X BOOST (${timeLeft}s)`, canvas.width / 2 - 100, 40);
-            }
-
-            // Restore context if shake was applied
-            if (GameState.shakeAmount > 0) {
-                ctx.restore();
-            }
+            // Draw particles
+            PARTICLES.draw();
         }
 
-        // Loading bar animation
+        // ============================================================================
+        // 8. UI CONTROLLER
+        // ============================================================================
+        function formatNumber(num) {
+            if (num >= 1000000000) return (num / 1000000000).toFixed(1) + 'B';
+            if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
+            if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
+            return Math.floor(num).toString();
+        }
+
+        function showFloatingText(text, color) {
+            const el = document.createElement('div');
+            el.className = 'floating-text';
+            el.textContent = text;
+            el.style.color = color;
+            el.style.left = (GAME_CANVAS.width / 2) + 'px';
+            el.style.top = (GAME_CANVAS.height / 2) + 'px';
+
+            document.getElementById('game-container').appendChild(el);
+
+            setTimeout(() => el.remove(), 1500);
+        }
+
+        function screenShake() {
+            const container = document.getElementById('game-container');
+            container.classList.add('shake');
+            setTimeout(() => container.classList.remove('shake'), 300);
+        }
+
+        function showOfflineEarnings(amount) {
+            document.getElementById('offline-earnings').textContent = formatNumber(amount);
+            document.getElementById('offline-modal').classList.add('active');
+
+            document.getElementById('btn-claim-offline').onclick = () => {
+                GAME_STATE.addMoney(amount);
+                document.getElementById('offline-modal').classList.remove('active');
+                AUDIO.playMoneyEarn();
+            };
+        }
+
+        function showAchievement(text) {
+            document.getElementById('achievement-text').textContent = text;
+            document.getElementById('achievement-modal').classList.add('active');
+
+            document.getElementById('btn-close-achievement').onclick = () => {
+                document.getElementById('achievement-modal').classList.remove('active');
+            };
+
+            setTimeout(() => {
+                document.getElementById('achievement-modal').classList.remove('active');
+            }, 3000);
+        }
+
+        // ============================================================================
+        // 9. INITIALIZATION
+        // ============================================================================
+
+        // Get canvas elements
+        const GAME_CANVAS = document.getElementById('game-canvas');
+        const GAME_CTX = GAME_CANVAS.getContext('2d');
+        const PARTICLE_CANVAS = document.getElementById('particle-canvas');
+
+        // Resize canvases
+        function resizeCanvas() {
+            const container = document.getElementById('game-container');
+            GAME_CANVAS.width = container.clientWidth;
+            GAME_CANVAS.height = container.clientHeight;
+            PARTICLE_CANVAS.width = container.clientWidth;
+            PARTICLE_CANVAS.height = container.clientHeight;
+        }
+
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        // Initialize systems
+        const AUDIO = new AudioEngine();
+        const PIXEL_ART = new PixelArtRenderer(GAME_CTX, CONFIG.canvas.pixelSize);
+        const PARTICLES = new ParticleSystem(PARTICLE_CANVAS);
+        const GAME_STATE = new GameState();
+        const TOUCH_HANDLER = new TouchHandler(GAME_CANVAS);
+
+        // Button event listeners
+        document.getElementById('btn-tap-cookie').addEventListener('click', () => {
+            if (GAME_STATE.makeCookie()) {
+                // Create floating cookie
+                gameObjects.cookies.push({
+                    x: GAME_CANVAS.width / 2,
+                    y: GAME_CANVAS.height / 2,
+                    rotation: 0,
+                    scale: 1,
+                    life: 60
+                });
+
+                PARTICLES.emit(
+                    GAME_CANVAS.width / 2,
+                    GAME_CANVAS.height / 2,
+                    20,
+                    CONFIG.colors.pistachio.main,
+                    20
+                );
+
+                screenShake();
+
+                // Auto-sell after 1 second
+                setTimeout(() => {
+                    GAME_STATE.sellCookie();
+                }, 1000);
+            }
+        });
+
+        document.getElementById('btn-harvest-kataifi').addEventListener('click', () => {
+            GAME_STATE.harvestKataifi();
+            PARTICLES.emit(
+                GAME_CANVAS.width / 2,
+                GAME_CANVAS.height / 2,
+                10,
+                CONFIG.colors.kataifi.gold,
+                12
+            );
+            screenShake();
+        });
+
+        document.getElementById('btn-crush-pistachio').addEventListener('click', () => {
+            GAME_STATE.crushPistachio();
+            PARTICLES.emit(
+                GAME_CANVAS.width / 2,
+                GAME_CANVAS.height / 2,
+                10,
+                CONFIG.colors.pistachio.main,
+                12
+            );
+            screenShake();
+        });
+
+        // Auto-make filling
+        setInterval(() => {
+            GAME_STATE.makeFilling();
+        }, 2000);
+
+        // Auto-save
+        setInterval(() => {
+            GAME_STATE.save();
+        }, CONFIG.save.interval);
+
+        // Ad banner
+        document.getElementById('ad-banner').addEventListener('click', () => {
+            alert('광고 시청 중... (SDK 연동 필요)');
+            setTimeout(() => {
+                GAME_STATE.addMoney(1000 * GAME_STATE.level);
+                AUDIO.playMoneyEarn();
+                showFloatingText('보너스 획득!', CONFIG.colors.kataifi.gold);
+            }, 1000);
+        });
+
+        // Loading sequence
         let loadingProgress = 0;
         const loadingInterval = setInterval(() => {
-            loadingProgress += Math.random() * 30;
+            loadingProgress += Math.random() * 25;
             if (loadingProgress >= 100) {
                 loadingProgress = 100;
                 clearInterval(loadingInterval);
-            }
-            document.getElementById('loading-bar-fill').style.width = `${loadingProgress}%`;
-        }, 100);
 
-        // Start game when page loads
-        window.addEventListener('load', () => {
-            setTimeout(initGame, 1500);
-        });
+                setTimeout(() => {
+                    document.getElementById('loading-screen').classList.add('hidden');
+                    AUDIO.playSuccess();
+                    gameLoop(0);
+                }, 500);
+            }
+
+            document.getElementById('loading-bar-fill').style.width = loadingProgress + '%';
+        }, 150);
 
         // Save before unload
         window.addEventListener('beforeunload', () => {
-            saveSystem.save();
+            GAME_STATE.save();
         });
 
-        // Prevent context menu on canvas
-        canvas?.addEventListener('contextmenu', (e) => {
-            e.preventDefault();
-        });
+        // Prevent context menu
+        document.addEventListener('contextmenu', (e) => e.preventDefault());
+
+        // Prevent zoom on double-tap
+        let lastTouchEnd = 0;
+        document.addEventListener('touchend', (e) => {
+            const now = Date.now();
+            if (now - lastTouchEnd <= 300) {
+                e.preventDefault();
+            }
+            lastTouchEnd = now;
+        }, { passive: false });
+
+        console.log('🍪 두바이 쫀득 쿠키 타이쿤 - Mobile Premium Edition');
+        console.log('Game systems initialized successfully!');
     </script>
 </body>
 </html>
