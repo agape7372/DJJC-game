@@ -147,7 +147,7 @@ _(게임 플레이 화면)_
 
 ### GitHub Pages
 이 프로젝트는 GitHub Actions로 자동 배포됩니다:
-- Push 시 자동 빌드 & 배포
+- `claude/dubai-cookie-tycoon-L2OA5` 브랜치에 Push 시 자동 빌드 & 배포
 - GitHub Pages에서 즉시 플레이 가능
 
 ### 수동 배포
