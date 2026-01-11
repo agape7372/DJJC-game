@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>로딩 테스트</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 20px;
+            font-family: monospace;
+            background: #333;
+            color: white;
+        }
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #3D2817;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+        #loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+        #content {
+            padding: 20px;
+        }
+        .log {
+            margin: 5px 0;
+            padding: 5px;
+            background: rgba(0,0,0,0.5);
+            border-left: 3px solid #FFD700;
+        }
+        button {
+            margin: 10px 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <div id="loading">
+        <div style="text-align: center;">
+            <div style="font-size: 64px;">🍫</div>
+            <div style="font-size: 24px; color: #FFD700;">로딩 중...</div>
+        </div>
+    </div>
+
+    <div id="content">
+        <h1>🔍 로딩 화면 테스트</h1>
+        <div id="logs"></div>
+        <div>
+            <button onclick="testMethod1()">방법 1: classList.add('hidden')</button>
+            <button onclick="testMethod2()">방법 2: style.display = 'none'</button>
+            <button onclick="testMethod3()">방법 3: remove()</button>
+            <button onclick="reset()">리셋</button>
+        </div>
+    </div>
+
+    <script>
+        const logs = document.getElementById('logs');
+
+        function log(msg, color = '#FFD700') {
+            const div = document.createElement('div');
+            div.className = 'log';
+            div.style.borderColor = color;
+            div.innerHTML = `[${new Date().toLocaleTimeString()}] ${msg}`;
+            logs.appendChild(div);
+            console.log(msg);
+        }
+
+        function testMethod1() {
+            log('테스트: classList.add("hidden")', '#4CAF50');
+            const loading = document.getElementById('loading');
+            loading.classList.add('hidden');
+
+            setTimeout(() => {
+                const styles = window.getComputedStyle(loading);
+                log(`→ opacity: ${styles.opacity}`, '#4CAF50');
+                log(`→ display: ${styles.display}`, '#4CAF50');
+                log(`→ pointer-events: ${styles.pointerEvents}`, '#4CAF50');
+                log(`→ z-index: ${styles.zIndex}`, '#4CAF50');
+
+                if (styles.opacity === '0' && styles.pointerEvents === 'none') {
+                    log('✅ 보이지 않고 클릭도 안 됨 (정상)', '#4CAF50');
+                } else {
+                    log('❌ 여전히 클릭 가능할 수 있음!', '#FF5252');
+                }
+            }, 600);
+        }
+
+        function testMethod2() {
+            log('테스트: style.display = "none"', '#2196F3');
+            const loading = document.getElementById('loading');
+            loading.style.display = 'none';
+
+            setTimeout(() => {
+                const styles = window.getComputedStyle(loading);
+                log(`→ display: ${styles.display}`, '#2196F3');
+                log('✅ 완전히 제거됨', '#2196F3');
+            }, 100);
+        }
+
+        function testMethod3() {
+            log('테스트: remove()', '#9C27B0');
+            const loading = document.getElementById('loading');
+            loading.remove();
+            log('✅ DOM에서 완전 삭제', '#9C27B0');
+        }
+
+        function reset() {
+            window.location.reload();
+        }
+
+        // 자동 초기화 테스트
+        window.addEventListener('load', () => {
+            log('🍫 페이지 로드 완료');
+            log('3초 후 자동으로 로딩 화면 숨김 테스트...');
+
+            setTimeout(() => {
+                log('⚠️ 타임아웃 발생! (현재 코드 시뮬레이션)');
+                const loading = document.getElementById('loading');
+                loading.style.display = 'none';
+                log('→ style.display = "none" 적용');
+            }, 3000);
+        });
+    </script>
+</body>
+</html>
