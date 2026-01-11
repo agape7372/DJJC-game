@@ -1212,6 +1212,239 @@
                     console.warn('Draw char error:', e);
                 }
             }
+
+            // ============================================================================
+            // PROCEDURAL PIXEL ART SYSTEM (스프라이트 생성 엔진)
+            // ============================================================================
+
+            // 배열 기반 픽셀 드로잉
+            drawSprite(ctx, spriteData, x, y, pixelSize = 2) {
+                try {
+                    if (!ctx) return;
+
+                    for (let row = 0; row < spriteData.length; row++) {
+                        for (let col = 0; col < spriteData[row].length; col++) {
+                            const color = spriteData[row][col];
+                            if (color !== 0) { // 0 = 투명
+                                ctx.fillStyle = color;
+                                ctx.fillRect(
+                                    x + col * pixelSize,
+                                    y + row * pixelSize,
+                                    pixelSize,
+                                    pixelSize
+                                );
+                            }
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Sprite draw error:', e);
+                }
+            }
+
+            // 두바이 쿠키 스프라이트 (키치 컬러)
+            drawCookie(x, y, quality = 'normal', showCross = false) {
+                try {
+                    if (!this.charCtx) return;
+
+                    const colors = {
+                        choco: '#3E2723',      // 딥 초코
+                        pistachio: '#93C572',  // 피스타치오 그린
+                        kataifi: '#FFD54F',    // 카다이프 골드
+                        cream: '#FFF9C4',      // 크림
+                        shadow: '#1B0000'      // 그림자
+                    };
+
+                    // 쿠키 외곽선 (울퉁불퉁)
+                    const cookieSprite = [
+                        [0,0,colors.shadow,colors.shadow,colors.shadow,colors.shadow,colors.shadow,0,0],
+                        [0,colors.shadow,colors.choco,colors.choco,colors.choco,colors.choco,colors.choco,colors.shadow,0],
+                        [colors.shadow,colors.choco,colors.choco,colors.kataifi,colors.kataifi,colors.kataifi,colors.choco,colors.choco,colors.shadow],
+                        [colors.shadow,colors.choco,colors.kataifi,colors.pistachio,colors.pistachio,colors.pistachio,colors.kataifi,colors.choco,colors.shadow],
+                        [colors.shadow,colors.choco,colors.kataifi,colors.pistachio,colors.cream,colors.pistachio,colors.kataifi,colors.choco,colors.shadow],
+                        [colors.shadow,colors.choco,colors.kataifi,colors.pistachio,colors.pistachio,colors.pistachio,colors.kataifi,colors.choco,colors.shadow],
+                        [colors.shadow,colors.choco,colors.choco,colors.kataifi,colors.kataifi,colors.kataifi,colors.choco,colors.choco,colors.shadow],
+                        [0,colors.shadow,colors.choco,colors.choco,colors.choco,colors.choco,colors.choco,colors.shadow,0],
+                        [0,0,colors.shadow,colors.shadow,colors.shadow,colors.shadow,colors.shadow,0,0]
+                    ];
+
+                    this.drawSprite(this.charCtx, cookieSprite, x, y, 3);
+
+                    // 쿠키 단면 연출 (반으로 갈라진 효과)
+                    if (showCross) {
+                        const ctx = this.charCtx;
+                        ctx.save();
+
+                        // 필링이 흐르는 애니메이션
+                        const gradient = ctx.createLinearGradient(x, y, x, y + 30);
+                        gradient.addColorStop(0, colors.pistachio);
+                        gradient.addColorStop(0.5, colors.cream);
+                        gradient.addColorStop(1, colors.pistachio);
+
+                        ctx.fillStyle = gradient;
+                        ctx.fillRect(x + 10, y + 10, 8, 15);
+
+                        // 반짝이는 효과
+                        ctx.fillStyle = 'rgba(255,255,255,0.6)';
+                        ctx.fillRect(x + 12, y + 12, 2, 2);
+
+                        ctx.restore();
+                    }
+                } catch (e) {
+                    console.warn('Cookie draw error:', e);
+                }
+            }
+
+            // 손님 캐릭터 (2등신 도트, 걷는 애니메이션)
+            drawCustomer(x, y, frame = 0, mood = 'happy') {
+                try {
+                    if (!this.charCtx) return;
+
+                    const skin = '#FFDBAC';
+                    const hair = '#5D4037';
+                    const shirt = frame % 2 === 0 ? '#FF6B9D' : '#FF8FAB'; // 걷기 애니메이션
+                    const pants = '#4A90E2';
+
+                    const customerSprite = [
+                        [0,0,hair,hair,hair,0,0],
+                        [0,hair,skin,skin,skin,hair,0],
+                        [0,skin,0,skin,0,skin,0], // 눈
+                        [0,skin,skin,skin,skin,skin,0],
+                        [0,0,shirt,shirt,shirt,0,0],
+                        [0,shirt,shirt,shirt,shirt,shirt,0],
+                        [0,pants,pants,0,pants,pants,0], // 다리 (frame에 따라 변경)
+                        [0,pants,0,0,0,pants,0]
+                    ];
+
+                    // 기분에 따라 입 모양 변경
+                    if (mood === 'angry') {
+                        customerSprite[4] = [0,skin,0,0,0,skin,0]; // 화난 입
+                    }
+
+                    this.drawSprite(this.charCtx, customerSprite, x, y, 2);
+
+                    // 말풍선 (주문/만족/불만)
+                    if (mood === 'waiting') {
+                        const ctx = this.charCtx;
+                        ctx.fillStyle = 'rgba(255,255,255,0.9)';
+                        ctx.fillRect(x + 18, y - 10, 20, 12);
+                        ctx.fillStyle = '#000';
+                        ctx.font = '10px Arial';
+                        ctx.fillText('🍪', x + 20, y - 2);
+                    }
+                } catch (e) {
+                    console.warn('Customer draw error:', e);
+                }
+            }
+
+            // 오븐 (열기 애니메이션)
+            drawOven(x, y, heat = 0) {
+                try {
+                    if (!this.furnitureCtx) return;
+
+                    const metal = '#757575';
+                    const glass = '#B3E5FC';
+                    const fire = heat > 0.5 ? '#FF6F00' : '#FFAB00';
+
+                    const ovenSprite = [
+                        [metal,metal,metal,metal,metal,metal,metal,metal],
+                        [metal,glass,glass,glass,glass,glass,glass,metal],
+                        [metal,glass,glass,glass,glass,glass,glass,metal],
+                        [metal,glass,fire,fire,fire,fire,glass,metal],
+                        [metal,glass,fire,fire,fire,fire,glass,metal],
+                        [metal,glass,glass,glass,glass,glass,glass,metal],
+                        [metal,metal,metal,metal,metal,metal,metal,metal]
+                    ];
+
+                    this.drawSprite(this.furnitureCtx, ovenSprite, x, y, 4);
+
+                    // 열기 파티클
+                    if (heat > 0) {
+                        const ctx = this.effectCtx;
+                        for (let i = 0; i < 3; i++) {
+                            const py = y - 10 - Math.random() * 20;
+                            ctx.fillStyle = `rgba(255,${165 + Math.random() * 90},0,${0.3 + Math.random() * 0.3})`;
+                            ctx.fillRect(x + 10 + i * 8, py, 4, 4);
+                        }
+                    }
+                } catch (e) {
+                    console.warn('Oven draw error:', e);
+                }
+            }
+
+            // 화면 흔들림 (타격감)
+            screenShake(intensity = 5, duration = 200) {
+                try {
+                    const container = document.querySelector('.canvas-container');
+                    if (!container) return;
+
+                    let elapsed = 0;
+                    const interval = 16;
+
+                    const shake = setInterval(() => {
+                        if (elapsed >= duration) {
+                            container.style.transform = 'translate(0, 0)';
+                            clearInterval(shake);
+                            return;
+                        }
+
+                        const x = (Math.random() - 0.5) * intensity;
+                        const y = (Math.random() - 0.5) * intensity;
+                        container.style.transform = `translate(${x}px, ${y}px)`;
+
+                        elapsed += interval;
+                    }, interval);
+                } catch (e) {
+                    console.warn('Screen shake error:', e);
+                }
+            }
+
+            // 쿠키 반으로 가르기 연출
+            cookieCutAnimation(x, y, callback) {
+                try {
+                    if (!this.effectCtx) return;
+
+                    let frame = 0;
+                    const maxFrames = 20;
+
+                    const animate = () => {
+                        if (frame >= maxFrames) {
+                            if (callback) callback();
+                            return;
+                        }
+
+                        const ctx = this.effectCtx;
+                        ctx.clearRect(x - 50, y - 50, 100, 100);
+
+                        // 칼이 내려오는 효과
+                        const knifeY = y - 40 + (frame / maxFrames) * 50;
+                        ctx.fillStyle = '#C0C0C0';
+                        ctx.fillRect(x + 10, knifeY, 3, 20);
+
+                        // 쿠키 갈라지는 효과
+                        if (frame > maxFrames / 2) {
+                            const gap = (frame - maxFrames / 2) * 2;
+                            this.drawCookie(x - gap, y, 'supreme', true);
+                            this.drawCookie(x + gap, y, 'supreme', true);
+
+                            // 필링이 흐르는 파티클
+                            for (let i = 0; i < 5; i++) {
+                                const px = x + (Math.random() - 0.5) * 30;
+                                const py = y + 10 + Math.random() * 20;
+                                ctx.fillStyle = 'rgba(147,197,114,0.8)'; // 피스타치오 색
+                                ctx.fillRect(px, py, 2, 8);
+                            }
+                        }
+
+                        frame++;
+                        requestAnimationFrame(animate);
+                    };
+
+                    animate();
+                    this.screenShake(3, 150);
+                } catch (e) {
+                    console.warn('Cut animation error:', e);
+                }
+            }
         }
 
         const renderer = new CanvasRenderer();
@@ -1263,6 +1496,156 @@
 
             setTimeout(() => div.remove(), 1000);
         }
+
+        // ============================================================================
+        // NPC AI SYSTEM (카이로소프트 스타일 동선)
+        // ============================================================================
+        class NPCManager {
+            constructor() {
+                this.customers = [];
+                this.nextCustomerId = 0;
+                this.spawnInterval = 5000; // 5초마다 손님 생성
+                this.maxCustomers = 5;
+            }
+
+            // 손님 생성
+            spawnCustomer() {
+                if (this.customers.length >= this.maxCustomers) return;
+
+                const customer = {
+                    id: this.nextCustomerId++,
+                    x: -30, // 화면 밖에서 시작
+                    y: 150,
+                    targetX: 50 + this.customers.length * 40, // 줄 서기 위치
+                    targetY: 150,
+                    state: 'entering', // entering → waiting → selecting → paying → leaving
+                    mood: 'happy',
+                    patience: 100, // 인내심 (시간이 지나면 감소)
+                    walkFrame: 0,
+                    waitTime: 0,
+                    order: null
+                };
+
+                this.customers.push(customer);
+                console.log(`👤 손님 #${customer.id} 입장`);
+            }
+
+            // 손님 업데이트 (매 프레임)
+            update(deltaTime) {
+                this.customers.forEach((customer, index) => {
+                    customer.walkFrame = (customer.walkFrame + 1) % 60;
+
+                    switch (customer.state) {
+                        case 'entering':
+                            // 줄 서는 위치로 이동
+                            if (customer.x < customer.targetX) {
+                                customer.x += 2;
+                            } else {
+                                customer.state = 'waiting';
+                                customer.mood = 'waiting';
+                                console.log(`👤 손님 #${customer.id} 대기 중`);
+                            }
+                            break;
+
+                        case 'waiting':
+                            // 대기 중 인내심 감소
+                            customer.waitTime += deltaTime;
+                            customer.patience -= deltaTime * 0.01;
+
+                            if (customer.patience <= 0) {
+                                customer.mood = 'angry';
+                                customer.state = 'leaving';
+                                console.log(`😡 손님 #${customer.id} 화남!`);
+                                gameState.reputation = Math.max(0, gameState.reputation - 5);
+                            }
+
+                            // 쿠키가 있으면 주문
+                            if (customer.waitTime > 2000 && !customer.order && Math.random() < 0.3) {
+                                customer.order = this.generateOrder();
+                                customer.state = 'selecting';
+                                console.log(`🍪 손님 #${customer.id} 주문: ${customer.order.name}`);
+                            }
+                            break;
+
+                        case 'selecting':
+                            // 쿠키 선택 완료 → 계산대로 이동
+                            customer.targetX = 200;
+                            customer.targetY = 100;
+
+                            if (Math.abs(customer.x - customer.targetX) < 5) {
+                                customer.state = 'paying';
+                            } else {
+                                customer.x += (customer.targetX - customer.x) * 0.1;
+                                customer.y += (customer.targetY - customer.y) * 0.1;
+                            }
+                            break;
+
+                        case 'paying':
+                            // 결제 처리
+                            if (customer.order) {
+                                gameState.money += customer.order.price;
+                                gameState.reputation += customer.mood === 'happy' ? 2 : -1;
+                                floatNumber(`+₩${customer.order.price}`, customer.x, customer.y - 20, '#FFD700');
+
+                                customer.mood = customer.patience > 50 ? 'happy' : 'neutral';
+                                customer.state = 'leaving';
+                                customer.targetX = 400; // 화면 밖으로
+                                customer.targetY = 150;
+
+                                audio?.play('coin');
+                                vibrate(50);
+
+                                console.log(`💰 손님 #${customer.id} 결제 완료`);
+                            }
+                            break;
+
+                        case 'leaving':
+                            // 퇴장
+                            if (customer.x < customer.targetX) {
+                                customer.x += 3;
+                            } else {
+                                this.customers.splice(index, 1);
+                                console.log(`👋 손님 #${customer.id} 퇴장`);
+                            }
+                            break;
+                    }
+                });
+            }
+
+            // 주문 생성
+            generateOrder() {
+                const recipes = ['클래식 쿠키', '프리미엄 쿠키', '럭셔리 쿠키'];
+                const prices = [10000, 25000, 50000];
+                const index = Math.floor(Math.random() * recipes.length);
+
+                return {
+                    name: recipes[index],
+                    price: prices[index]
+                };
+            }
+
+            // 모든 손님 렌더링
+            render() {
+                this.customers.forEach(customer => {
+                    renderer?.drawCustomer(
+                        Math.floor(customer.x),
+                        Math.floor(customer.y),
+                        Math.floor(customer.walkFrame / 30),
+                        customer.mood
+                    );
+                });
+            }
+
+            // 손님 서빙 (수동으로 쿠키 제공)
+            serveCustomer(customerId) {
+                const customer = this.customers.find(c => c.id === customerId);
+                if (customer && customer.state === 'waiting') {
+                    customer.state = 'selecting';
+                }
+            }
+        }
+
+        const npcManager = new NPCManager();
 
         // ============================================================================
         // HAPTIC FEEDBACK
@@ -1432,11 +1815,14 @@
                 document.getElementById('slice-count').textContent = sliceState.count;
                 document.getElementById('slice-progress').style.width = (sliceState.count / sliceState.target * 100) + '%';
 
-                audio.play('slice');
+                audio?.play('slice');
                 vibrate(150);
 
                 // Particle effect
                 createParticles(window.innerWidth / 2, window.innerHeight / 2, '✨', 20);
+
+                // Screen shake (타격감!)
+                renderer?.screenShake(5, 150);
 
                 if (sliceState.count >= sliceState.target) {
                     setTimeout(() => {
@@ -1707,6 +2093,26 @@
 
         function sellChocolate() {
             const chocolate = gameState.currentChocolate;
+
+            // 쿠키 반으로 가르기 연출 (최상급 품질일 때만)
+            if (chocolate.quality === 'supreme') {
+                renderer?.cookieCutAnimation(
+                    window.innerWidth / 2,
+                    window.innerHeight / 3,
+                    () => {
+                        // 애니메이션 끝나고 판매 처리
+                        completeSale(chocolate);
+                    }
+                );
+            } else {
+                // 일반 판매
+                completeSale(chocolate);
+            }
+
+            document.getElementById('result-modal').classList.remove('active');
+        }
+
+        function completeSale(chocolate) {
             gameState.money += chocolate.price;
             gameState.stats.totalChocolates++;
             gameState.stats.totalEarnings += chocolate.price;
@@ -1718,16 +2124,16 @@
                 levelUp();
             }
 
-            audio.play('coin');
+            audio?.play('coin');
             vibrate([50, 50, 50]);
             floatNumber('+₩' + chocolate.price.toLocaleString(), window.innerWidth / 2, window.innerHeight / 2, '#FFD700');
             createParticles(window.innerWidth / 2, window.innerHeight / 2, '💰', 15);
 
+            // Screen shake (판매 타격감)
+            renderer?.screenShake(8, 300);
+
             updateUI();
             checkDailyQuest();
-
-            document.getElementById('result-modal').classList.remove('active');
-
             save();
         }
 
@@ -1937,17 +2343,41 @@
         // GAME LOOP
         // ============================================================================
         let gameLoopRunning = false;
+        let lastFrameTime = Date.now();
+        let npcSpawnTimer = 0;
 
         function gameLoop() {
             try {
                 if (!gameLoopRunning) return;
 
+                // Delta time 계산
+                const now = Date.now();
+                const deltaTime = now - lastFrameTime;
+                lastFrameTime = now;
+
+                // 에너지 업데이트
                 updateEnergy();
+
+                // 캔버스 클리어
                 renderer?.clear('char');
                 renderer?.clear('effect');
 
-                // Render NPCs (placeholder)
-                renderer?.drawPixelChar(100, 100, '👨‍🍳', 1);
+                // NPC 스폰 (5초마다)
+                npcSpawnTimer += deltaTime;
+                if (npcSpawnTimer >= npcManager.spawnInterval) {
+                    npcManager.spawnCustomer();
+                    npcSpawnTimer = 0;
+                }
+
+                // NPC 업데이트 & 렌더링
+                npcManager.update(deltaTime);
+                npcManager.render();
+
+                // 오븐 렌더링 (예시)
+                renderer?.drawOven(300, 200, Math.sin(now / 1000) * 0.5 + 0.5);
+
+                // 쿠키 샘플 렌더링 (예시)
+                renderer?.drawCookie(150, 50, 'supreme', false);
 
                 requestAnimationFrame(gameLoop);
             } catch (e) {
