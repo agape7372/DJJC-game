@@ -1957,87 +1957,120 @@
         }
 
         // ============================================================================
-        // SAFE GAME START (ZOMBIE MODE)
+        // INITIALIZATION (ULTRA-SAFE MODE)
         // ============================================================================
-        function startGameSafely() {
+        let gameStarted = false;
+        let intervalsCreated = false;
+
+        // 로딩 화면 숨기기 (display none으로 완전 제거)
+        function hideLoading() {
             try {
-                console.log('🚀 강제 게임 시작...');
-
-                // Load save
-                load();
-                updateUI();
-
-                // Start game loop
-                if (!gameLoopRunning) {
-                    gameLoopRunning = true;
-                    gameLoop();
+                const loading = document.getElementById('loading');
+                if (loading) {
+                    loading.style.display = 'none'; // classList 대신 직접 사용!
+                    console.log('✅ 로딩 화면 완전 제거');
                 }
-
-                // Auto-save
-                setInterval(save, 30000);
-
-                // Energy regen
-                setInterval(updateEnergy, 1000);
-
-                console.log('✅ 게임 시작 완료!');
             } catch (e) {
-                console.error('Safe start error:', e);
+                console.warn('Hide loading error:', e);
             }
         }
 
-        // ============================================================================
-        // INITIALIZATION
-        // ============================================================================
-        window.addEventListener('load', () => {
+        // 게임 시작
+        function startGame() {
+            try {
+                if (!gameLoopRunning) {
+                    gameLoopRunning = true;
+                    gameLoop();
+                    console.log('✅ 게임 루프 시작');
+                }
+
+                // setInterval 중복 방지
+                if (!intervalsCreated) {
+                    setInterval(save, 30000);
+                    setInterval(updateEnergy, 1000);
+                    intervalsCreated = true;
+                    console.log('✅ Auto-save & Energy regen 활성화');
+                }
+            } catch (e) {
+                console.error('Start game error:', e);
+            }
+        }
+
+        // 게임 초기화
+        function initGame() {
+            if (gameStarted) {
+                console.log('⚠️ 이미 시작됨, 중복 방지');
+                return;
+            }
+
             try {
                 console.log('🍫 게임 초기화 시작...');
 
-                // SAFETY RULE #1: Force Start Timeout (3 seconds)
-                let loadingTimeout = setTimeout(() => {
-                    console.warn('⚠️ 로딩 타임아웃! 강제 시작합니다...');
-                    const loading = document.getElementById('loading');
-                    if (loading) {
-                        loading.style.display = 'none';
-                    }
-                    startGameSafely();
-                }, 3000);
-
-                // Try canvas initialization
+                // Canvas 초기화
                 const canvasOk = renderer.init();
                 if (canvasOk) {
                     console.log('✅ Canvas 초기화 완료');
                 } else {
-                    console.warn('⚠️ Canvas 초기화 실패 - 폴백 모드로 계속');
+                    console.warn('⚠️ Canvas 초기화 실패 - 폴백 모드');
                 }
 
-                // Load game state
+                // 게임 상태 로드
                 load();
                 updateUI();
-
                 console.log('✅ 게임 상태 로드 완료');
 
-                // Hide loading screen after delay
-                setTimeout(() => {
-                    clearTimeout(loadingTimeout); // Cancel force start
+                // 로딩 화면 숨기기
+                hideLoading();
 
-                    const loading = document.getElementById('loading');
-                    if (loading) {
-                        loading.classList.add('hidden');
-                        console.log('✅ 로딩 화면 숨김');
-                    }
+                // 게임 시작
+                startGame();
 
-                    startGameSafely();
-                }, 1000); // Reduced from 1.5s to 1s
-
-                console.log('🎮 게임 초기화 완료!');
+                gameStarted = true;
+                console.log('🎮 게임 시작 완료!');
             } catch (e) {
-                console.error('초기화 오류:', e);
-                // Even if initialization fails, try to start
-                startGameSafely();
+                console.error('Init game error:', e);
+                // 에러 발생해도 로딩은 숨기고 게임 시작 시도
+                hideLoading();
+                startGame();
+                gameStarted = true;
             }
+        }
+
+        // 강제 시작 (최후의 보루)
+        function forceStartGame() {
+            console.warn('🚨 강제 시작! (타임아웃)');
+            hideLoading();
+
+            if (!gameStarted) {
+                initGame();
+            }
+        }
+
+        // ============================================================================
+        // 즉시 실행: 2초 강제 타임아웃 등록 (이벤트 밖에서 실행!)
+        // ============================================================================
+        setTimeout(forceStartGame, 2000);
+        console.log('⏰ 2초 강제 타임아웃 등록됨');
+
+        // ============================================================================
+        // DOMContentLoaded: 가장 빠른 초기화 (권장)
+        // ============================================================================
+        document.addEventListener('DOMContentLoaded', () => {
+            console.log('📄 DOMContentLoaded 발생');
+            setTimeout(initGame, 100); // 100ms 후 초기화 (DOM 완전 준비 대기)
         });
 
-        // SAFETY RULE #3: Lazy Audio Initialization on First Touch
+        // ============================================================================
+        // window.load: 백업 초기화
+        // ============================================================================
+        window.addEventListener('load', () => {
+            console.log('🌐 window.load 발생');
+            setTimeout(initGame, 100);
+        });
+
+        // ============================================================================
+        // Lazy Audio Initialization
+        // ============================================================================
         let audioInitialized = false;
         document.addEventListener('touchstart', () => {
             if (!audioInitialized) {
