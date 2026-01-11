@@ -908,20 +908,31 @@
         class AudioEngine {
             constructor() {
                 this.ctx = null;
-                this.initAudio();
+                this.initialized = false;
             }
 
+            // Lazy initialization - only create on first user interaction
             initAudio() {
+                if (this.initialized) return;
                 try {
                     const AudioContext = window.AudioContext || window.webkitAudioContext;
                     this.ctx = new AudioContext();
+                    this.initialized = true;
+                    console.log('✅ Audio initialized');
                 } catch (e) {
-                    console.warn('Web Audio API not supported');
+                    console.warn('Web Audio API not supported:', e);
                 }
             }
 
             play(type) {
-                if (!gameState.settings.soundEnabled || !this.ctx) return;
+                if (!gameState?.settings?.soundEnabled) return;
+
+                // Lazy init on first play
+                if (!this.initialized) {
+                    this.initAudio();
+                }
+
+                if (!this.ctx) return;
 
                 const sounds = {
                     slice: () => this.playSlice(),
@@ -936,113 +947,144 @@
             }
 
             playSlice() {
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
 
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(4000, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(2000, this.ctx.currentTime + 0.1);
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(4000, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(2000, this.ctx.currentTime + 0.1);
 
-                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                    gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
 
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
 
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.15);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.15);
+                } catch (e) {
+                    console.warn('Audio playback error:', e);
+                }
             }
 
             playSmash() {
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
 
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(2500, this.ctx.currentTime);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(2500, this.ctx.currentTime);
 
-                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+                    gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
 
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
 
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.05);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.05);
+                } catch (e) {
+                    console.warn('Audio playback error:', e);
+                }
             }
 
             playTemp() {
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
 
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(3000, this.ctx.currentTime);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(3000, this.ctx.currentTime);
 
-                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
 
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
 
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.3);
+                } catch (e) {
+                    console.warn('Audio playback error:', e);
+                }
             }
 
             playPerfect() {
-                const notes = [523, 659, 784, 1047]; // C-E-G-C
-                notes.forEach((freq, i) => {
-                    setTimeout(() => {
-                        const osc = this.ctx.createOscillator();
-                        const gain = this.ctx.createGain();
+                if (!this.ctx) return;
+                try {
+                    const notes = [523, 659, 784, 1047]; // C-E-G-C
+                    notes.forEach((freq, i) => {
+                        setTimeout(() => {
+                            if (!this.ctx) return;
+                            const osc = this.ctx.createOscillator();
+                            const gain = this.ctx.createGain();
 
-                        osc.type = 'sine';
-                        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+                            osc.type = 'sine';
+                            osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
 
-                        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-                        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                            gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                            gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
 
-                        osc.connect(gain);
-                        gain.connect(this.ctx.destination);
+                            osc.connect(gain);
+                            gain.connect(this.ctx.destination);
 
-                        osc.start();
-                        osc.stop(this.ctx.currentTime + 0.3);
-                    }, i * 100);
-                });
+                            osc.start();
+                            osc.stop(this.ctx.currentTime + 0.3);
+                        }, i * 100);
+                    });
+                } catch (e) {
+                    console.warn('Audio playback error:', e);
+                }
             }
 
             playCoin() {
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
 
-                osc.type = 'sine';
-                osc.frequency.setValueAtTime(800, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(1600, this.ctx.currentTime + 0.1);
+                    osc.type = 'sine';
+                    osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(1600, this.ctx.currentTime + 0.1);
 
-                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                    gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
 
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
 
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.3);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.3);
+                } catch (e) {
+                    console.warn('Audio playback error:', e);
+                }
             }
 
             playFail() {
-                const osc = this.ctx.createOscillator();
-                const gain = this.ctx.createGain();
+                if (!this.ctx) return;
+                try {
+                    const osc = this.ctx.createOscillator();
+                    const gain = this.ctx.createGain();
 
-                osc.type = 'sawtooth';
-                osc.frequency.setValueAtTime(200, this.ctx.currentTime);
-                osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.2);
+                    osc.type = 'sawtooth';
+                    osc.frequency.setValueAtTime(200, this.ctx.currentTime);
+                    osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.2);
 
-                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
-                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+                    gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
 
-                osc.connect(gain);
-                gain.connect(this.ctx.destination);
+                    osc.connect(gain);
+                    gain.connect(this.ctx.destination);
 
-                osc.start();
-                osc.stop(this.ctx.currentTime + 0.2);
+                    osc.start();
+                    osc.stop(this.ctx.currentTime + 0.2);
+                } catch (e) {
+                    console.warn('Audio playback error:', e);
+                }
             }
         }
 
@@ -1092,67 +1134,83 @@
             }
 
             resize() {
-                if (!this.initialized) return;
+                try {
+                    if (!this.initialized) return;
 
-                const container = document.querySelector('.canvas-container');
-                if (!container) return;
+                    const container = document.querySelector('.canvas-container');
+                    if (!container) return;
 
-                const width = container.clientWidth;
-                const height = container.clientHeight;
+                    const width = container.clientWidth;
+                    const height = container.clientHeight;
 
-                [this.bgCanvas, this.furnitureCanvas, this.charCanvas, this.effectCanvas, this.uiCanvas].forEach(canvas => {
-                    if (canvas) {
-                        canvas.width = width;
-                        canvas.height = height;
-                    }
-                });
+                    [this.bgCanvas, this.furnitureCanvas, this.charCanvas, this.effectCanvas, this.uiCanvas].forEach(canvas => {
+                        if (canvas) {
+                            canvas.width = width;
+                            canvas.height = height;
+                        }
+                    });
 
-                this.renderBackground();
+                    this.renderBackground();
+                } catch (e) {
+                    console.warn('Resize error:', e);
+                }
             }
 
             renderBackground() {
-                if (!this.initialized || !this.bgCtx) return;
+                try {
+                    if (!this.initialized || !this.bgCtx || !this.bgCanvas) return;
 
-                const ctx = this.bgCtx;
-                const w = this.bgCanvas.width;
-                const h = this.bgCanvas.height;
+                    const ctx = this.bgCtx;
+                    const w = this.bgCanvas.width;
+                    const h = this.bgCanvas.height;
 
-                // Floor tiles
-                ctx.fillStyle = '#3D2817';
-                ctx.fillRect(0, 0, w, h);
+                    // Floor tiles
+                    ctx.fillStyle = '#3D2817';
+                    ctx.fillRect(0, 0, w, h);
 
-                const tileSize = 32;
-                for (let y = 0; y < h; y += tileSize) {
-                    for (let x = 0; x < w; x += tileSize) {
-                        if ((x / tileSize + y / tileSize) % 2 === 0) {
-                            ctx.fillStyle = '#4A3426';
-                        } else {
-                            ctx.fillStyle = '#3D2817';
+                    const tileSize = 32;
+                    for (let y = 0; y < h; y += tileSize) {
+                        for (let x = 0; x < w; x += tileSize) {
+                            if ((x / tileSize + y / tileSize) % 2 === 0) {
+                                ctx.fillStyle = '#4A3426';
+                            } else {
+                                ctx.fillStyle = '#3D2817';
+                            }
+                            ctx.fillRect(x, y, tileSize, tileSize);
                         }
-                        ctx.fillRect(x, y, tileSize, tileSize);
                     }
+                } catch (e) {
+                    console.warn('Background render error:', e);
                 }
             }
 
             clear(layer) {
-                if (!this.initialized) return;
+                try {
+                    if (!this.initialized) return;
 
-                const ctx = layer === 'char' ? this.charCtx : this.effectCtx;
-                if (ctx && ctx.canvas) {
-                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    const ctx = layer === 'char' ? this.charCtx : this.effectCtx;
+                    if (ctx?.canvas) {
+                        ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                    }
+                } catch (e) {
+                    console.warn('Clear error:', e);
                 }
             }
 
             drawPixelChar(x, y, emoji, scale = 1) {
-                if (!this.initialized || !this.charCtx) return;
+                try {
+                    if (!this.initialized || !this.charCtx) return;
 
-                const ctx = this.charCtx;
-                ctx.save();
-                ctx.font = `${32 * scale}px Arial`;
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText(emoji, x, y);
-                ctx.restore();
+                    const ctx = this.charCtx;
+                    ctx.save();
+                    ctx.font = `${32 * scale}px Arial`;
+                    ctx.textAlign = 'center';
+                    ctx.textBaseline = 'middle';
+                    ctx.fillText(emoji, x, y);
+                    ctx.restore();
+                } catch (e) {
+                    console.warn('Draw char error:', e);
+                }
             }
         }
 
@@ -1210,8 +1268,12 @@
         // HAPTIC FEEDBACK
         // ============================================================================
         function vibrate(pattern) {
-            if (gameState.settings.hapticEnabled && navigator.vibrate) {
-                navigator.vibrate(pattern);
+            try {
+                if (gameState?.settings?.hapticEnabled && navigator?.vibrate) {
+                    navigator.vibrate(pattern);
+                }
+            } catch (e) {
+                console.warn('Vibrate error:', e);
             }
         }
 
@@ -1219,24 +1281,39 @@
         // UI UPDATES
         // ============================================================================
         function updateUI() {
-            document.getElementById('money').textContent = formatMoney(gameState.money);
-            document.getElementById('level').textContent = gameState.level;
-            document.getElementById('reputation').textContent = gameState.reputation;
-            updateEnergyDisplay();
+            try {
+                const moneyEl = document.getElementById('money');
+                const levelEl = document.getElementById('level');
+                const reputationEl = document.getElementById('reputation');
+
+                if (moneyEl) moneyEl.textContent = formatMoney(gameState.money);
+                if (levelEl) levelEl.textContent = gameState.level;
+                if (reputationEl) reputationEl.textContent = gameState.reputation;
+
+                updateEnergyDisplay();
+            } catch (e) {
+                console.warn('UI update error:', e);
+            }
         }
 
         function updateEnergyDisplay() {
-            const container = document.getElementById('energy-display');
-            container.innerHTML = '';
+            try {
+                const container = document.getElementById('energy-display');
+                if (!container) return;
 
-            for (let i = 0; i < gameState.maxEnergy; i++) {
-                const icon = document.createElement('span');
-                icon.className = 'energy-icon';
-                icon.textContent = '⚡';
-                if (i >= gameState.energy) {
-                    icon.classList.add('empty');
+                container.innerHTML = '';
+
+                for (let i = 0; i < gameState.maxEnergy; i++) {
+                    const icon = document.createElement('span');
+                    icon.className = 'energy-icon';
+                    icon.textContent = '⚡';
+                    if (i >= gameState.energy) {
+                        icon.classList.add('empty');
+                    }
+                    container.appendChild(icon);
                 }
-                container.appendChild(icon);
+            } catch (e) {
+                console.warn('Energy display error:', e);
             }
         }
 
@@ -1859,15 +1936,53 @@
         // ============================================================================
         // GAME LOOP
         // ============================================================================
+        let gameLoopRunning = false;
+
         function gameLoop() {
-            updateEnergy();
-            renderer.clear('char');
-            renderer.clear('effect');
+            try {
+                if (!gameLoopRunning) return;
 
-            // Render NPCs (placeholder)
-            renderer.drawPixelChar(100, 100, '👨‍🍳', 1);
+                updateEnergy();
+                renderer?.clear('char');
+                renderer?.clear('effect');
 
-            requestAnimationFrame(gameLoop);
+                // Render NPCs (placeholder)
+                renderer?.drawPixelChar(100, 100, '👨‍🍳', 1);
+
+                requestAnimationFrame(gameLoop);
+            } catch (e) {
+                console.warn('Game loop error:', e);
+                requestAnimationFrame(gameLoop);
+            }
+        }
+
+        // ============================================================================
+        // SAFE GAME START (ZOMBIE MODE)
+        // ============================================================================
+        function startGameSafely() {
+            try {
+                console.log('🚀 강제 게임 시작...');
+
+                // Load save
+                load();
+                updateUI();
+
+                // Start game loop
+                if (!gameLoopRunning) {
+                    gameLoopRunning = true;
+                    gameLoop();
+                }
+
+                // Auto-save
+                setInterval(save, 30000);
+
+                // Energy regen
+                setInterval(updateEnergy, 1000);
+
+                console.log('✅ 게임 시작 완료!');
+            } catch (e) {
+                console.error('Safe start error:', e);
+            }
         }
 
         // ============================================================================
@@ -1877,44 +1992,66 @@
             try {
                 console.log('🍫 게임 초기화 시작...');
 
-                // Canvas 초기화
-                if (!renderer.init()) {
-                    console.error('Canvas 초기화 실패!');
-                    alert('게임 로딩 실패! 페이지를 새로고침해주세요.');
-                    return;
+                // SAFETY RULE #1: Force Start Timeout (3 seconds)
+                let loadingTimeout = setTimeout(() => {
+                    console.warn('⚠️ 로딩 타임아웃! 강제 시작합니다...');
+                    const loading = document.getElementById('loading');
+                    if (loading) {
+                        loading.style.display = 'none';
+                    }
+                    startGameSafely();
+                }, 3000);
+
+                // Try canvas initialization
+                const canvasOk = renderer.init();
+                if (canvasOk) {
+                    console.log('✅ Canvas 초기화 완료');
+                } else {
+                    console.warn('⚠️ Canvas 초기화 실패 - 폴백 모드로 계속');
                 }
 
-                console.log('✅ Canvas 초기화 완료');
-
-                // 게임 상태 로드
+                // Load game state
                 load();
                 updateUI();
 
                 console.log('✅ 게임 상태 로드 완료');
 
-                // 로딩 화면 숨기기
+                // Hide loading screen after delay
                 setTimeout(() => {
+                    clearTimeout(loadingTimeout); // Cancel force start
+
                     const loading = document.getElementById('loading');
                     if (loading) {
                         loading.classList.add('hidden');
                         console.log('✅ 로딩 화면 숨김');
                     }
-                    gameLoop();
-                    console.log('✅ 게임 루프 시작');
-                }, 1500); // 2초 -> 1.5초로 단축
 
-                // Auto-save every 30 seconds
-                setInterval(save, 30000);
-
-                // Energy regen check every second
-                setInterval(updateEnergy, 1000);
+                    startGameSafely();
+                }, 1000); // Reduced from 1.5s to 1s
 
                 console.log('🎮 게임 초기화 완료!');
             } catch (e) {
                 console.error('초기화 오류:', e);
-                alert('게임 로딩 중 오류가 발생했습니다: ' + e.message);
+                // Even if initialization fails, try to start
+                startGameSafely();
             }
         });
+
+        // SAFETY RULE #3: Lazy Audio Initialization on First Touch
+        let audioInitialized = false;
+        document.addEventListener('touchstart', () => {
+            if (!audioInitialized) {
+                audio.initAudio();
+                audioInitialized = true;
+            }
+        }, { once: true, passive: true });
+
+        document.addEventListener('click', () => {
+            if (!audioInitialized) {
+                audio.initAudio();
+                audioInitialized = true;
+            }
+        }, { once: true, passive: true });
 
         // Prevent context menu
         document.addEventListener('contextmenu', e => e.preventDefault());
