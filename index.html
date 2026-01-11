@@ -4,21 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="theme-color" content="#2D1B0E">
-    <title>두바이 쫀득 쿠키 타이쿤 🍪</title>
+    <title>🍫 두바이 초콜릿 타이쿤</title>
     <style>
-        /* Color Palette */
         :root {
-            --chocolate-dark: #2D1B0E;
-            --chocolate-mid: #5D4037;
-            --kataifi-gold: #FFD54F;
-            --pistachio-main: #7CB342;
-            --pistachio-dark: #558B2F;
-            --pistachio-light: #C5E1A5;
-            --dough-base: #D7C49E;
-            --ui-panel: rgba(26, 15, 10, 0.95);
+            --chocolate: #2C1810;
+            --chocolate-light: #5D4037;
+            --kataifi: #FFD700;
+            --pistachio: #4A7C2C;
+            --pistachio-light: #7CB342;
+            --dough: #D4A574;
+            --gold: #FFD700;
+            --bg: #1a1410;
         }
 
         * {
@@ -30,190 +26,284 @@
         }
 
         body {
-            width: 100%;
-            height: 100vh;
-            overflow: hidden;
-            background: var(--chocolate-dark);
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-            touch-action: manipulation;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+            background: var(--bg);
             color: white;
+            overflow: hidden;
+            height: 100vh;
+            touch-action: manipulation;
         }
 
-        #game {
-            width: 100%;
-            height: 100%;
+        #app {
             max-width: 480px;
             margin: 0 auto;
+            height: 100vh;
             display: flex;
             flex-direction: column;
-            background: linear-gradient(180deg, var(--chocolate-mid) 0%, var(--chocolate-dark) 100%);
-            position: relative;
+            background: linear-gradient(180deg, var(--chocolate-light), var(--chocolate));
         }
 
         /* HUD */
         .hud {
-            padding: 16px;
-            background: linear-gradient(180deg, rgba(0,0,0,0.8) 0%, transparent 100%);
+            padding: 12px 16px;
+            background: rgba(0,0,0,0.8);
             display: flex;
             justify-content: space-between;
-            z-index: 100;
+            align-items: center;
+            border-bottom: 2px solid var(--gold);
         }
 
-        .stat {
-            font-size: 20px;
-            font-weight: bold;
+        .hud-item {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
+            font-size: 18px;
+            font-weight: bold;
         }
 
-        .money { color: var(--kataifi-gold); }
-        .level {
-            background: var(--pistachio-main);
-            padding: 6px 12px;
-            border-radius: 12px;
-            font-size: 16px;
-        }
+        .money { color: var(--gold); }
 
-        /* Canvas Area */
-        #canvas-area {
-            flex: 1;
-            position: relative;
-            overflow: hidden;
-        }
-
-        #canvas {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            image-rendering: pixelated;
-        }
-
-        #particle-canvas {
-            width: 100%;
-            height: 100%;
-            position: absolute;
-            top: 0;
-            left: 0;
-            pointer-events: none;
-            z-index: 5;
-        }
-
-        /* Bottom Panel */
-        .bottom-panel {
-            background: linear-gradient(0deg, rgba(0,0,0,0.95) 0%, transparent 100%);
-            padding: 16px;
-            max-height: 45vh;
-            overflow-y: auto;
-            z-index: 100;
-        }
-
-        .tab-bar {
+        /* Tab Navigation */
+        .tabs {
             display: flex;
-            gap: 8px;
-            margin-bottom: 12px;
+            background: rgba(0,0,0,0.5);
+            border-bottom: 2px solid rgba(255,255,255,0.1);
         }
 
         .tab {
             flex: 1;
-            padding: 12px;
-            background: rgba(255,255,255,0.1);
+            padding: 12px 8px;
+            background: transparent;
             border: none;
-            border-radius: 8px;
-            color: white;
-            font-size: 16px;
+            color: rgba(255,255,255,0.6);
+            font-size: 14px;
             cursor: pointer;
+            border-bottom: 3px solid transparent;
             transition: all 0.2s;
         }
 
         .tab.active {
-            background: var(--pistachio-main);
-            transform: scale(1.05);
+            color: white;
+            border-bottom-color: var(--gold);
+            background: rgba(255,255,255,0.05);
+        }
+
+        /* Content Area */
+        .content {
+            flex: 1;
+            overflow-y: auto;
+            position: relative;
         }
 
         .tab-content {
             display: none;
+            height: 100%;
         }
 
         .tab-content.active {
             display: block;
         }
 
-        /* Buttons */
-        .btn {
+        /* Canvas */
+        canvas {
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+            display: block;
+        }
+
+        /* Station Layout */
+        .station-grid {
+            padding: 16px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            height: 100%;
+        }
+
+        .station {
+            background: rgba(0,0,0,0.4);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
+        }
+
+        .station:active {
+            transform: scale(0.98);
+            background: rgba(255,255,255,0.1);
+        }
+
+        .station-icon {
+            font-size: 48px;
+            text-align: center;
+        }
+
+        .station-name {
+            font-size: 14px;
+            font-weight: bold;
+            text-align: center;
+        }
+
+        .station-count {
+            text-align: center;
+            font-size: 20px;
+            color: var(--gold);
+            font-weight: bold;
+        }
+
+        .station-progress {
+            width: 100%;
+            height: 6px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 3px;
+            overflow: hidden;
+        }
+
+        .station-progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--pistachio), var(--pistachio-light));
+            transition: width 0.3s;
+        }
+
+        /* Assembly Area */
+        .assembly-area {
+            padding: 16px;
+        }
+
+        .chocolate-preview {
+            background: var(--chocolate-light);
+            border: 3px solid var(--gold);
+            border-radius: 16px;
+            padding: 20px;
+            margin-bottom: 16px;
+        }
+
+        .chocolate-layers {
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            height: 200px;
+            position: relative;
+        }
+
+        .layer {
+            width: 100%;
+            transition: height 0.5s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: rgba(0,0,0,0.5);
+            font-weight: bold;
+        }
+
+        .layer-coating { background: var(--chocolate); color: white; }
+        .layer-pistachio { background: var(--pistachio); color: white; }
+        .layer-kataifi { background: var(--kataifi); }
+        .layer-base { background: var(--dough); }
+
+        .assembly-btn {
             width: 100%;
             padding: 16px;
-            margin-bottom: 8px;
-            background: linear-gradient(135deg, var(--pistachio-main), var(--pistachio-dark));
+            background: linear-gradient(135deg, var(--pistachio), var(--pistachio-light));
             border: none;
             border-radius: 12px;
             color: white;
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
+            margin-bottom: 8px;
             box-shadow: 0 4px 0 rgba(0,0,0,0.3);
             transition: all 0.1s;
-            position: relative;
-            overflow: hidden;
         }
 
-        .btn:active {
+        .assembly-btn:active {
             transform: translateY(4px);
             box-shadow: 0 0 0 rgba(0,0,0,0.3);
         }
 
-        .btn:disabled {
+        .assembly-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
 
-        .btn-primary {
-            background: linear-gradient(135deg, var(--kataifi-gold), #FFC107);
-            color: var(--chocolate-dark);
-            font-size: 20px;
+        /* Shop Layout */
+        .shop-area {
+            padding: 16px;
+            height: 100%;
+            overflow-y: auto;
         }
 
-        .upgrade-btn {
-            background: linear-gradient(135deg, var(--chocolate-mid), var(--chocolate-dark));
-            color: var(--kataifi-gold);
-            text-align: left;
-            padding: 12px;
+        .display-case {
+            background: rgba(255,255,255,0.1);
+            border: 2px solid var(--gold);
+            border-radius: 12px;
+            padding: 16px;
+            margin-bottom: 16px;
         }
 
-        .upgrade-name {
-            display: block;
+        .display-title {
             font-size: 16px;
-            margin-bottom: 4px;
+            font-weight: bold;
+            margin-bottom: 12px;
+            color: var(--gold);
         }
 
-        .upgrade-cost {
-            display: block;
-            font-size: 14px;
-            opacity: 0.9;
+        .chocolate-stock {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            min-height: 80px;
+            align-items: center;
+            justify-content: center;
         }
 
-        .upgrade-level {
+        .chocolate-item {
+            width: 40px;
+            height: 60px;
+            background: linear-gradient(180deg, var(--chocolate-light), var(--chocolate));
+            border: 2px solid var(--kataifi);
+            border-radius: 4px;
+            position: relative;
+            animation: popIn 0.3s;
+        }
+
+        @keyframes popIn {
+            from { transform: scale(0); }
+            to { transform: scale(1); }
+        }
+
+        .chocolate-item::before {
+            content: '';
             position: absolute;
-            top: 8px;
-            right: 12px;
-            background: rgba(0,0,0,0.3);
-            padding: 4px 8px;
-            border-radius: 8px;
-            font-size: 12px;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80%;
+            height: 4px;
+            background: var(--pistachio);
+            border-radius: 2px;
         }
 
-        /* Customer Queue */
+        .customer-queue {
+            margin-top: 16px;
+        }
+
         .customer {
-            background: rgba(255,255,255,0.05);
+            background: rgba(0,0,0,0.4);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
             padding: 12px;
             margin-bottom: 8px;
-            border-radius: 8px;
             display: flex;
             align-items: center;
             gap: 12px;
-            border-left: 3px solid var(--kataifi-gold);
             cursor: pointer;
             transition: all 0.2s;
         }
@@ -224,7 +314,7 @@
         }
 
         .customer-emoji {
-            font-size: 32px;
+            font-size: 40px;
         }
 
         .customer-info {
@@ -232,49 +322,94 @@
         }
 
         .customer-name {
-            font-size: 14px;
             font-weight: bold;
             margin-bottom: 4px;
         }
 
         .patience-bar {
             width: 100%;
-            height: 4px;
-            background: rgba(255,255,255,0.2);
-            border-radius: 2px;
+            height: 6px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 3px;
             overflow: hidden;
         }
 
         .patience-fill {
             height: 100%;
-            background: linear-gradient(90deg, #ff4444, #ffd700, var(--pistachio-main));
+            background: linear-gradient(90deg, #ff4444, #ffd700, #4ecca3);
             transition: width 0.3s;
         }
 
-        /* Resources */
-        .resources {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 8px;
-            margin-bottom: 12px;
+        /* Upgrades */
+        .upgrade-list {
+            padding: 16px;
         }
 
-        .resource {
-            background: var(--ui-panel);
-            padding: 12px 8px;
-            border-radius: 8px;
-            text-align: center;
+        .upgrade-item {
+            background: rgba(0,0,0,0.4);
+            border: 2px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 12px;
+            margin-bottom: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+            position: relative;
         }
 
-        .resource-icon {
-            font-size: 28px;
-            margin-bottom: 4px;
+        .upgrade-item:active {
+            transform: scale(0.98);
         }
 
-        .resource-count {
-            font-size: 16px;
+        .upgrade-item.locked {
+            opacity: 0.5;
+        }
+
+        .upgrade-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .upgrade-name {
             font-weight: bold;
-            color: var(--kataifi-gold);
+            font-size: 16px;
+        }
+
+        .upgrade-level {
+            background: rgba(0,0,0,0.5);
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 12px;
+        }
+
+        .upgrade-desc {
+            font-size: 13px;
+            color: rgba(255,255,255,0.7);
+            margin-bottom: 8px;
+        }
+
+        .upgrade-cost {
+            font-size: 14px;
+            color: var(--gold);
+            font-weight: bold;
+        }
+
+        /* Floating Numbers */
+        .float-num {
+            position: fixed;
+            font-size: 24px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 1000;
+            animation: floatUp 1.5s forwards;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        @keyframes floatUp {
+            0% { transform: translateY(0) scale(0.5); opacity: 0; }
+            20% { opacity: 1; transform: translateY(-20px) scale(1.2); }
+            100% { transform: translateY(-100px) scale(1); opacity: 0; }
         }
 
         /* Modal */
@@ -288,18 +423,16 @@
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 1000;
+            z-index: 2000;
         }
 
-        .modal.active {
-            display: flex;
-        }
+        .modal.active { display: flex; }
 
         .modal-content {
-            background: var(--ui-panel);
-            padding: 32px;
+            background: var(--chocolate-light);
+            border: 3px solid var(--gold);
             border-radius: 20px;
-            border: 3px solid var(--kataifi-gold);
+            padding: 32px;
             text-align: center;
             max-width: 90%;
             animation: slideUp 0.3s;
@@ -312,7 +445,7 @@
 
         .modal-title {
             font-size: 28px;
-            color: var(--kataifi-gold);
+            color: var(--gold);
             margin-bottom: 16px;
         }
 
@@ -322,32 +455,15 @@
             line-height: 1.5;
         }
 
-        /* Floating Text */
-        .float-text {
-            position: absolute;
-            font-size: 32px;
+        .modal-btn {
+            padding: 16px 32px;
+            background: var(--gold);
+            border: none;
+            border-radius: 12px;
+            color: var(--chocolate);
+            font-size: 18px;
             font-weight: bold;
-            pointer-events: none;
-            z-index: 200;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
-            animation: floatUp 1.5s forwards;
-        }
-
-        @keyframes floatUp {
-            0% { transform: translateY(0) scale(0.5); opacity: 0; }
-            20% { opacity: 1; transform: translateY(-20px) scale(1.2); }
-            100% { transform: translateY(-100px) scale(1); opacity: 0; }
-        }
-
-        /* Screen Shake */
-        .shake {
-            animation: shake 0.3s;
-        }
-
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-8px); }
-            20%, 40%, 60%, 80% { transform: translateX(8px); }
+            cursor: pointer;
         }
 
         /* Loading */
@@ -357,7 +473,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: var(--chocolate-dark);
+            background: var(--chocolate);
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -371,7 +487,7 @@
             pointer-events: none;
         }
 
-        .loading-emoji {
+        .loading-icon {
             font-size: 80px;
             animation: spin 2s linear infinite;
         }
@@ -383,127 +499,151 @@
 
         .loading-text {
             font-size: 24px;
-            color: var(--kataifi-gold);
+            color: var(--gold);
             margin-top: 20px;
         }
 
         /* Scrollbar */
-        .bottom-panel::-webkit-scrollbar {
+        .content::-webkit-scrollbar {
             width: 6px;
         }
 
-        .bottom-panel::-webkit-scrollbar-track {
+        .content::-webkit-scrollbar-track {
             background: rgba(0,0,0,0.2);
         }
 
-        .bottom-panel::-webkit-scrollbar-thumb {
-            background: var(--pistachio-main);
+        .content::-webkit-scrollbar-thumb {
+            background: var(--gold);
             border-radius: 3px;
         }
     </style>
 </head>
 <body>
     <div id="loading">
-        <div class="loading-emoji">🍪</div>
-        <div class="loading-text">두바이 쫀득 쿠키 타이쿤</div>
+        <div class="loading-icon">🍫</div>
+        <div class="loading-text">두바이 초콜릿 로딩 중...</div>
     </div>
 
-    <div id="game">
+    <div id="app">
         <div class="hud">
-            <div class="stat money">💰 <span id="money">0</span></div>
-            <div class="stat level">Lv. <span id="level">1</span></div>
+            <div class="hud-item money">💰 <span id="money">0</span></div>
+            <div class="hud-item">Lv. <span id="level">1</span></div>
+            <div class="hud-item">⭐ <span id="reputation">0</span></div>
         </div>
 
-        <div id="canvas-area">
-            <canvas id="canvas"></canvas>
-            <canvas id="particle-canvas"></canvas>
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab(0)">🍳 재료실</button>
+            <button class="tab" onclick="switchTab(1)">🏭 제조실</button>
+            <button class="tab" onclick="switchTab(2)">🏪 판매장</button>
+            <button class="tab" onclick="switchTab(3)">⬆️ 업그레이드</button>
         </div>
 
-        <div class="bottom-panel">
-            <div class="tab-bar">
-                <button class="tab active" onclick="switchTab('main')">🍪 메인</button>
-                <button class="tab" onclick="switchTab('upgrade')">⬆️ 업그레이드</button>
-                <button class="tab" onclick="switchTab('customer')">👥 손님</button>
-            </div>
+        <div class="content">
+            <!-- Tab 0: Ingredients -->
+            <div id="tab-0" class="tab-content active">
+                <div class="station-grid">
+                    <div class="station" onclick="harvestKataifi()">
+                        <div class="station-icon">🌾</div>
+                        <div class="station-name">카다이프 볶기</div>
+                        <div class="station-count" id="kataifi-count">0</div>
+                        <div class="station-progress">
+                            <div class="station-progress-bar" id="kataifi-progress" style="width: 0%"></div>
+                        </div>
+                    </div>
 
-            <div id="main-tab" class="tab-content active">
-                <div class="resources">
-                    <div class="resource">
-                        <div class="resource-icon">🌾</div>
-                        <div class="resource-count" id="kataifi">0</div>
+                    <div class="station" onclick="crushPistachio()">
+                        <div class="station-icon">🥜</div>
+                        <div class="station-name">피스타치오 분쇄</div>
+                        <div class="station-count" id="pistachio-count">0</div>
+                        <div class="station-progress">
+                            <div class="station-progress-bar" id="pistachio-progress" style="width: 0%"></div>
+                        </div>
                     </div>
-                    <div class="resource">
-                        <div class="resource-icon">🥜</div>
-                        <div class="resource-count" id="pistachio">0</div>
+
+                    <div class="station" onclick="mixSpread()">
+                        <div class="station-icon">🍯</div>
+                        <div class="station-name">스프레드 제조</div>
+                        <div class="station-count" id="spread-count">0</div>
+                        <div class="station-progress">
+                            <div class="station-progress-bar" id="spread-progress" style="width: 0%"></div>
+                        </div>
                     </div>
-                    <div class="resource">
-                        <div class="resource-icon">🍯</div>
-                        <div class="resource-count" id="filling">0</div>
-                    </div>
-                    <div class="resource">
-                        <div class="resource-icon">🍪</div>
-                        <div class="resource-count" id="cookies">0</div>
+
+                    <div class="station" onclick="bakeDough()">
+                        <div class="station-icon">🍪</div>
+                        <div class="station-name">도우 베이킹</div>
+                        <div class="station-count" id="dough-count">0</div>
+                        <div class="station-progress">
+                            <div class="station-progress-bar" id="dough-progress" style="width: 0%"></div>
+                        </div>
                     </div>
                 </div>
-
-                <button class="btn btn-primary" onclick="tapCookie()">
-                    🍪 쿠키 터치 (클릭!)
-                </button>
-                <button class="btn" onclick="harvestKataifi()">
-                    🌾 카다이프 수확
-                </button>
-                <button class="btn" onclick="crushPistachio()">
-                    🥜 피스타치오 분쇄
-                </button>
-                <button class="btn" onclick="makeFilling()" id="btn-filling">
-                    🍯 필링 제조 (🌾5 + 🥜3)
-                </button>
-                <button class="btn" onclick="bakeCookie()" id="btn-bake">
-                    🔥 쿠키 굽기 (🍯1)
-                </button>
             </div>
 
-            <div id="upgrade-tab" class="tab-content">
-                <button class="upgrade-btn" onclick="buyUpgrade('autoKataifi')" id="up-autoKataifi">
-                    <span class="upgrade-level">Lv <span id="lv-autoKataifi">0</span></span>
-                    <span class="upgrade-name">🤖 자동 카다이프 생산</span>
-                    <span class="upgrade-cost" id="cost-autoKataifi">₩1,000</span>
-                </button>
-                <button class="upgrade-btn" onclick="buyUpgrade('autoPistachio')" id="up-autoPistachio">
-                    <span class="upgrade-level">Lv <span id="lv-autoPistachio">0</span></span>
-                    <span class="upgrade-name">🤖 자동 피스타치오 생산</span>
-                    <span class="upgrade-cost" id="cost-autoPistachio">₩1,500</span>
-                </button>
-                <button class="upgrade-btn" onclick="buyUpgrade('autoOven')" id="up-autoOven">
-                    <span class="upgrade-level">Lv <span id="lv-autoOven">0</span></span>
-                    <span class="upgrade-name">🔥 자동 오븐</span>
-                    <span class="upgrade-cost" id="cost-autoOven">₩5,000</span>
-                </button>
-                <button class="upgrade-btn" onclick="buyUpgrade('price')" id="up-price">
-                    <span class="upgrade-level">Lv <span id="lv-price">0</span></span>
-                    <span class="upgrade-name">💰 판매가 상승 +20%</span>
-                    <span class="upgrade-cost" id="cost-price">₩2,000</span>
-                </button>
-                <button class="upgrade-btn" onclick="buyUpgrade('speed')" id="up-speed">
-                    <span class="upgrade-level">Lv <span id="lv-speed">0</span></span>
-                    <span class="upgrade-name">⚡ 손님 스폰 속도</span>
-                    <span class="upgrade-cost" id="cost-speed">₩3,000</span>
-                </button>
+            <!-- Tab 1: Assembly -->
+            <div id="tab-1" class="tab-content">
+                <div class="assembly-area">
+                    <div class="chocolate-preview">
+                        <div class="chocolate-layers" id="preview-layers">
+                            <div class="layer layer-coating" id="layer-coating" style="height: 20%">초콜릿 코팅</div>
+                            <div class="layer layer-pistachio" id="layer-pistachio" style="height: 30%">피스타치오</div>
+                            <div class="layer layer-kataifi" id="layer-kataifi" style="height: 30%">카다이프</div>
+                            <div class="layer layer-base" id="layer-base" style="height: 20%">쿠키 베이스</div>
+                        </div>
+                    </div>
+
+                    <div style="font-size: 14px; margin-bottom: 12px; color: rgba(255,255,255,0.7);">
+                        필요: 🍪베이스 1 + 🌾카다이프 3 + 🍯스프레드 1
+                    </div>
+
+                    <button class="assembly-btn" onclick="assembleChocolate()" id="assemble-btn">
+                        🏭 초콜릿 조립하기
+                    </button>
+
+                    <div style="text-align: center; font-size: 18px; font-weight: bold; color: var(--gold);">
+                        완성품: <span id="finished-count">0</span>개
+                    </div>
+                </div>
             </div>
 
-            <div id="customer-tab" class="tab-content">
-                <div id="customer-list"></div>
+            <!-- Tab 2: Shop -->
+            <div id="tab-2" class="tab-content">
+                <div class="shop-area">
+                    <div class="display-case">
+                        <div class="display-title">🍫 진열대</div>
+                        <div class="chocolate-stock" id="chocolate-display"></div>
+                    </div>
+
+                    <div class="customer-queue">
+                        <div class="display-title">👥 손님 대기열</div>
+                        <div id="customer-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tab 3: Upgrades -->
+            <div id="tab-3" class="tab-content">
+                <div class="upgrade-list" id="upgrade-list"></div>
             </div>
         </div>
     </div>
 
+    <!-- Modals -->
     <div class="modal" id="offline-modal">
         <div class="modal-content">
             <div class="modal-title">💰 오프라인 수익</div>
             <div class="modal-text">
-                알바생이 <span id="offline-earn" style="color: var(--kataifi-gold);">0</span>원을 벌었습니다!
+                알바생이 <span id="offline-earn" style="color: var(--gold);">0</span>원을 벌었습니다!
             </div>
-            <button class="btn btn-primary" onclick="claimOffline()">받기</button>
+            <button class="modal-btn" onclick="claimOffline()">받기</button>
+        </div>
+    </div>
+
+    <div class="modal" id="achievement-modal">
+        <div class="modal-content">
+            <div class="modal-title">🏆 업적 달성!</div>
+            <div class="modal-text" id="achievement-text"></div>
+            <button class="modal-btn" onclick="closeAchievement()">확인</button>
         </div>
     </div>
 
@@ -513,19 +653,27 @@
         // ============================================================================
         // GAME CONFIG
         // ============================================================================
-        const CFG = {
-            colors: {
-                chocolate: { dark: '#2D1B0E', mid: '#5D4037', light: '#8D6E63' },
-                kataifi: { gold: '#FFD54F', bright: '#FFC107' },
-                pistachio: { main: '#7CB342', dark: '#558B2F', light: '#C5E1A5' },
-                dough: { base: '#D7C49E', dark: '#A89C7E', light: '#F5E6D3' }
-            },
+        const CONFIG = {
             balance: {
-                cookiePrice: 1000,
-                fillingCost: { kataifi: 5, pistachio: 3 },
-                upgradeCosts: { autoKataifi: 1000, autoPistachio: 1500, autoOven: 5000, price: 2000, speed: 3000 },
-                upgradeMultipliers: { autoKataifi: 1.5, autoPistachio: 1.5, autoOven: 1.8, price: 1.3, speed: 1.4 }
-            }
+                chocolatePrice: 5000,
+                assemblyRequires: { dough: 1, kataifi: 3, spread: 1 },
+                spreadRequires: { pistachio: 5 },
+                harvestBase: { kataifi: 1, pistachio: 1, dough: 1, spread: 1 },
+                customerSpawnInterval: 3000,
+                customerPatience: 20000
+            },
+            upgrades: [
+                { id: 'autoKataifi', name: '🤖 자동 카다이프', desc: '초당 +1 생산', baseCost: 1000, mult: 1.5, effect: 'autoKataifi' },
+                { id: 'autoPistachio', name: '🤖 자동 피스타치오', desc: '초당 +1 생산', baseCost: 1500, mult: 1.5, effect: 'autoPistachio' },
+                { id: 'autoSpread', name: '🤖 자동 스프레드', desc: '초당 +1 생산', baseCost: 2500, mult: 1.6, effect: 'autoSpread' },
+                { id: 'autoDough', name: '🤖 자동 도우', desc: '초당 +1 생산', baseCost: 2000, mult: 1.5, effect: 'autoDough' },
+                { id: 'autoAssembly', name: '🏭 자동 조립', desc: '자동으로 조립', baseCost: 10000, mult: 2.0, effect: 'autoAssembly' },
+                { id: 'clickPower', name: '💪 클릭 파워', desc: '클릭당 +1', baseCost: 500, mult: 1.4, effect: 'clickPower' },
+                { id: 'price', name: '💰 판매가 상승', desc: '가격 +25%', baseCost: 3000, mult: 1.5, effect: 'priceBoost' },
+                { id: 'customerSpeed', name: '⚡ 손님 속도', desc: '스폰 속도 +20%', baseCost: 2500, mult: 1.4, effect: 'customerSpeed' },
+                { id: 'quality', name: '⭐ 품질 개선', desc: '평판 획득 +50%', baseCost: 5000, mult: 1.6, effect: 'qualityBoost' },
+                { id: 'efficiency', name: '⚙️ 효율 향상', desc: '재료 소모 -10%', baseCost: 8000, mult: 1.7, effect: 'efficiency' }
+            ]
         };
 
         // ============================================================================
@@ -535,20 +683,40 @@
             money: 0,
             level: 1,
             exp: 0,
-            expNext: 100,
-            resources: { kataifi: 0, pistachio: 0, filling: 0, cookies: 0 },
-            upgrades: { autoKataifi: 0, autoPistachio: 0, autoOven: 0, price: 0, speed: 0 },
+            expNext: 1000,
+            reputation: 0,
+
+            resources: {
+                kataifi: 0,
+                pistachio: 0,
+                spread: 0,
+                dough: 0,
+                finished: 0
+            },
+
+            upgrades: {},
+
             customers: [],
+
+            autoProduction: {
+                kataifi: 0,
+                pistachio: 0,
+                spread: 0,
+                dough: 0,
+                assembly: 0
+            },
+
             clickPower: 1,
+            priceMultiplier: 1,
+            qualityMultiplier: 1,
+            efficiencyMultiplier: 1,
+
             lastSave: Date.now(),
-            cookieState: {
-                scale: 1,
-                rotation: 0,
-                ooze: 0,
-                cracks: [],
-                pulse: 0
-            }
+            achievements: []
         };
+
+        // Initialize upgrades
+        CONFIG.upgrades.forEach(u => state.upgrades[u.id] = 0);
 
         // ============================================================================
         // AUDIO ENGINE
@@ -570,366 +738,174 @@
                 if (!this.ctx) return;
                 this.ctx.resume();
 
-                if (type === 'tap') {
-                    const osc = this.ctx.createOscillator();
-                    const g = this.ctx.createGain();
-                    osc.type = 'sine';
-                    osc.frequency.setValueAtTime(800, this.ctx.currentTime);
-                    osc.frequency.exponentialRampToValueAtTime(400, this.ctx.currentTime + 0.1);
-                    g.gain.setValueAtTime(0.3, this.ctx.currentTime);
-                    g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
-                    osc.connect(g);
-                    g.connect(this.gain);
-                    osc.start();
-                    osc.stop(this.ctx.currentTime + 0.1);
-                } else if (type === 'crunch') {
-                    const buf = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.2, this.ctx.sampleRate);
-                    const data = buf.getChannelData(0);
-                    for (let i = 0; i < data.length; i++) {
-                        if (Math.random() > 0.7) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+                const sounds = {
+                    click: () => {
+                        const o = this.ctx.createOscillator();
+                        const g = this.ctx.createGain();
+                        o.type = 'sine';
+                        o.frequency.value = 800;
+                        g.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                        g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.1);
+                        o.connect(g);
+                        g.connect(this.gain);
+                        o.start();
+                        o.stop(this.ctx.currentTime + 0.1);
+                    },
+                    crunch: () => {
+                        const buf = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.15, this.ctx.sampleRate);
+                        const data = buf.getChannelData(0);
+                        for (let i = 0; i < data.length; i++) {
+                            if (Math.random() > 0.7) data[i] = (Math.random() * 2 - 1) * (1 - i / data.length);
+                        }
+                        const src = this.ctx.createBufferSource();
+                        src.buffer = buf;
+                        const filt = this.ctx.createBiquadFilter();
+                        filt.type = 'highpass';
+                        filt.frequency.value = 2000;
+                        const g = this.ctx.createGain();
+                        g.gain.value = 0.15;
+                        src.connect(filt);
+                        filt.connect(g);
+                        g.connect(this.gain);
+                        src.start();
+                    },
+                    coin: () => {
+                        [1047, 1319, 1568].forEach((f, i) => {
+                            setTimeout(() => {
+                                const o = this.ctx.createOscillator();
+                                const g = this.ctx.createGain();
+                                o.frequency.value = f;
+                                g.gain.setValueAtTime(0.12, this.ctx.currentTime);
+                                g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+                                o.connect(g);
+                                g.connect(this.gain);
+                                o.start();
+                                o.stop(this.ctx.currentTime + 0.2);
+                            }, i * 70);
+                        });
+                    },
+                    success: () => {
+                        const o = this.ctx.createOscillator();
+                        const g = this.ctx.createGain();
+                        o.type = 'sine';
+                        o.frequency.setValueAtTime(1200, this.ctx.currentTime);
+                        o.frequency.exponentialRampToValueAtTime(1800, this.ctx.currentTime + 0.15);
+                        g.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                        g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+                        o.connect(g);
+                        g.connect(this.gain);
+                        o.start();
+                        o.stop(this.ctx.currentTime + 0.15);
+                    },
+                    levelup: () => {
+                        [523, 659, 784, 1047].forEach((f, i) => {
+                            setTimeout(() => {
+                                const o = this.ctx.createOscillator();
+                                const g = this.ctx.createGain();
+                                o.type = 'square';
+                                o.frequency.value = f;
+                                g.gain.setValueAtTime(0.1, this.ctx.currentTime);
+                                g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+                                o.connect(g);
+                                g.connect(this.gain);
+                                o.start();
+                                o.stop(this.ctx.currentTime + 0.2);
+                            }, i * 90);
+                        });
                     }
-                    const src = this.ctx.createBufferSource();
-                    src.buffer = buf;
-                    const filt = this.ctx.createBiquadFilter();
-                    filt.type = 'highpass';
-                    filt.frequency.value = 2000;
-                    const g = this.ctx.createGain();
-                    g.gain.value = 0.2;
-                    src.connect(filt);
-                    filt.connect(g);
-                    g.connect(this.gain);
-                    src.start();
-                } else if (type === 'coin') {
-                    [1047, 1319, 1568].forEach((f, i) => {
-                        setTimeout(() => {
-                            const osc = this.ctx.createOscillator();
-                            const g = this.ctx.createGain();
-                            osc.frequency.value = f;
-                            g.gain.setValueAtTime(0.15, this.ctx.currentTime);
-                            g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
-                            osc.connect(g);
-                            g.connect(this.gain);
-                            osc.start();
-                            osc.stop(this.ctx.currentTime + 0.2);
-                        }, i * 80);
-                    });
-                } else if (type === 'levelup') {
-                    [523, 659, 784, 1047].forEach((f, i) => {
-                        setTimeout(() => {
-                            const osc = this.ctx.createOscillator();
-                            const g = this.ctx.createGain();
-                            osc.type = 'square';
-                            osc.frequency.value = f;
-                            g.gain.setValueAtTime(0.12, this.ctx.currentTime);
-                            g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
-                            osc.connect(g);
-                            g.connect(this.gain);
-                            osc.start();
-                            osc.stop(this.ctx.currentTime + 0.25);
-                        }, i * 100);
-                    });
-                }
+                };
+
+                if (sounds[type]) sounds[type]();
             }
         }
 
         const audio = new Audio();
 
         // ============================================================================
-        // PARTICLE SYSTEM
-        // ============================================================================
-        class Particle {
-            constructor(x, y, color) {
-                this.x = x;
-                this.y = y;
-                this.vx = (Math.random() - 0.5) * 15;
-                this.vy = (Math.random() - 1) * 15;
-                this.color = color;
-                this.life = 1;
-                this.size = Math.random() * 5 + 2;
-            }
-
-            update() {
-                this.x += this.vx;
-                this.y += this.vy;
-                this.vy += 0.5;
-                this.vx *= 0.98;
-                this.life -= 0.02;
-            }
-
-            draw(ctx) {
-                ctx.globalAlpha = this.life;
-                ctx.fillStyle = this.color;
-                ctx.fillRect(this.x, this.y, this.size, this.size);
-                ctx.globalAlpha = 1;
-            }
-        }
-
-        const particles = [];
-
-        function emitParticles(x, y, color, count = 20) {
-            for (let i = 0; i < count; i++) {
-                particles.push(new Particle(x, y, color));
-            }
-        }
-
-        // ============================================================================
-        // PIXEL ART RENDERER
-        // ============================================================================
-        const canvas = document.getElementById('canvas');
-        const ctx = canvas.getContext('2d');
-        const pCanvas = document.getElementById('particle-canvas');
-        const pCtx = pCanvas.getContext('2d');
-
-        function resize() {
-            const container = document.getElementById('canvas-area');
-            canvas.width = pCanvas.width = container.clientWidth;
-            canvas.height = pCanvas.height = container.clientHeight;
-        }
-        window.addEventListener('resize', resize);
-        resize();
-
-        class Pixel {
-            constructor(ctx, size = 3) {
-                this.ctx = ctx;
-                this.s = size;
-            }
-
-            draw(x, y, color) {
-                this.ctx.fillStyle = color;
-                this.ctx.fillRect(x * this.s, y * this.s, this.s, this.s);
-            }
-
-            circle(cx, cy, r, color) {
-                for (let x = -r; x <= r; x++) {
-                    for (let y = -r; y <= r; y++) {
-                        if (x*x + y*y <= r*r) {
-                            this.draw(cx + x, cy + y, color);
-                        }
-                    }
-                }
-            }
-
-            drawCookie(cx, cy, size) {
-                const r = size / 2;
-                const cs = state.cookieState;
-
-                // Animated values
-                const scale = cs.scale;
-                const ooze = cs.ooze;
-                const pulse = Math.sin(cs.pulse) * 2;
-
-                // Layer 1: Dough (animated scale)
-                this.circle(cx, cy, r * scale, CFG.colors.dough.base);
-                this.circle(cx, cy, (r - 1) * scale, CFG.colors.dough.dark);
-
-                // Layer 2: Chocolate
-                this.circle(cx, cy, (r - 3) * scale, CFG.colors.chocolate.mid);
-                this.circle(cx, cy, (r - 4) * scale, CFG.colors.chocolate.dark);
-
-                // Layer 3: Kataifi strands (dynamic)
-                for (let i = 0; i < 12; i++) {
-                    const angle = (i / 12) * Math.PI * 2 + cs.rotation;
-                    const dist = (r - 3) * scale + pulse;
-                    const x = cx + Math.cos(angle) * dist;
-                    const y = cy + Math.sin(angle) * dist;
-                    this.draw(Math.floor(x), Math.floor(y), CFG.colors.kataifi.gold);
-                }
-
-                // Layer 4: Pistachio filling (oozing effect)
-                const fillR = (r - 7) * scale + ooze;
-                for (let x = -fillR; x <= fillR; x++) {
-                    for (let y = -fillR; y <= fillR; y++) {
-                        const noise = Math.sin(x * 0.5) * Math.cos(y * 0.5) * 2;
-                        const adjR = fillR + noise;
-                        if (x*x + y*y <= adjR*adjR) {
-                            this.draw(cx + Math.floor(x), cy + Math.floor(y), CFG.colors.pistachio.main);
-                        }
-                    }
-                }
-
-                // Dark center
-                this.circle(cx, cy, (r - 9) * scale, CFG.colors.pistachio.dark);
-
-                // Chunks
-                for (let i = 0; i < 6; i++) {
-                    const angle = (i / 6) * Math.PI * 2;
-                    const dist = (r - 8) * scale;
-                    const x = cx + Math.cos(angle) * dist;
-                    const y = cy + Math.sin(angle) * dist;
-                    this.draw(Math.floor(x), Math.floor(y), CFG.colors.pistachio.light);
-                }
-
-                // Highlight
-                this.draw(cx - Math.floor(r/3), cy - Math.floor(r/3), CFG.colors.dough.light);
-
-                // Cracks (appear on tap)
-                cs.cracks.forEach(crack => {
-                    const angle = crack.angle;
-                    const len = crack.len;
-                    for (let i = 0; i < len; i++) {
-                        const dist = r * 0.5 + i * 2;
-                        const x = cx + Math.cos(angle) * dist;
-                        const y = cy + Math.sin(angle) * dist;
-                        this.draw(Math.floor(x), Math.floor(y), CFG.colors.chocolate.dark);
-                    }
-                });
-            }
-
-            drawCustomer(x, y, mood) {
-                // Body
-                this.ctx.fillStyle = '#4169E1';
-                this.ctx.fillRect(x * this.s, (y + 6) * this.s, 8 * this.s, 10 * this.s);
-
-                // Head
-                this.circle(x + 4, y + 3, 4, '#FFCC80');
-
-                // Eyes
-                this.draw(x + 2, y + 2, '#000');
-                this.draw(x + 6, y + 2, '#000');
-
-                // Mouth
-                if (mood === 'happy') {
-                    this.draw(x + 2, y + 5, '#000');
-                    this.draw(x + 3, y + 6, '#000');
-                    this.draw(x + 5, y + 6, '#000');
-                    this.draw(x + 6, y + 5, '#000');
-                } else if (mood === 'angry') {
-                    this.draw(x + 2, y + 6, '#000');
-                    this.draw(x + 3, y + 5, '#000');
-                    this.draw(x + 5, y + 5, '#000');
-                    this.draw(x + 6, y + 6, '#000');
-                } else {
-                    for (let i = 0; i < 4; i++) this.draw(x + 2 + i, y + 5, '#000');
-                }
-            }
-        }
-
-        const pixel = new Pixel(ctx, 3);
-
-        // ============================================================================
-        // GAME LOOP
-        // ============================================================================
-        function gameLoop() {
-            // Clear
-            ctx.fillStyle = CFG.colors.chocolate.dark;
-            ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-            // Background gradient
-            for (let i = 0; i < 50; i++) {
-                const ratio = i / 50;
-                const r = Math.floor(93 + (45 - 93) * ratio);
-                const g = Math.floor(64 + (27 - 64) * ratio);
-                const b = Math.floor(55 + (14 - 55) * ratio);
-                ctx.fillStyle = `rgb(${r},${g},${b})`;
-                ctx.fillRect(0, i * canvas.height / 50, canvas.width, canvas.height / 50);
-            }
-
-            // Update cookie state
-            const cs = state.cookieState;
-            cs.scale += (1 - cs.scale) * 0.1;
-            cs.ooze *= 0.95;
-            cs.pulse += 0.1;
-            cs.rotation += 0.01;
-            cs.cracks.forEach(c => c.len *= 0.95);
-            cs.cracks = cs.cracks.filter(c => c.len > 0.5);
-
-            // Draw cookie
-            const cx = Math.floor(canvas.width / pixel.s / 2);
-            const cy = Math.floor(canvas.height / pixel.s / 2.5);
-            pixel.drawCookie(cx, cy, 40);
-
-            // Draw customers
-            state.customers.forEach((c, i) => {
-                c.x += (c.targetX - c.x) * 0.1;
-                c.patience -= 16;
-                if (c.patience <= 0) {
-                    c.mood = 'angry';
-                }
-                pixel.drawCustomer(Math.floor(c.x), Math.floor(c.y + i * 5), c.mood);
-            });
-
-            // Particles
-            pCtx.clearRect(0, 0, pCanvas.width, pCanvas.height);
-            particles.forEach((p, i) => {
-                p.update();
-                p.draw(pCtx);
-                if (p.life <= 0) particles.splice(i, 1);
-            });
-
-            requestAnimationFrame(gameLoop);
-        }
-
-        // ============================================================================
         // GAME ACTIONS
         // ============================================================================
-        function tapCookie() {
-            const cs = state.cookieState;
-            cs.scale = 1.2;
-            cs.ooze = 10;
-            cs.cracks.push({ angle: Math.random() * Math.PI * 2, len: 8 });
-
-            emitParticles(canvas.width / 2, canvas.height / 2.5, CFG.colors.pistachio.main, 30);
-            shake();
-            audio.play('tap');
-            vibrate();
-        }
-
         function harvestKataifi() {
-            state.resources.kataifi += 3 * state.clickPower;
+            state.resources.kataifi += CONFIG.balance.harvestBase.kataifi * state.clickPower;
             audio.play('crunch');
-            emitParticles(canvas.width / 2, canvas.height / 2, CFG.colors.kataifi.gold, 15);
-            shake();
+            animateProgress('kataifi');
             updateUI();
         }
 
         function crushPistachio() {
-            state.resources.pistachio += 2 * state.clickPower;
+            state.resources.pistachio += CONFIG.balance.harvestBase.pistachio * state.clickPower;
             audio.play('crunch');
-            emitParticles(canvas.width / 2, canvas.height / 2, CFG.colors.pistachio.light, 15);
-            shake();
+            animateProgress('pistachio');
             updateUI();
         }
 
-        function makeFilling() {
-            const c = CFG.balance.fillingCost;
-            if (state.resources.kataifi >= c.kataifi && state.resources.pistachio >= c.pistachio) {
-                state.resources.kataifi -= c.kataifi;
-                state.resources.pistachio -= c.pistachio;
-                state.resources.filling++;
-                audio.play('tap');
+        function mixSpread() {
+            const req = CONFIG.balance.spreadRequires.pistachio * state.efficiencyMultiplier;
+            if (state.resources.pistachio >= req) {
+                state.resources.pistachio -= Math.floor(req);
+                state.resources.spread += CONFIG.balance.harvestBase.spread * state.clickPower;
+                audio.play('click');
+                animateProgress('spread');
                 updateUI();
             }
         }
 
-        function bakeCookie() {
-            if (state.resources.filling >= 1) {
-                state.resources.filling--;
-                state.resources.cookies++;
-                audio.play('tap');
-                shake();
+        function bakeDough() {
+            state.resources.dough += CONFIG.balance.harvestBase.dough * state.clickPower;
+            audio.play('click');
+            animateProgress('dough');
+            updateUI();
+        }
+
+        function assembleChocolate() {
+            const req = CONFIG.balance.assemblyRequires;
+            const mult = state.efficiencyMultiplier;
+
+            const needs = {
+                dough: Math.floor(req.dough * mult),
+                kataifi: Math.floor(req.kataifi * mult),
+                spread: Math.floor(req.spread * mult)
+            };
+
+            if (state.resources.dough >= needs.dough &&
+                state.resources.kataifi >= needs.kataifi &&
+                state.resources.spread >= needs.spread) {
+
+                state.resources.dough -= needs.dough;
+                state.resources.kataifi -= needs.kataifi;
+                state.resources.spread -= needs.spread;
+                state.resources.finished++;
+
+                audio.play('success');
                 updateUI();
+                updateChocolateDisplay();
             }
         }
 
-        function sellCookie(customer) {
-            if (state.resources.cookies > 0) {
-                state.resources.cookies--;
-                const price = CFG.balance.cookiePrice * state.level * (1 + state.upgrades.price * 0.2);
-                state.money += Math.floor(price);
-                state.exp += Math.floor(price * 0.05);
+        function sellChocolate(customer) {
+            if (state.resources.finished > 0) {
+                state.resources.finished--;
 
-                customer.mood = 'happy';
+                const basePrice = CONFIG.balance.chocolatePrice;
+                const price = Math.floor(basePrice * state.level * state.priceMultiplier);
+                const rep = Math.floor(10 * state.qualityMultiplier);
+
+                state.money += price;
+                state.reputation += rep;
+                state.exp += price * 0.1;
+
+                customer.satisfied = true;
+                audio.play('coin');
+                floatNumber(`+${fmt(price)}`, customer.x, customer.y, '#FFD700');
+
                 setTimeout(() => {
                     const idx = state.customers.indexOf(customer);
                     if (idx > -1) state.customers.splice(idx, 1);
                     updateCustomerUI();
                 }, 500);
 
-                audio.play('coin');
-                floatText(`+${fmt(Math.floor(price))}원`, CFG.colors.kataifi.gold);
-
                 if (state.exp >= state.expNext) levelUp();
                 updateUI();
+                updateChocolateDisplay();
             }
         }
 
@@ -939,48 +915,116 @@
             state.expNext = Math.floor(state.expNext * 1.5);
             state.clickPower++;
             audio.play('levelup');
-            shake();
-            floatText(`레벨 ${state.level}!`, '#fff');
+            showAchievement(`레벨 ${state.level} 달성!`);
         }
 
         // ============================================================================
         // UPGRADES
         // ============================================================================
-        function buyUpgrade(type) {
-            const lvl = state.upgrades[type];
-            const base = CFG.balance.upgradeCosts[type];
-            const mult = CFG.balance.upgradeMultipliers[type];
-            const cost = Math.floor(base * Math.pow(mult, lvl));
+        function buyUpgrade(upgradeId) {
+            const upgrade = CONFIG.upgrades.find(u => u.id === upgradeId);
+            if (!upgrade) return;
+
+            const level = state.upgrades[upgradeId];
+            const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.mult, level));
 
             if (state.money >= cost) {
                 state.money -= cost;
-                state.upgrades[type]++;
+                state.upgrades[upgradeId]++;
+
+                // Apply effect
+                applyUpgradeEffect(upgrade.effect);
+
                 audio.play('coin');
                 updateUI();
+                updateUpgradeList();
             }
         }
 
-        // Auto production
+        function applyUpgradeEffect(effect) {
+            if (effect === 'autoKataifi') state.autoProduction.kataifi++;
+            else if (effect === 'autoPistachio') state.autoProduction.pistachio++;
+            else if (effect === 'autoSpread') state.autoProduction.spread++;
+            else if (effect === 'autoDough') state.autoProduction.dough++;
+            else if (effect === 'autoAssembly') state.autoProduction.assembly++;
+            else if (effect === 'clickPower') state.clickPower++;
+            else if (effect === 'priceBoost') state.priceMultiplier *= 1.25;
+            else if (effect === 'customerSpeed') {}  // Handled in spawn logic
+            else if (effect === 'qualityBoost') state.qualityMultiplier *= 1.5;
+            else if (effect === 'efficiency') state.efficiencyMultiplier *= 0.9;
+        }
+
+        function updateUpgradeList() {
+            const list = document.getElementById('upgrade-list');
+            list.innerHTML = '';
+
+            CONFIG.upgrades.forEach(upgrade => {
+                const level = state.upgrades[upgrade.id];
+                const cost = Math.floor(upgrade.baseCost * Math.pow(upgrade.mult, level));
+                const canAfford = state.money >= cost;
+
+                const div = document.createElement('div');
+                div.className = `upgrade-item ${canAfford ? '' : 'locked'}`;
+                div.innerHTML = `
+                    <div class="upgrade-header">
+                        <div class="upgrade-name">${upgrade.name}</div>
+                        <div class="upgrade-level">Lv ${level}</div>
+                    </div>
+                    <div class="upgrade-desc">${upgrade.desc}</div>
+                    <div class="upgrade-cost">₩${fmt(cost)}</div>
+                `;
+                div.onclick = () => buyUpgrade(upgrade.id);
+                list.appendChild(div);
+            });
+        }
+
+        // ============================================================================
+        // AUTO PRODUCTION
+        // ============================================================================
         setInterval(() => {
-            if (state.upgrades.autoKataifi > 0) {
-                state.resources.kataifi += state.upgrades.autoKataifi;
+            // Auto harvest
+            if (state.autoProduction.kataifi > 0) {
+                state.resources.kataifi += state.autoProduction.kataifi;
             }
-            if (state.upgrades.autoPistachio > 0) {
-                state.resources.pistachio += state.upgrades.autoPistachio;
+            if (state.autoProduction.pistachio > 0) {
+                state.resources.pistachio += state.autoProduction.pistachio;
             }
-            if (state.upgrades.autoOven > 0) {
-                if (state.resources.filling >= 1) {
-                    state.resources.filling--;
-                    state.resources.cookies++;
+            if (state.autoProduction.dough > 0) {
+                state.resources.dough += state.autoProduction.dough;
+            }
+
+            // Auto spread
+            if (state.autoProduction.spread > 0) {
+                const req = CONFIG.balance.spreadRequires.pistachio * state.efficiencyMultiplier;
+                if (state.resources.pistachio >= req * state.autoProduction.spread) {
+                    state.resources.pistachio -= Math.floor(req * state.autoProduction.spread);
+                    state.resources.spread += state.autoProduction.spread;
                 }
             }
-            // Auto filling
-            const c = CFG.balance.fillingCost;
-            if (state.resources.kataifi >= c.kataifi && state.resources.pistachio >= c.pistachio) {
-                state.resources.kataifi -= c.kataifi;
-                state.resources.pistachio -= c.pistachio;
-                state.resources.filling++;
+
+            // Auto assembly
+            if (state.autoProduction.assembly > 0) {
+                const req = CONFIG.balance.assemblyRequires;
+                const mult = state.efficiencyMultiplier;
+                const needs = {
+                    dough: Math.floor(req.dough * mult * state.autoProduction.assembly),
+                    kataifi: Math.floor(req.kataifi * mult * state.autoProduction.assembly),
+                    spread: Math.floor(req.spread * mult * state.autoProduction.assembly)
+                };
+
+                if (state.resources.dough >= needs.dough &&
+                    state.resources.kataifi >= needs.kataifi &&
+                    state.resources.spread >= needs.spread) {
+
+                    state.resources.dough -= needs.dough;
+                    state.resources.kataifi -= needs.kataifi;
+                    state.resources.spread -= needs.spread;
+                    state.resources.finished += state.autoProduction.assembly;
+
+                    updateChocolateDisplay();
+                }
             }
+
             updateUI();
         }, 1000);
 
@@ -988,67 +1032,106 @@
         // CUSTOMERS
         // ============================================================================
         setInterval(() => {
-            const interval = 5000 / (1 + state.upgrades.speed * 0.2);
-            if (Math.random() < 16 / interval && state.customers.length < 5) {
+            const speedBonus = 1 + (state.upgrades.customerSpeed || 0) * 0.2;
+            const interval = CONFIG.balance.customerSpawnInterval / speedBonus;
+
+            if (Math.random() < 1000 / interval && state.customers.length < 5) {
+                const names = ['김민수', '이영희', '박철수', '최지영', '정대호', '강수진'];
                 state.customers.push({
-                    name: ['김민수', '이영희', '박철수', '최지영'][Math.floor(Math.random() * 4)],
-                    x: -10,
-                    y: 50,
-                    targetX: 10 + state.customers.length * 12,
-                    patience: 30000,
-                    mood: 'neutral'
+                    name: names[Math.floor(Math.random() * names.length)],
+                    patience: CONFIG.balance.customerPatience,
+                    maxPatience: CONFIG.balance.customerPatience,
+                    satisfied: false,
+                    x: Math.random() * 300 + 50,
+                    y: Math.random() * 100 + 100
                 });
                 updateCustomerUI();
             }
-        }, 16);
+        }, 100);
+
+        function updateCustomers() {
+            state.customers.forEach((c, i) => {
+                c.patience -= 16;
+                if (c.patience <= 0 && !c.satisfied) {
+                    state.customers.splice(i, 1);
+                    updateCustomerUI();
+                }
+            });
+        }
+
+        setInterval(updateCustomers, 16);
 
         function updateCustomerUI() {
             const list = document.getElementById('customer-list');
             list.innerHTML = '';
+
             state.customers.forEach(c => {
+                const pct = Math.max(0, c.patience / c.maxPatience * 100);
+                const emoji = c.satisfied ? '😊' : (pct < 30 ? '😠' : pct < 60 ? '😐' : '🙂');
+
                 const div = document.createElement('div');
                 div.className = 'customer';
                 div.innerHTML = `
-                    <div class="customer-emoji">${c.mood === 'happy' ? '😊' : c.mood === 'angry' ? '😠' : '😐'}</div>
+                    <div class="customer-emoji">${emoji}</div>
                     <div class="customer-info">
                         <div class="customer-name">${c.name}</div>
                         <div class="patience-bar">
-                            <div class="patience-fill" style="width: ${Math.max(0, c.patience / 30000 * 100)}%"></div>
+                            <div class="patience-fill" style="width: ${pct}%"></div>
                         </div>
                     </div>
                 `;
-                div.onclick = () => sellCookie(c);
+                div.onclick = () => sellChocolate(c);
                 list.appendChild(div);
             });
         }
 
         // ============================================================================
-        // UI HELPERS
+        // UI UPDATES
         // ============================================================================
         function updateUI() {
             document.getElementById('money').textContent = fmt(state.money);
             document.getElementById('level').textContent = state.level;
-            document.getElementById('kataifi').textContent = state.resources.kataifi;
-            document.getElementById('pistachio').textContent = state.resources.pistachio;
-            document.getElementById('filling').textContent = state.resources.filling;
-            document.getElementById('cookies').textContent = state.resources.cookies;
+            document.getElementById('reputation').textContent = fmt(state.reputation);
 
-            // Upgrade buttons
-            ['autoKataifi', 'autoPistachio', 'autoOven', 'price', 'speed'].forEach(type => {
-                const lvl = state.upgrades[type];
-                const base = CFG.balance.upgradeCosts[type];
-                const mult = CFG.balance.upgradeMultipliers[type];
-                const cost = Math.floor(base * Math.pow(mult, lvl));
-                document.getElementById(`lv-${type}`).textContent = lvl;
-                document.getElementById(`cost-${type}`).textContent = `₩${fmt(cost)}`;
-                document.getElementById(`up-${type}`).disabled = state.money < cost;
-            });
+            document.getElementById('kataifi-count').textContent = state.resources.kataifi;
+            document.getElementById('pistachio-count').textContent = state.resources.pistachio;
+            document.getElementById('spread-count').textContent = state.resources.spread;
+            document.getElementById('dough-count').textContent = state.resources.dough;
+            document.getElementById('finished-count').textContent = state.resources.finished;
 
-            // Buttons
-            const c = CFG.balance.fillingCost;
-            document.getElementById('btn-filling').disabled =
-                state.resources.kataifi < c.kataifi || state.resources.pistachio < c.pistachio;
-            document.getElementById('btn-bake').disabled = state.resources.filling < 1;
+            // Assembly button
+            const req = CONFIG.balance.assemblyRequires;
+            const mult = state.efficiencyMultiplier;
+            const canAssemble = state.resources.dough >= Math.floor(req.dough * mult) &&
+                               state.resources.kataifi >= Math.floor(req.kataifi * mult) &&
+                               state.resources.spread >= Math.floor(req.spread * mult);
+            document.getElementById('assemble-btn').disabled = !canAssemble;
+        }
+
+        function updateChocolateDisplay() {
+            const display = document.getElementById('chocolate-display');
+            display.innerHTML = '';
+
+            const count = Math.min(state.resources.finished, 20);
+            for (let i = 0; i < count; i++) {
+                const div = document.createElement('div');
+                div.className = 'chocolate-item';
+                display.appendChild(div);
+            }
+
+            if (state.resources.finished > 20) {
+                const more = document.createElement('div');
+                more.style.fontSize = '24px';
+                more.style.fontWeight = 'bold';
+                more.textContent = `+${state.resources.finished - 20}`;
+                display.appendChild(more);
+            }
+        }
+
+        function animateProgress(type) {
+            const bar = document.getElementById(`${type}-progress`);
+            bar.style.width = '100%';
+            setTimeout(() => bar.style.width = '0%', 300);
         }
 
         function fmt(n) {
@@ -1058,60 +1141,72 @@
             return Math.floor(n).toString();
         }
 
-        function shake() {
-            document.getElementById('game').classList.add('shake');
-            setTimeout(() => document.getElementById('game').classList.remove('shake'), 300);
+        function switchTab(index) {
+            document.querySelectorAll('.tab').forEach((t, i) => {
+                t.classList.toggle('active', i === index);
+            });
+            document.querySelectorAll('.tab-content').forEach((t, i) => {
+                t.classList.toggle('active', i === index);
+            });
+
+            if (index === 3) updateUpgradeList();
         }
 
-        function vibrate() {
-            if (navigator.vibrate) navigator.vibrate(10);
-        }
-
-        function floatText(text, color) {
+        function floatNumber(text, x, y, color) {
             const div = document.createElement('div');
-            div.className = 'float-text';
+            div.className = 'float-num';
             div.textContent = text;
             div.style.color = color;
-            div.style.left = canvas.width / 2 + 'px';
-            div.style.top = canvas.height / 2 + 'px';
-            document.getElementById('canvas-area').appendChild(div);
+            div.style.left = x + 'px';
+            div.style.top = y + 'px';
+            document.body.appendChild(div);
             setTimeout(() => div.remove(), 1500);
         }
 
-        function switchTab(tab) {
-            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
-            document.querySelectorAll('.tab-content').forEach(t => t.classList.remove('active'));
-            event.target.classList.add('active');
-            document.getElementById(tab + '-tab').classList.add('active');
+        function showAchievement(text) {
+            document.getElementById('achievement-text').textContent = text;
+            document.getElementById('achievement-modal').classList.add('active');
+            setTimeout(() => {
+                document.getElementById('achievement-modal').classList.remove('active');
+            }, 2000);
+        }
+
+        function closeAchievement() {
+            document.getElementById('achievement-modal').classList.remove('active');
         }
 
         // ============================================================================
         // SAVE/LOAD
         // ============================================================================
         function save() {
-            localStorage.setItem('dujjonku', JSON.stringify({
+            localStorage.setItem('dubai_choco', JSON.stringify({
                 money: state.money,
                 level: state.level,
                 exp: state.exp,
                 expNext: state.expNext,
+                reputation: state.reputation,
                 resources: state.resources,
                 upgrades: state.upgrades,
+                autoProduction: state.autoProduction,
                 clickPower: state.clickPower,
+                priceMultiplier: state.priceMultiplier,
+                qualityMultiplier: state.qualityMultiplier,
+                efficiencyMultiplier: state.efficiencyMultiplier,
                 lastSave: Date.now()
             }));
         }
 
         function load() {
-            const data = localStorage.getItem('dujjonku');
-            if (data) {
+            const saved = localStorage.getItem('dubai_choco');
+            if (saved) {
                 try {
-                    const saved = JSON.parse(data);
-                    Object.assign(state, saved);
+                    const data = JSON.parse(saved);
+                    Object.assign(state, data);
 
-                    const offline = Date.now() - saved.lastSave;
+                    const offline = Date.now() - data.lastSave;
                     if (offline > 60000) {
                         const mins = Math.min(offline, 86400000) / 60000;
-                        const earn = Math.floor(mins * state.level * 10 * 0.5);
+                        const earn = Math.floor(mins * state.level * state.autoProduction.assembly * 100);
                         if (earn > 0) {
                             document.getElementById('offline-earn').textContent = fmt(earn);
                             document.getElementById('offline-modal').classList.add('active');
@@ -1120,6 +1215,7 @@
                     }
 
                     updateUI();
+                    updateChocolateDisplay();
                 } catch(e) {}
             }
         }
@@ -1138,10 +1234,10 @@
         // ============================================================================
         load();
         updateUI();
+        updateUpgradeList();
 
         setTimeout(() => {
             document.getElementById('loading').classList.add('hidden');
-            gameLoop();
         }, 1000);
 
         // Prevent double-tap zoom
@@ -1154,7 +1250,7 @@
 
         document.addEventListener('contextmenu', e => e.preventDefault());
 
-        console.log('🍪 두바이 쫀득 쿠키 타이쿤 시작!');
+        console.log('🍫 두바이 초콜릿 타이쿤 시작!');
     </script>
 </body>
 </html>
