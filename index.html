@@ -2223,6 +2223,19 @@
         updateUpgradeList();
         updateReputationTier();
 
+        // Welcome bonus for new players
+        const isNewPlayer = state.stats.totalSales === 0 && state.money === 0 && state.level === 1;
+        if (isNewPlayer) {
+            setTimeout(() => {
+                // Give starter resources
+                state.money = 2000;
+                state.resources.kataifi = 5;
+                state.resources.pistachio = 5;
+                updateUI();
+                showEvent('🎁 환영 보너스: ₩2,000 + 재료 x5!');
+            }, 1500);
+        }
+
         // Start tutorial for new players
         if (!state.tutorial.completed && state.tutorial.step === 0 && state.stats.totalSales === 0) {
             setTimeout(() => {
