@@ -464,7 +464,205 @@
             font-size: 18px;
             font-weight: bold;
             cursor: pointer;
+            margin: 4px;
         }
+
+        /* Minigame Styles */
+        .minigame-area {
+            margin: 20px 0;
+            position: relative;
+        }
+
+        .heat-meter {
+            width: 100%;
+            height: 60px;
+            background: linear-gradient(90deg, #4ecca3 0%, #ffd700 50%, #ff4444 100%);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 12px;
+        }
+
+        .heat-indicator {
+            position: absolute;
+            width: 4px;
+            height: 100%;
+            background: white;
+            box-shadow: 0 0 10px white;
+            left: 0%;
+            transition: left 0.05s linear;
+        }
+
+        .sweet-spot {
+            position: absolute;
+            width: 20%;
+            height: 100%;
+            top: 0;
+            left: 40%;
+            background: rgba(255,255,255,0.3);
+            border: 2px dashed white;
+        }
+
+        .smash-zone {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin: 20px 0;
+        }
+
+        .smash-target {
+            aspect-ratio: 1;
+            background: var(--pistachio);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 36px;
+            cursor: pointer;
+            transition: all 0.1s;
+            position: relative;
+        }
+
+        .smash-target:active {
+            transform: scale(0.9);
+            background: var(--pistachio-light);
+        }
+
+        .smash-target.smashed {
+            background: rgba(255,255,255,0.1);
+            pointer-events: none;
+        }
+
+        .swirl-circle {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            border-radius: 50%;
+            background: conic-gradient(var(--pistachio) 0deg, var(--kataifi) 180deg, var(--pistachio) 360deg);
+            position: relative;
+            animation: rotate 2s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .swirl-indicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.3);
+            border: 3px solid white;
+        }
+
+        .minigame-progress {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--gold);
+            margin: 12px 0;
+        }
+
+        /* Particle System */
+        .particle {
+            position: fixed;
+            pointer-events: none;
+            z-index: 1500;
+            animation: particleFly 1s forwards;
+        }
+
+        @keyframes particleFly {
+            0% { transform: translate(0, 0) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+        }
+
+        /* Achievement Badge */
+        .achievement-badge {
+            background: linear-gradient(135deg, #ffd700, #ff8800);
+            padding: 8px 16px;
+            border-radius: 20px;
+            display: inline-block;
+            margin: 4px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        /* Tutorial Overlay */
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            display: none;
+            z-index: 3000;
+        }
+
+        .tutorial-overlay.active { display: block; }
+
+        .tutorial-pointer {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            border: 4px solid var(--gold);
+            border-radius: 50%;
+            animation: pulse 1s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.2); opacity: 0.5; }
+        }
+
+        .tutorial-text {
+            position: absolute;
+            background: var(--chocolate-light);
+            border: 3px solid var(--gold);
+            padding: 16px;
+            border-radius: 12px;
+            font-size: 16px;
+            max-width: 250px;
+        }
+
+        /* Event Banner */
+        .event-banner {
+            position: fixed;
+            top: 60px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #ff4444, #ff8800);
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-weight: bold;
+            z-index: 1000;
+            animation: slideDown 0.5s;
+        }
+
+        @keyframes slideDown {
+            from { transform: translateX(-50%) translateY(-100px); }
+            to { transform: translateX(-50%) translateY(0); }
+        }
+
+        /* Reputation Tier Display */
+        .tier-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            margin-left: 8px;
+        }
+
+        .tier-bronze { background: #CD7F32; }
+        .tier-silver { background: #C0C0C0; }
+        .tier-gold { background: #FFD700; color: #000; }
+        .tier-platinum { background: linear-gradient(135deg, #E5E4E2, #BCC6CC); }
+        .tier-diamond { background: linear-gradient(135deg, #B9F2FF, #00D4FF); }
 
         /* Loading */
         #loading {
@@ -528,7 +726,7 @@
         <div class="hud">
             <div class="hud-item money">💰 <span id="money">0</span></div>
             <div class="hud-item">Lv. <span id="level">1</span></div>
-            <div class="hud-item">⭐ <span id="reputation">0</span></div>
+            <div class="hud-item">⭐ <span id="reputation">0</span><span id="tier-badge"></span></div>
         </div>
 
         <div class="tabs">
@@ -542,7 +740,7 @@
             <!-- Tab 0: Ingredients -->
             <div id="tab-0" class="tab-content active">
                 <div class="station-grid">
-                    <div class="station" onclick="harvestKataifi()">
+                    <div class="station" onclick="openKataifiMinigame()">
                         <div class="station-icon">🌾</div>
                         <div class="station-name">카다이프 볶기</div>
                         <div class="station-count" id="kataifi-count">0</div>
@@ -551,7 +749,7 @@
                         </div>
                     </div>
 
-                    <div class="station" onclick="crushPistachio()">
+                    <div class="station" onclick="openPistachioMinigame()">
                         <div class="station-icon">🥜</div>
                         <div class="station-name">피스타치오 분쇄</div>
                         <div class="station-count" id="pistachio-count">0</div>
@@ -560,7 +758,7 @@
                         </div>
                     </div>
 
-                    <div class="station" onclick="mixSpread()">
+                    <div class="station" onclick="openSpreadMinigame()">
                         <div class="station-icon">🍯</div>
                         <div class="station-name">스프레드 제조</div>
                         <div class="station-count" id="spread-count">0</div>
@@ -569,7 +767,7 @@
                         </div>
                     </div>
 
-                    <div class="station" onclick="bakeDough()">
+                    <div class="station" onclick="openDoughMinigame()">
                         <div class="station-icon">🍪</div>
                         <div class="station-name">도우 베이킹</div>
                         <div class="station-count" id="dough-count">0</div>
@@ -624,6 +822,19 @@
             <!-- Tab 3: Upgrades -->
             <div id="tab-3" class="tab-content">
                 <div class="upgrade-list" id="upgrade-list"></div>
+
+                <div style="padding: 16px; margin-top: 20px; background: rgba(0,0,0,0.4); border-radius: 12px; margin: 16px;">
+                    <div style="font-size: 18px; font-weight: bold; color: var(--gold); margin-bottom: 12px;">📊 통계</div>
+                    <div style="font-size: 14px; line-height: 1.8;">
+                        <div>💰 총 수익: ₩<span id="stat-earnings">0</span></div>
+                        <div>🍫 총 판매: <span id="stat-sales">0</span>개</div>
+                        <div>😊 만족한 손님: <span id="stat-happy">0</span>명</div>
+                        <div>😠 화난 손님: <span id="stat-angry">0</span>명</div>
+                        <div>🎮 미니게임 플레이: <span id="stat-minigames">0</span>회</div>
+                        <div>⭐ 퍼펙트 달성: <span id="stat-perfect">0</span>회</div>
+                        <div>🏆 업적 달성: <span id="stat-achievements">0</span>/<span id="stat-total-achievements">15</span></div>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -645,6 +856,70 @@
             <div class="modal-text" id="achievement-text"></div>
             <button class="modal-btn" onclick="closeAchievement()">확인</button>
         </div>
+    </div>
+
+    <!-- Minigame Modals -->
+    <div class="modal" id="kataifi-minigame">
+        <div class="modal-content">
+            <div class="modal-title">🌾 카다이프 볶기</div>
+            <div class="modal-text">열기가 녹색 구간에 있을 때 클릭!</div>
+            <div class="minigame-area">
+                <div class="heat-meter">
+                    <div class="sweet-spot"></div>
+                    <div class="heat-indicator" id="heat-indicator"></div>
+                </div>
+            </div>
+            <div class="minigame-progress"><span id="kataifi-mg-progress">0</span> / 10</div>
+            <button class="modal-btn" onclick="clickHeatMeter()">🔥 볶기!</button>
+            <button class="modal-btn" onclick="closeMinigame()">나가기</button>
+        </div>
+    </div>
+
+    <div class="modal" id="pistachio-minigame">
+        <div class="modal-content">
+            <div class="modal-title">🥜 피스타치오 분쇄</div>
+            <div class="modal-text">모든 피스타치오를 빠르게 터트리세요!</div>
+            <div class="minigame-area">
+                <div class="smash-zone" id="smash-zone"></div>
+            </div>
+            <div class="minigame-progress"><span id="pistachio-mg-progress">0</span> / 15</div>
+        </div>
+    </div>
+
+    <div class="modal" id="spread-minigame">
+        <div class="modal-content">
+            <div class="modal-title">🍯 스프레드 제조</div>
+            <div class="modal-text">5초간 버튼을 누르고 있으세요!</div>
+            <div class="minigame-area">
+                <div class="swirl-circle">
+                    <div class="swirl-indicator"></div>
+                </div>
+            </div>
+            <div class="minigame-progress"><span id="spread-mg-progress">0</span>%</div>
+            <button class="modal-btn" id="swirl-btn" onmousedown="startSwirl()" onmouseup="stopSwirl()" ontouchstart="startSwirl()" ontouchend="stopSwirl()">🌀 섞기</button>
+        </div>
+    </div>
+
+    <div class="modal" id="dough-minigame">
+        <div class="modal-content">
+            <div class="modal-title">🍪 도우 베이킹</div>
+            <div class="modal-text">완벽한 타이밍에 오븐에서 꺼내세요!</div>
+            <div class="minigame-area">
+                <div class="heat-meter">
+                    <div class="sweet-spot"></div>
+                    <div class="heat-indicator" id="dough-heat-indicator"></div>
+                </div>
+            </div>
+            <div class="minigame-progress">🌡️ <span id="dough-temp">0</span>°C</div>
+            <button class="modal-btn" onclick="checkDoughTemp()">🔥 굽기 완료!</button>
+            <button class="modal-btn" onclick="closeMinigame()">나가기</button>
+        </div>
+    </div>
+
+    <!-- Tutorial Overlay -->
+    <div class="tutorial-overlay" id="tutorial">
+        <div class="tutorial-pointer" id="tutorial-pointer"></div>
+        <div class="tutorial-text" id="tutorial-text"></div>
     </div>
 
     <script>
@@ -685,6 +960,7 @@
             exp: 0,
             expNext: 1000,
             reputation: 0,
+            reputationTier: 'none',
 
             resources: {
                 kataifi: 0,
@@ -692,6 +968,15 @@
                 spread: 0,
                 dough: 0,
                 finished: 0
+            },
+
+            stats: {
+                totalSales: 0,
+                totalEarnings: 0,
+                happyCustomers: 0,
+                angryCustomers: 0,
+                minigamesPlayed: 0,
+                perfectMinigames: 0
             },
 
             upgrades: {},
@@ -712,11 +997,73 @@
             efficiencyMultiplier: 1,
 
             lastSave: Date.now(),
-            achievements: []
+            achievements: [],
+            unlockedAchievements: [],
+
+            tutorial: {
+                completed: false,
+                step: 0
+            },
+
+            events: [],
+            currentEvent: null
+        };
+
+        // Minigame state
+        const minigameState = {
+            active: null,
+            kataifiProgress: 0,
+            pistachioProgress: 0,
+            spreadProgress: 0,
+            doughTemp: 0,
+            heatPosition: 0,
+            swirlHolding: false,
+            swirlInterval: null
         };
 
         // Initialize upgrades
         CONFIG.upgrades.forEach(u => state.upgrades[u.id] = 0);
+
+        // Achievements
+        const ACHIEVEMENTS = [
+            { id: 'first_sale', name: '첫 판매', desc: '첫 초콜릿 판매', check: () => state.stats.totalSales >= 1, reward: 1000 },
+            { id: 'baker_10', name: '초보 제빵사', desc: '10개 판매', check: () => state.stats.totalSales >= 10, reward: 5000 },
+            { id: 'baker_50', name: '숙련 제빵사', desc: '50개 판매', check: () => state.stats.totalSales >= 50, reward: 25000 },
+            { id: 'baker_100', name: '마스터 제빵사', desc: '100개 판매', check: () => state.stats.totalSales >= 100, reward: 100000 },
+            { id: 'rich_10k', name: '부자 1단계', desc: '₩10,000 달성', check: () => state.money >= 10000, reward: 2000 },
+            { id: 'rich_100k', name: '부자 2단계', desc: '₩100,000 달성', check: () => state.money >= 100000, reward: 10000 },
+            { id: 'rich_1m', name: '백만장자', desc: '₩1,000,000 달성', check: () => state.money >= 1000000, reward: 50000 },
+            { id: 'level_5', name: '레벨 5', desc: '레벨 5 달성', check: () => state.level >= 5, reward: 10000 },
+            { id: 'level_10', name: '레벨 10', desc: '레벨 10 달성', check: () => state.level >= 10, reward: 30000 },
+            { id: 'happy_10', name: '인기 매장', desc: '만족한 손님 10명', check: () => state.stats.happyCustomers >= 10, reward: 5000 },
+            { id: 'happy_50', name: '명품 매장', desc: '만족한 손님 50명', check: () => state.stats.happyCustomers >= 50, reward: 25000 },
+            { id: 'minigame_10', name: '게임 매니아', desc: '미니게임 10회', check: () => state.stats.minigamesPlayed >= 10, reward: 5000 },
+            { id: 'perfect_5', name: '완벽주의자', desc: '퍼펙트 5회', check: () => state.stats.perfectMinigames >= 5, reward: 10000 },
+            { id: 'reputation_100', name: '평판 상승', desc: '평판 100 달성', check: () => state.reputation >= 100, reward: 10000 },
+            { id: 'reputation_500', name: '명성 확립', desc: '평판 500 달성', check: () => state.reputation >= 500, reward: 50000 }
+        ];
+
+        // Customer personalities
+        const CUSTOMER_TYPES = [
+            { emoji: '🙂', name: ['김민수', '이영희'], patience: 1.0, tip: 1.0, dialogue: '맛있어 보이네요!' },
+            { emoji: '😊', name: ['박철수', '최지영'], patience: 1.2, tip: 1.2, dialogue: '두바이 초콜릿 좋아해요!' },
+            { emoji: '🤩', name: ['정대호', '강수진'], patience: 0.9, tip: 1.5, dialogue: '인스타에 올려야지!' },
+            { emoji: '😎', name: ['윤서준', '한예린'], patience: 1.1, tip: 1.3, dialogue: '이거 진짜네!' },
+            { emoji: '🥳', name: ['신동욱', '류지민'], patience: 1.3, tip: 1.4, dialogue: '생일 선물로 완벽!' },
+            { emoji: '😋', name: ['문재현', '황미소'], patience: 0.8, tip: 1.1, dialogue: '배고파요!' },
+            { emoji: '🤗', name: ['송하늘', '조은별'], patience: 1.5, tip: 1.6, dialogue: '달콤한 게 최고~' },
+            { emoji: '😍', name: ['배민준', '오세아'], patience: 1.0, tip: 2.0, dialogue: '사랑해요 피스타치오!' }
+        ];
+
+        // Reputation tiers
+        const REP_TIERS = [
+            { name: 'none', min: 0, badge: '', bonuses: {} },
+            { name: 'bronze', min: 50, badge: '🥉', bonuses: { priceBonus: 1.1 } },
+            { name: 'silver', min: 200, badge: '🥈', bonuses: { priceBonus: 1.25, qualityBonus: 1.1 } },
+            { name: 'gold', min: 500, badge: '🥇', bonuses: { priceBonus: 1.5, qualityBonus: 1.25, customerSpeed: 1.2 } },
+            { name: 'platinum', min: 1000, badge: '💎', bonuses: { priceBonus: 2.0, qualityBonus: 1.5, customerSpeed: 1.5 } },
+            { name: 'diamond', min: 2000, badge: '💠', bonuses: { priceBonus: 3.0, qualityBonus: 2.0, customerSpeed: 2.0 } }
+        ];
 
         // ============================================================================
         // AUDIO ENGINE
@@ -812,6 +1159,65 @@
                                 o.stop(this.ctx.currentTime + 0.2);
                             }, i * 90);
                         });
+                    },
+                    perfect: () => {
+                        [1047, 1319, 1568, 2093].forEach((f, i) => {
+                            setTimeout(() => {
+                                const o = this.ctx.createOscillator();
+                                const g = this.ctx.createGain();
+                                o.type = 'sine';
+                                o.frequency.value = f;
+                                g.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                                g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                                o.connect(g);
+                                g.connect(this.gain);
+                                o.start();
+                                o.stop(this.ctx.currentTime + 0.3);
+                            }, i * 60);
+                        });
+                    },
+                    fail: () => {
+                        const o = this.ctx.createOscillator();
+                        const g = this.ctx.createGain();
+                        o.type = 'sawtooth';
+                        o.frequency.setValueAtTime(400, this.ctx.currentTime);
+                        o.frequency.exponentialRampToValueAtTime(200, this.ctx.currentTime + 0.3);
+                        g.gain.setValueAtTime(0.15, this.ctx.currentTime);
+                        g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+                        o.connect(g);
+                        g.connect(this.gain);
+                        o.start();
+                        o.stop(this.ctx.currentTime + 0.3);
+                    },
+                    smash: () => {
+                        const buf = this.ctx.createBuffer(1, this.ctx.sampleRate * 0.1, this.ctx.sampleRate);
+                        const data = buf.getChannelData(0);
+                        for (let i = 0; i < data.length; i++) {
+                            data[i] = (Math.random() * 2 - 1) * Math.exp(-i / data.length * 5);
+                        }
+                        const src = this.ctx.createBufferSource();
+                        src.buffer = buf;
+                        const g = this.ctx.createGain();
+                        g.gain.value = 0.2;
+                        src.connect(g);
+                        g.connect(this.gain);
+                        src.start();
+                    },
+                    achievement: () => {
+                        [880, 1047, 1319, 1568, 1760].forEach((f, i) => {
+                            setTimeout(() => {
+                                const o = this.ctx.createOscillator();
+                                const g = this.ctx.createGain();
+                                o.type = 'triangle';
+                                o.frequency.value = f;
+                                g.gain.setValueAtTime(0.12, this.ctx.currentTime);
+                                g.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.25);
+                                o.connect(g);
+                                g.connect(this.gain);
+                                o.start();
+                                o.stop(this.ctx.currentTime + 0.25);
+                            }, i * 70);
+                        });
                     }
                 };
 
@@ -822,39 +1228,276 @@
         const audio = new Audio();
 
         // ============================================================================
-        // GAME ACTIONS
+        // PARTICLE SYSTEM
         // ============================================================================
-        function harvestKataifi() {
-            state.resources.kataifi += CONFIG.balance.harvestBase.kataifi * state.clickPower;
-            audio.play('crunch');
-            animateProgress('kataifi');
-            updateUI();
-        }
+        function createParticles(x, y, emoji, count = 5) {
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.textContent = emoji;
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.fontSize = (Math.random() * 20 + 15) + 'px';
 
-        function crushPistachio() {
-            state.resources.pistachio += CONFIG.balance.harvestBase.pistachio * state.clickPower;
-            audio.play('crunch');
-            animateProgress('pistachio');
-            updateUI();
-        }
+                const tx = (Math.random() - 0.5) * 150;
+                const ty = (Math.random() - 0.5) * 150 - 50;
+                particle.style.setProperty('--tx', tx + 'px');
+                particle.style.setProperty('--ty', ty + 'px');
 
-        function mixSpread() {
-            const req = CONFIG.balance.spreadRequires.pistachio * state.efficiencyMultiplier;
-            if (state.resources.pistachio >= req) {
-                state.resources.pistachio -= Math.floor(req);
-                state.resources.spread += CONFIG.balance.harvestBase.spread * state.clickPower;
-                audio.play('click');
-                animateProgress('spread');
-                updateUI();
+                document.body.appendChild(particle);
+                setTimeout(() => particle.remove(), 1000);
             }
         }
 
-        function bakeDough() {
-            state.resources.dough += CONFIG.balance.harvestBase.dough * state.clickPower;
-            audio.play('click');
-            animateProgress('dough');
+        // ============================================================================
+        // ACHIEVEMENTS
+        // ============================================================================
+        function checkAchievements() {
+            ACHIEVEMENTS.forEach(ach => {
+                if (!state.unlockedAchievements.includes(ach.id) && ach.check()) {
+                    state.unlockedAchievements.push(ach.id);
+                    state.money += ach.reward;
+                    audio.play('achievement');
+                    showAchievement(`🏆 ${ach.name}\n${ach.desc}\n보상: ₩${fmt(ach.reward)}`);
+                }
+            });
+        }
+
+        // ============================================================================
+        // REPUTATION TIER SYSTEM
+        // ============================================================================
+        function updateReputationTier() {
+            const oldTier = state.reputationTier;
+            for (let i = REP_TIERS.length - 1; i >= 0; i--) {
+                if (state.reputation >= REP_TIERS[i].min) {
+                    state.reputationTier = REP_TIERS[i].name;
+
+                    if (oldTier !== state.reputationTier && oldTier !== 'none') {
+                        showEvent(`🎉 평판 등급 상승: ${REP_TIERS[i].badge} ${REP_TIERS[i].name.toUpperCase()}!`);
+                        audio.play('levelup');
+                    }
+                    break;
+                }
+            }
+
+            // Update tier badge
+            const tier = REP_TIERS.find(t => t.name === state.reputationTier);
+            document.getElementById('tier-badge').textContent = tier?.badge || '';
+        }
+
+        // ============================================================================
+        // MINIGAME FUNCTIONS
+        // ============================================================================
+        function openKataifiMinigame() {
+            minigameState.active = 'kataifi';
+            minigameState.kataifiProgress = 0;
+            minigameState.heatPosition = 0;
+            document.getElementById('kataifi-mg-progress').textContent = '0';
+            document.getElementById('kataifi-minigame').classList.add('active');
+            startHeatMeter();
+        }
+
+        function startHeatMeter() {
+            const indicator = document.getElementById('heat-indicator');
+            let direction = 1;
+
+            const interval = setInterval(() => {
+                minigameState.heatPosition += direction * 2;
+
+                if (minigameState.heatPosition >= 100) {
+                    minigameState.heatPosition = 100;
+                    direction = -1;
+                } else if (minigameState.heatPosition <= 0) {
+                    minigameState.heatPosition = 0;
+                    direction = 1;
+                }
+
+                indicator.style.left = minigameState.heatPosition + '%';
+            }, 20);
+
+            minigameState.heatInterval = interval;
+        }
+
+        function clickHeatMeter() {
+            const inSweetSpot = minigameState.heatPosition >= 40 && minigameState.heatPosition <= 60;
+
+            if (inSweetSpot) {
+                minigameState.kataifiProgress++;
+                audio.play('success');
+                document.getElementById('kataifi-mg-progress').textContent = minigameState.kataifiProgress;
+
+                if (minigameState.kataifiProgress >= 10) {
+                    // Perfect!
+                    clearInterval(minigameState.heatInterval);
+                    state.resources.kataifi += 10 * state.clickPower;
+                    state.stats.minigamesPlayed++;
+                    state.stats.perfectMinigames++;
+                    audio.play('perfect');
+                    screenShake(8);
+                    closeMinigame();
+                    createParticles(window.innerWidth / 2, window.innerHeight / 2, '🌾', 10);
+                    floatNumber('PERFECT! 🌾', window.innerWidth / 2, window.innerHeight / 2, '#FFD700');
+                    checkAchievements();
+                    updateUI();
+                }
+            } else {
+                audio.play('fail');
+                minigameState.kataifiProgress = Math.max(0, minigameState.kataifiProgress - 1);
+                document.getElementById('kataifi-mg-progress').textContent = minigameState.kataifiProgress;
+            }
+        }
+
+        function openPistachioMinigame() {
+            minigameState.active = 'pistachio';
+            minigameState.pistachioProgress = 0;
+            document.getElementById('pistachio-mg-progress').textContent = '0';
+            document.getElementById('pistachio-minigame').classList.add('active');
+
+            const zone = document.getElementById('smash-zone');
+            zone.innerHTML = '';
+
+            for (let i = 0; i < 15; i++) {
+                const target = document.createElement('div');
+                target.className = 'smash-target';
+                target.textContent = '🥜';
+                target.onclick = () => smashTarget(target, i);
+                zone.appendChild(target);
+            }
+        }
+
+        function smashTarget(target, index) {
+            if (target.classList.contains('smashed')) return;
+
+            target.classList.add('smashed');
+            target.textContent = '💥';
+            minigameState.pistachioProgress++;
+            audio.play('smash');
+            document.getElementById('pistachio-mg-progress').textContent = minigameState.pistachioProgress;
+
+            if (minigameState.pistachioProgress >= 15) {
+                setTimeout(() => {
+                    state.resources.pistachio += 15 * state.clickPower;
+                    state.stats.minigamesPlayed++;
+                    state.stats.perfectMinigames++;
+                    audio.play('perfect');
+                    screenShake(8);
+                    closeMinigame();
+                    createParticles(window.innerWidth / 2, window.innerHeight / 2, '🥜', 15);
+                    floatNumber('PERFECT! 🥜', window.innerWidth / 2, window.innerHeight / 2, '#7CB342');
+                    checkAchievements();
+                    updateUI();
+                }, 300);
+            }
+        }
+
+        function openSpreadMinigame() {
+            minigameState.active = 'spread';
+            minigameState.spreadProgress = 0;
+            minigameState.swirlHolding = false;
+
+            const req = CONFIG.balance.spreadRequires.pistachio * state.efficiencyMultiplier;
+            if (state.resources.pistachio < req) {
+                audio.play('fail');
+                return;
+            }
+
+            state.resources.pistachio -= Math.floor(req);
+            document.getElementById('spread-mg-progress').textContent = '0';
+            document.getElementById('spread-minigame').classList.add('active');
             updateUI();
         }
+
+        function startSwirl() {
+            if (minigameState.swirlHolding) return;
+            minigameState.swirlHolding = true;
+
+            minigameState.swirlInterval = setInterval(() => {
+                minigameState.spreadProgress += 2;
+                document.getElementById('spread-mg-progress').textContent = Math.floor(minigameState.spreadProgress);
+
+                if (minigameState.spreadProgress >= 100) {
+                    stopSwirl();
+                    state.resources.spread += 5 * state.clickPower;
+                    state.stats.minigamesPlayed++;
+                    state.stats.perfectMinigames++;
+                    audio.play('perfect');
+                    screenShake(8);
+                    closeMinigame();
+                    createParticles(window.innerWidth / 2, window.innerHeight / 2, '🍯', 8);
+                    floatNumber('PERFECT! 🍯', window.innerWidth / 2, window.innerHeight / 2, '#FFD700');
+                    checkAchievements();
+                    updateUI();
+                }
+            }, 50);
+        }
+
+        function stopSwirl() {
+            minigameState.swirlHolding = false;
+            if (minigameState.swirlInterval) {
+                clearInterval(minigameState.swirlInterval);
+                minigameState.swirlInterval = null;
+            }
+        }
+
+        function openDoughMinigame() {
+            minigameState.active = 'dough';
+            minigameState.doughTemp = 0;
+            minigameState.heatPosition = 0;
+            document.getElementById('dough-temp').textContent = '0';
+            document.getElementById('dough-minigame').classList.add('active');
+
+            const indicator = document.getElementById('dough-heat-indicator');
+            const interval = setInterval(() => {
+                minigameState.doughTemp += 2;
+                minigameState.heatPosition = (minigameState.doughTemp / 200) * 100;
+                indicator.style.left = minigameState.heatPosition + '%';
+                document.getElementById('dough-temp').textContent = Math.floor(minigameState.doughTemp);
+
+                if (minigameState.doughTemp >= 200) {
+                    clearInterval(interval);
+                    audio.play('fail');
+                    closeMinigame();
+                }
+            }, 30);
+
+            minigameState.doughInterval = interval;
+        }
+
+        function checkDoughTemp() {
+            const perfect = minigameState.doughTemp >= 160 && minigameState.doughTemp <= 180;
+
+            clearInterval(minigameState.doughInterval);
+
+            if (perfect) {
+                state.resources.dough += 5 * state.clickPower;
+                state.stats.minigamesPlayed++;
+                state.stats.perfectMinigames++;
+                audio.play('perfect');
+                screenShake(8);
+                createParticles(window.innerWidth / 2, window.innerHeight / 2, '🍪', 8);
+                floatNumber('PERFECT! 🍪', window.innerWidth / 2, window.innerHeight / 2, '#D4A574');
+                checkAchievements();
+            } else {
+                state.resources.dough += Math.ceil(2 * state.clickPower);
+                state.stats.minigamesPlayed++;
+                audio.play('success');
+            }
+
+            closeMinigame();
+            updateUI();
+        }
+
+        function closeMinigame() {
+            document.querySelectorAll('.modal').forEach(m => m.classList.remove('active'));
+            if (minigameState.heatInterval) clearInterval(minigameState.heatInterval);
+            if (minigameState.doughInterval) clearInterval(minigameState.doughInterval);
+            if (minigameState.swirlInterval) clearInterval(minigameState.swirlInterval);
+            minigameState.active = null;
+        }
+
+        // ============================================================================
+        // GAME ACTIONS
+        // ============================================================================
 
         function assembleChocolate() {
             const req = CONFIG.balance.assemblyRequires;
@@ -876,6 +1519,7 @@
                 state.resources.finished++;
 
                 audio.play('success');
+                createParticles(window.innerWidth / 2, window.innerHeight / 2, '🍫', 5);
                 updateUI();
                 updateChocolateDisplay();
             }
@@ -885,17 +1529,27 @@
             if (state.resources.finished > 0) {
                 state.resources.finished--;
 
+                // Get tier bonuses
+                const tier = REP_TIERS.find(t => t.name === state.reputationTier) || REP_TIERS[0];
+                const tierPriceBonus = tier.bonuses.priceBonus || 1;
+
                 const basePrice = CONFIG.balance.chocolatePrice;
-                const price = Math.floor(basePrice * state.level * state.priceMultiplier);
-                const rep = Math.floor(10 * state.qualityMultiplier);
+                const price = Math.floor(basePrice * state.level * state.priceMultiplier * tierPriceBonus * (customer.tipMultiplier || 1));
+                const rep = Math.floor(10 * state.qualityMultiplier * (tier.bonuses.qualityBonus || 1));
 
                 state.money += price;
                 state.reputation += rep;
                 state.exp += price * 0.1;
 
+                // Update stats
+                state.stats.totalSales++;
+                state.stats.totalEarnings += price;
+                state.stats.happyCustomers++;
+
                 customer.satisfied = true;
                 audio.play('coin');
                 floatNumber(`+${fmt(price)}`, customer.x, customer.y, '#FFD700');
+                createParticles(customer.x, customer.y, '💰', 3);
 
                 setTimeout(() => {
                     const idx = state.customers.indexOf(customer);
@@ -904,6 +1558,8 @@
                 }, 500);
 
                 if (state.exp >= state.expNext) levelUp();
+                updateReputationTier();
+                checkAchievements();
                 updateUI();
                 updateChocolateDisplay();
             }
@@ -915,7 +1571,10 @@
             state.expNext = Math.floor(state.expNext * 1.5);
             state.clickPower++;
             audio.play('levelup');
-            showAchievement(`레벨 ${state.level} 달성!`);
+            screenShake(15);
+            showAchievement(`🎉 레벨 ${state.level} 달성!\n클릭 파워 +1`);
+            createParticles(window.innerWidth / 2, 100, '⭐', 10);
+            checkAchievements();
         }
 
         // ============================================================================
@@ -1032,15 +1691,22 @@
         // CUSTOMERS
         // ============================================================================
         setInterval(() => {
-            const speedBonus = 1 + (state.upgrades.customerSpeed || 0) * 0.2;
+            const tier = REP_TIERS.find(t => t.name === state.reputationTier) || REP_TIERS[0];
+            const tierSpeedBonus = tier.bonuses.customerSpeed || 1;
+            const speedBonus = (1 + (state.upgrades.customerSpeed || 0) * 0.2) * tierSpeedBonus;
             const interval = CONFIG.balance.customerSpawnInterval / speedBonus;
 
             if (Math.random() < 1000 / interval && state.customers.length < 5) {
-                const names = ['김민수', '이영희', '박철수', '최지영', '정대호', '강수진'];
+                const type = CUSTOMER_TYPES[Math.floor(Math.random() * CUSTOMER_TYPES.length)];
+                const name = type.name[Math.floor(Math.random() * type.name.length)];
+
                 state.customers.push({
-                    name: names[Math.floor(Math.random() * names.length)],
-                    patience: CONFIG.balance.customerPatience,
-                    maxPatience: CONFIG.balance.customerPatience,
+                    name: name,
+                    emoji: type.emoji,
+                    dialogue: type.dialogue,
+                    patience: CONFIG.balance.customerPatience * type.patience,
+                    maxPatience: CONFIG.balance.customerPatience * type.patience,
+                    tipMultiplier: type.tip,
                     satisfied: false,
                     x: Math.random() * 300 + 50,
                     y: Math.random() * 100 + 100
@@ -1054,7 +1720,11 @@
                 c.patience -= 16;
                 if (c.patience <= 0 && !c.satisfied) {
                     state.customers.splice(i, 1);
+                    state.stats.angryCustomers++;
+                    floatNumber('😠 -10 평판', c.x, c.y, '#ff4444');
+                    state.reputation = Math.max(0, state.reputation - 10);
                     updateCustomerUI();
+                    updateUI();
                 }
             });
         }
@@ -1067,14 +1737,15 @@
 
             state.customers.forEach(c => {
                 const pct = Math.max(0, c.patience / c.maxPatience * 100);
-                const emoji = c.satisfied ? '😊' : (pct < 30 ? '😠' : pct < 60 ? '😐' : '🙂');
+                const displayEmoji = c.satisfied ? '😊' : (pct < 30 ? '😠' : pct < 60 ? '😐' : c.emoji);
 
                 const div = document.createElement('div');
                 div.className = 'customer';
                 div.innerHTML = `
-                    <div class="customer-emoji">${emoji}</div>
+                    <div class="customer-emoji">${displayEmoji}</div>
                     <div class="customer-info">
                         <div class="customer-name">${c.name}</div>
+                        <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 2px;">${c.dialogue}</div>
                         <div class="patience-bar">
                             <div class="patience-fill" style="width: ${pct}%"></div>
                         </div>
@@ -1084,6 +1755,160 @@
                 list.appendChild(div);
             });
         }
+
+        // ============================================================================
+        // EVENT SYSTEM
+        // ============================================================================
+        const EVENTS = [
+            {
+                name: '럭키 타임!',
+                desc: '판매가 2배!',
+                duration: 30000,
+                effect: () => { state.priceMultiplier *= 2; },
+                end: () => { state.priceMultiplier /= 2; }
+            },
+            {
+                name: '인플루언서 방문!',
+                desc: '평판 획득 3배!',
+                duration: 20000,
+                effect: () => { state.qualityMultiplier *= 3; },
+                end: () => { state.qualityMultiplier /= 3; }
+            },
+            {
+                name: '재료 풍년!',
+                desc: '자동 생산 2배!',
+                duration: 40000,
+                effect: () => {
+                    state.autoProduction.kataifi *= 2;
+                    state.autoProduction.pistachio *= 2;
+                    state.autoProduction.dough *= 2;
+                },
+                end: () => {
+                    state.autoProduction.kataifi /= 2;
+                    state.autoProduction.pistachio /= 2;
+                    state.autoProduction.dough /= 2;
+                }
+            },
+            {
+                name: '클릭 파워 부스트!',
+                desc: '클릭 파워 3배!',
+                duration: 25000,
+                effect: () => { state.clickPower *= 3; },
+                end: () => { state.clickPower /= 3; }
+            },
+            {
+                name: '대박 손님!',
+                desc: '손님 팁 5배!',
+                duration: 30000,
+                effect: () => {
+                    state.customers.forEach(c => c.tipMultiplier = (c.tipMultiplier || 1) * 5);
+                },
+                end: () => {
+                    state.customers.forEach(c => c.tipMultiplier = (c.tipMultiplier || 1) / 5);
+                }
+            }
+        ];
+
+        function triggerRandomEvent() {
+            if (state.currentEvent || state.level < 3) return;
+
+            const event = EVENTS[Math.floor(Math.random() * EVENTS.length)];
+            state.currentEvent = event;
+
+            showEvent(`🎉 ${event.name} - ${event.desc} (${event.duration / 1000}초)`);
+            audio.play('levelup');
+            event.effect();
+
+            setTimeout(() => {
+                event.end();
+                state.currentEvent = null;
+            }, event.duration);
+        }
+
+        // Trigger random events every 2-5 minutes
+        setInterval(() => {
+            if (Math.random() < 0.3) triggerRandomEvent();
+        }, 120000);
+
+        function showEvent(message) {
+            const banner = document.createElement('div');
+            banner.className = 'event-banner';
+            banner.textContent = message;
+            document.body.appendChild(banner);
+
+            setTimeout(() => {
+                banner.style.opacity = '0';
+                banner.style.transition = 'opacity 0.5s';
+                setTimeout(() => banner.remove(), 500);
+            }, 3000);
+        }
+
+        // ============================================================================
+        // TUTORIAL SYSTEM
+        // ============================================================================
+        const TUTORIAL_STEPS = [
+            {
+                message: '환영합니다! 두바이 초콜릿 타이쿤에 오신 것을 환영합니다!\n\n🌾 카다이프 볶기 스테이션을 탭해보세요!',
+                target: null,
+                check: () => state.resources.kataifi > 0
+            },
+            {
+                message: '잘하셨어요! 이제 🥜 피스타치오를 분쇄해보세요!',
+                target: null,
+                check: () => state.resources.pistachio > 0
+            },
+            {
+                message: '완벽합니다! 피스타치오로 🍯 스프레드를 만들어보세요!',
+                target: null,
+                check: () => state.resources.spread > 0
+            },
+            {
+                message: '좋아요! 이제 🍪 도우를 베이킹하세요!',
+                target: null,
+                check: () => state.resources.dough > 0
+            },
+            {
+                message: '모든 재료가 준비되었습니다!\n\n🏭 제조실 탭으로 이동해 초콜릿을 조립하세요!',
+                target: null,
+                check: () => state.resources.finished > 0
+            },
+            {
+                message: '초콜릿이 완성되었습니다!\n\n🏪 판매장으로 가서 손님에게 판매하세요!',
+                target: null,
+                check: () => state.stats.totalSales > 0
+            },
+            {
+                message: '축하합니다! 첫 판매를 완료했습니다!\n\n⬆️ 업그레이드 탭에서 자동화를 구매하면 더 빠르게 성장할 수 있습니다!',
+                target: null,
+                check: () => true
+            }
+        ];
+
+        function updateTutorial() {
+            if (state.tutorial.completed) return;
+
+            const step = TUTORIAL_STEPS[state.tutorial.step];
+            if (!step) {
+                state.tutorial.completed = true;
+                showEvent('🎓 튜토리얼 완료! 보너스 ₩50,000!');
+                state.money += 50000;
+                updateUI();
+                return;
+            }
+
+            if (step.check()) {
+                state.tutorial.step++;
+                if (state.tutorial.step < TUTORIAL_STEPS.length) {
+                    const nextStep = TUTORIAL_STEPS[state.tutorial.step];
+                    showAchievement(nextStep.message);
+                } else {
+                    updateTutorial();
+                }
+            }
+        }
+
+        // Check tutorial every second
+        setInterval(updateTutorial, 1000);
 
         // ============================================================================
         // UI UPDATES
@@ -1099,6 +1924,15 @@
             document.getElementById('dough-count').textContent = state.resources.dough;
             document.getElementById('finished-count').textContent = state.resources.finished;
 
+            // Stats
+            document.getElementById('stat-earnings').textContent = fmt(state.stats.totalEarnings);
+            document.getElementById('stat-sales').textContent = state.stats.totalSales;
+            document.getElementById('stat-happy').textContent = state.stats.happyCustomers;
+            document.getElementById('stat-angry').textContent = state.stats.angryCustomers;
+            document.getElementById('stat-minigames').textContent = state.stats.minigamesPlayed;
+            document.getElementById('stat-perfect').textContent = state.stats.perfectMinigames;
+            document.getElementById('stat-achievements').textContent = state.unlockedAchievements.length;
+
             // Assembly button
             const req = CONFIG.balance.assemblyRequires;
             const mult = state.efficiencyMultiplier;
@@ -1106,6 +1940,28 @@
                                state.resources.kataifi >= Math.floor(req.kataifi * mult) &&
                                state.resources.spread >= Math.floor(req.spread * mult);
             document.getElementById('assemble-btn').disabled = !canAssemble;
+        }
+
+        // Screen shake effect
+        function screenShake(intensity = 10) {
+            const app = document.getElementById('app');
+            const originalTransform = app.style.transform;
+
+            let shakes = 0;
+            const maxShakes = 5;
+
+            const shakeInterval = setInterval(() => {
+                if (shakes >= maxShakes) {
+                    app.style.transform = originalTransform;
+                    clearInterval(shakeInterval);
+                    return;
+                }
+
+                const x = (Math.random() - 0.5) * intensity;
+                const y = (Math.random() - 0.5) * intensity;
+                app.style.transform = `translate(${x}px, ${y}px)`;
+                shakes++;
+            }, 50);
         }
 
         function updateChocolateDisplay() {
@@ -1185,13 +2041,17 @@
                 exp: state.exp,
                 expNext: state.expNext,
                 reputation: state.reputation,
+                reputationTier: state.reputationTier,
                 resources: state.resources,
+                stats: state.stats,
                 upgrades: state.upgrades,
                 autoProduction: state.autoProduction,
                 clickPower: state.clickPower,
                 priceMultiplier: state.priceMultiplier,
                 qualityMultiplier: state.qualityMultiplier,
                 efficiencyMultiplier: state.efficiencyMultiplier,
+                unlockedAchievements: state.unlockedAchievements,
+                tutorial: state.tutorial,
                 lastSave: Date.now()
             }));
         }
@@ -1201,6 +2061,13 @@
             if (saved) {
                 try {
                     const data = JSON.parse(saved);
+
+                    // Merge with defaults for backward compatibility
+                    if (!data.stats) data.stats = state.stats;
+                    if (!data.unlockedAchievements) data.unlockedAchievements = [];
+                    if (!data.tutorial) data.tutorial = { completed: false, step: 0 };
+                    if (!data.reputationTier) data.reputationTier = 'none';
+
                     Object.assign(state, data);
 
                     const offline = Date.now() - data.lastSave;
@@ -1216,6 +2083,7 @@
 
                     updateUI();
                     updateChocolateDisplay();
+                    updateReputationTier();
                 } catch(e) {}
             }
         }
@@ -1235,6 +2103,14 @@
         load();
         updateUI();
         updateUpgradeList();
+        updateReputationTier();
+
+        // Start tutorial for new players
+        if (!state.tutorial.completed && state.tutorial.step === 0 && state.stats.totalSales === 0) {
+            setTimeout(() => {
+                showAchievement(TUTORIAL_STEPS[0].message);
+            }, 2000);
+        }
 
         setTimeout(() => {
             document.getElementById('loading').classList.add('hidden');
