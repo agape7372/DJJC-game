@@ -190,6 +190,12 @@
             overflow: hidden;
             height: 200px;
             position: relative;
+            animation: layerPulse 3s ease-in-out infinite;
+        }
+
+        @keyframes layerPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255,215,0,0.3); }
+            50% { box-shadow: 0 0 40px rgba(255,215,0,0.6); }
         }
 
         .layer {
@@ -859,7 +865,7 @@
                         <div>🎮 미니게임 플레이: <span id="stat-minigames">0</span>회</div>
                         <div>⭐ 퍼펙트 달성: <span id="stat-perfect">0</span>회</div>
                         <div>🔥 최대 콤보: <span id="stat-max-combo">0</span>x</div>
-                        <div>🏆 업적 달성: <span id="stat-achievements">0</span>/<span id="stat-total-achievements">18</span></div>
+                        <div>🏆 업적 달성: <span id="stat-achievements">0</span>/<span id="stat-total-achievements">22</span></div>
                     </div>
                 </div>
             </div>
@@ -1060,13 +1066,15 @@
             season: {
                 current: 'spring', // spring, summer, fall, winter, special
                 startDate: Date.now(),
-                duration: 604800000 // 7 days
+                duration: 604800000, // 7 days
+                experienced: 1 // Track how many seasons experienced
             },
 
             dailyMission: {
                 date: new Date().toDateString(),
                 missions: [],
-                completed: []
+                completed: [],
+                completedTotal: 0 // Total missions completed ever
             },
 
             recipes: {
@@ -1121,7 +1129,11 @@
             { id: 'reputation_500', name: '명성 확립', desc: '평판 500 달성', check: () => state.reputation >= 500, reward: 50000 },
             { id: 'combo_5', name: '콤보 초보', desc: '5 콤보 달성', check: () => state.stats.maxCombo >= 5, reward: 5000 },
             { id: 'combo_10', name: '콤보 마스터', desc: '10 콤보 달성', check: () => state.stats.maxCombo >= 10, reward: 15000 },
-            { id: 'combo_20', name: '콤보 신', desc: '20 콤보 달성', check: () => state.stats.maxCombo >= 20, reward: 50000 }
+            { id: 'combo_20', name: '콤보 신', desc: '20 콤보 달성', check: () => state.stats.maxCombo >= 20, reward: 50000 },
+            { id: 'recipe_3', name: '레시피 컬렉터', desc: '3개 레시피 발견', check: () => state.recipes.unlocked.length >= 3, reward: 20000 },
+            { id: 'recipe_all', name: '마스터 셰프', desc: '모든 레시피 발견', check: () => state.recipes.unlocked.length >= 5, reward: 100000 },
+            { id: 'mission_10', name: '미션 마스터', desc: '일일 미션 10회 완료', check: () => state.dailyMission.completedTotal >= 10, reward: 30000 },
+            { id: 'season_1', name: '사계절 마스터', desc: '4개 시즌 모두 경험', check: () => state.season.experienced >= 4, reward: 40000 }
         ];
 
         // Customer personalities
@@ -2122,6 +2134,7 @@
                 const nextIndex = (currentIndex + 1) % seasons.length;
                 state.season.current = seasons[nextIndex];
                 state.season.startDate = Date.now();
+                state.season.experienced = Math.min(state.season.experienced + 1, 4);
 
                 const season = SEASONS[state.season.current];
                 showEvent(`${season.emoji} ${season.name} 시즌 시작!`);
@@ -2184,10 +2197,12 @@
             state.dailyMission.missions.forEach(mission => {
                 if (!state.dailyMission.completed.includes(mission.id) && mission.check()) {
                     state.dailyMission.completed.push(mission.id);
+                    state.dailyMission.completedTotal++;
                     state.money += mission.reward;
                     audio.play('achievement');
                     showAchievement(`✅ 일일 미션 완료!\n${mission.name}\n보상: ₩${fmt(mission.reward)}`);
                     createParticles(window.innerWidth / 2, window.innerHeight / 2, '🎯', 8);
+                    checkAchievements();
                     updateUI();
                 }
             });
@@ -2499,8 +2514,10 @@
                     if (!data.tutorial) data.tutorial = { completed: false, step: 0 };
                     if (!data.reputationTier) data.reputationTier = 'none';
                     if (!data.prestige) data.prestige = { level: 0, tokens: 0, totalTokens: 0 };
-                    if (!data.season) data.season = { current: 'spring', startDate: Date.now(), duration: 604800000 };
-                    if (!data.dailyMission) data.dailyMission = { date: new Date().toDateString(), missions: [], completed: [] };
+                    if (!data.season) data.season = { current: 'spring', startDate: Date.now(), duration: 604800000, experienced: 1 };
+                    if (!data.season.experienced) data.season.experienced = 1;
+                    if (!data.dailyMission) data.dailyMission = { date: new Date().toDateString(), missions: [], completed: [], completedTotal: 0 };
+                    if (!data.dailyMission.completedTotal) data.dailyMission.completedTotal = 0;
                     if (!data.recipes) data.recipes = { unlocked: ['classic'], discovered: 0 };
                     if (!data.goldenTouchMultiplier) data.goldenTouchMultiplier = 1;
                     if (!data.comboMasterBonus) data.comboMasterBonus = 0;
