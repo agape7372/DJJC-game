@@ -824,6 +824,31 @@
             <div id="tab-3" class="tab-content">
                 <div class="upgrade-list" id="upgrade-list"></div>
 
+                <!-- Daily Missions -->
+                <div style="padding: 16px; margin-top: 20px; background: rgba(0,0,0,0.4); border-radius: 12px; margin: 16px;">
+                    <div style="font-size: 18px; font-weight: bold; color: var(--gold); margin-bottom: 12px;">🎯 일일 미션</div>
+                    <div id="daily-missions" style="font-size: 14px;"></div>
+                </div>
+
+                <!-- Recipes -->
+                <div style="padding: 16px; margin-top: 20px; background: rgba(0,0,0,0.4); border-radius: 12px; margin: 16px;">
+                    <div style="font-size: 18px; font-weight: bold; color: var(--gold); margin-bottom: 12px;">📖 레시피 (<span id="recipe-count">1</span>/5)</div>
+                    <div id="recipe-list" style="font-size: 14px; display: flex; flex-wrap: wrap; gap: 8px;"></div>
+                </div>
+
+                <!-- Season Info -->
+                <div style="padding: 16px; margin-top: 20px; background: rgba(0,0,0,0.4); border-radius: 12px; margin: 16px;">
+                    <div style="font-size: 18px; font-weight: bold; color: var(--gold); margin-bottom: 12px;">
+                        <span id="season-emoji">🌸</span> <span id="season-name">봄</span> 시즌
+                    </div>
+                    <div style="font-size: 14px;">
+                        <div id="season-bonus">품질 보너스 +50%</div>
+                        <div style="margin-top: 8px; color: rgba(255,255,255,0.6);">
+                            남은 시간: <span id="season-time">6일 23시간</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div style="padding: 16px; margin-top: 20px; background: rgba(0,0,0,0.4); border-radius: 12px; margin: 16px;">
                     <div style="font-size: 18px; font-weight: bold; color: var(--gold); margin-bottom: 12px;">📊 통계</div>
                     <div style="font-size: 14px; line-height: 1.8;">
@@ -984,7 +1009,13 @@
                 minigamesPlayed: 0,
                 perfectMinigames: 0,
                 combo: 0,
-                maxCombo: 0
+                maxCombo: 0,
+                dailySales: 0,
+                dailyEarnings: 0,
+                dailyMinigames: 0,
+                dailyPerfects: 0,
+                dailyHappy: 0,
+                dailyAngry: 0
             },
 
             upgrades: {},
@@ -1024,6 +1055,23 @@
                 level: 0,
                 tokens: 0,
                 totalTokens: 0
+            },
+
+            season: {
+                current: 'spring', // spring, summer, fall, winter, special
+                startDate: Date.now(),
+                duration: 604800000 // 7 days
+            },
+
+            dailyMission: {
+                date: new Date().toDateString(),
+                missions: [],
+                completed: []
+            },
+
+            recipes: {
+                unlocked: ['classic'],
+                discovered: 0
             }
         };
 
@@ -1096,6 +1144,37 @@
             { name: 'gold', min: 500, badge: '🥇', bonuses: { priceBonus: 1.5, qualityBonus: 1.25, customerSpeed: 1.2 } },
             { name: 'platinum', min: 1000, badge: '💎', bonuses: { priceBonus: 2.0, qualityBonus: 1.5, customerSpeed: 1.5 } },
             { name: 'diamond', min: 2000, badge: '💠', bonuses: { priceBonus: 3.0, qualityBonus: 2.0, customerSpeed: 2.0 } }
+        ];
+
+        // Seasons
+        const SEASONS = {
+            spring: { name: '봄', emoji: '🌸', theme: 'linear-gradient(180deg, #FFB3BA, #FFDFBA)', bonus: 'quality' },
+            summer: { name: '여름', emoji: '☀️', theme: 'linear-gradient(180deg, #87CEEB, #FFD700)', bonus: 'customer' },
+            fall: { name: '가을', emoji: '🍂', theme: 'linear-gradient(180deg, #D2691E, #8B4513)', bonus: 'price' },
+            winter: { name: '겨울', emoji: '❄️', theme: 'linear-gradient(180deg, #ADD8E6, #4682B4)', bonus: 'production' },
+            special: { name: '특별', emoji: '🎉', theme: 'linear-gradient(135deg, #FF1493, #FFD700, #00CED1)', bonus: 'all' }
+        };
+
+        // Special Recipes
+        const RECIPES = [
+            { id: 'classic', name: '클래식', emoji: '🍫', unlock: 0, bonus: 1.0 },
+            { id: 'royal', name: '로열 골드', emoji: '👑', unlock: 100, bonus: 1.5, require: { sales: 100 } },
+            { id: 'ruby', name: '루비 에디션', emoji: '💎', unlock: 500, bonus: 2.0, require: { sales: 500, level: 10 } },
+            { id: 'galaxy', name: '갤럭시', emoji: '🌌', unlock: 1000, bonus: 3.0, require: { sales: 1000, reputation: 1000 } },
+            { id: 'legendary', name: '레전더리', emoji: '⭐', unlock: 5000, bonus: 5.0, require: { sales: 5000, level: 30 } }
+        ];
+
+        // Daily Missions
+        const DAILY_MISSION_POOL = [
+            { id: 'sell_10', name: '10개 판매', desc: '초콜릿 10개 판매', check: () => state.stats.dailySales >= 10, reward: 5000 },
+            { id: 'sell_50', name: '50개 판매', desc: '초콜릿 50개 판매', check: () => state.stats.dailySales >= 50, reward: 25000 },
+            { id: 'earn_10k', name: '₩10,000 수익', desc: '₩10,000 벌기', check: () => state.stats.dailyEarnings >= 10000, reward: 3000 },
+            { id: 'earn_100k', name: '₩100,000 수익', desc: '₩100,000 벌기', check: () => state.stats.dailyEarnings >= 100000, reward: 20000 },
+            { id: 'minigame_5', name: '미니게임 5회', desc: '미니게임 5번 플레이', check: () => state.stats.dailyMinigames >= 5, reward: 8000 },
+            { id: 'perfect_3', name: '퍼펙트 3회', desc: '퍼펙트 3번 달성', check: () => state.stats.dailyPerfects >= 3, reward: 15000 },
+            { id: 'combo_10', name: '10 콤보', desc: '10 콤보 달성', check: () => state.stats.combo >= 10, reward: 10000 },
+            { id: 'happy_10', name: '손님 10명 만족', desc: '손님 10명 만족시키기', check: () => state.stats.dailyHappy >= 10, reward: 8000 },
+            { id: 'no_angry', name: '완벽한 서비스', desc: '화난 손님 0명', check: () => state.stats.dailyAngry === 0 && state.stats.dailySales > 0, reward: 20000 }
         ];
 
         // ============================================================================
@@ -1371,6 +1450,8 @@
                     state.resources.kataifi += 10 * state.clickPower * comboMult;
                     state.stats.minigamesPlayed++;
                     state.stats.perfectMinigames++;
+                    state.stats.dailyMinigames++;
+                    state.stats.dailyPerfects++;
                     audio.play('perfect');
                     screenShake(8);
                     closeMinigame();
@@ -1438,6 +1519,8 @@
                     state.resources.pistachio += 15 * state.clickPower * comboMult;
                     state.stats.minigamesPlayed++;
                     state.stats.perfectMinigames++;
+                    state.stats.dailyMinigames++;
+                    state.stats.dailyPerfects++;
                     audio.play('perfect');
                     screenShake(8);
                     closeMinigame();
@@ -1493,6 +1576,8 @@
                     state.resources.spread += 5 * state.clickPower * comboMult;
                     state.stats.minigamesPlayed++;
                     state.stats.perfectMinigames++;
+                    state.stats.dailyMinigames++;
+                    state.stats.dailyPerfects++;
                     audio.play('perfect');
                     screenShake(8);
                     closeMinigame();
@@ -1558,6 +1643,8 @@
                 state.resources.dough += 5 * state.clickPower * comboMult;
                 state.stats.minigamesPlayed++;
                 state.stats.perfectMinigames++;
+                state.stats.dailyMinigames++;
+                state.stats.dailyPerfects++;
                 audio.play('perfect');
                 screenShake(8);
                 createParticles(window.innerWidth / 2, window.innerHeight / 2, '🍪', 8 * comboMult);
@@ -1633,9 +1720,13 @@
                 const tier = REP_TIERS.find(t => t.name === state.reputationTier) || REP_TIERS[0];
                 const tierPriceBonus = tier.bonuses.priceBonus || 1;
 
+                // Get season and recipe bonuses
+                const seasonBonus = getSeasonBonus();
+                const recipeBonus = getRecipeBonus();
+
                 const basePrice = CONFIG.balance.chocolatePrice;
-                const price = Math.floor(basePrice * state.level * state.priceMultiplier * tierPriceBonus * (customer.tipMultiplier || 1) * state.goldenTouchMultiplier);
-                const rep = Math.floor(10 * state.qualityMultiplier * (tier.bonuses.qualityBonus || 1));
+                const price = Math.floor(basePrice * state.level * state.priceMultiplier * tierPriceBonus * (customer.tipMultiplier || 1) * state.goldenTouchMultiplier * seasonBonus.price * recipeBonus);
+                const rep = Math.floor(10 * state.qualityMultiplier * (tier.bonuses.qualityBonus || 1) * seasonBonus.quality);
 
                 state.money += price;
                 state.reputation += rep;
@@ -1645,6 +1736,9 @@
                 state.stats.totalSales++;
                 state.stats.totalEarnings += price;
                 state.stats.happyCustomers++;
+                state.stats.dailySales++;
+                state.stats.dailyEarnings += price;
+                state.stats.dailyHappy++;
 
                 customer.satisfied = true;
                 audio.play('coin');
@@ -1825,6 +1919,7 @@
                 if (c.patience <= 0 && !c.satisfied) {
                     state.customers.splice(i, 1);
                     state.stats.angryCustomers++;
+                    state.stats.dailyAngry++;
                     floatNumber('😠 -10 평판', c.x, c.y, '#ff4444');
                     state.reputation = Math.max(0, state.reputation - 10);
                     updateCustomerUI();
@@ -2016,6 +2111,133 @@
         setInterval(updateTutorial, 1000);
 
         // ============================================================================
+        // SEASON SYSTEM
+        // ============================================================================
+        function checkSeason() {
+            const elapsed = Date.now() - state.season.startDate;
+            if (elapsed >= state.season.duration) {
+                // Change season
+                const seasons = ['spring', 'summer', 'fall', 'winter'];
+                const currentIndex = seasons.indexOf(state.season.current);
+                const nextIndex = (currentIndex + 1) % seasons.length;
+                state.season.current = seasons[nextIndex];
+                state.season.startDate = Date.now();
+
+                const season = SEASONS[state.season.current];
+                showEvent(`${season.emoji} ${season.name} 시즌 시작!`);
+                audio.play('levelup');
+                screenShake(5);
+
+                // Apply theme
+                document.getElementById('app').style.background = season.theme;
+            }
+        }
+
+        function getSeasonBonus() {
+            const season = SEASONS[state.season.current];
+            const bonuses = { quality: 1, customer: 1, price: 1, production: 1 };
+
+            if (season.bonus === 'quality') bonuses.quality = 1.5;
+            else if (season.bonus === 'customer') bonuses.customer = 1.3;
+            else if (season.bonus === 'price') bonuses.price = 1.4;
+            else if (season.bonus === 'production') bonuses.production = 1.5;
+            else if (season.bonus === 'all') {
+                bonuses.quality = 1.2;
+                bonuses.customer = 1.2;
+                bonuses.price = 1.2;
+                bonuses.production = 1.2;
+            }
+
+            return bonuses;
+        }
+
+        // Check season every 10 minutes
+        setInterval(checkSeason, 600000);
+
+        // ============================================================================
+        // DAILY MISSION SYSTEM
+        // ============================================================================
+        function generateDailyMissions() {
+            const today = new Date().toDateString();
+            if (state.dailyMission.date !== today) {
+                // New day - generate missions
+                state.dailyMission.date = today;
+                state.dailyMission.completed = [];
+
+                // Pick 3 random missions
+                const shuffled = [...DAILY_MISSION_POOL].sort(() => Math.random() - 0.5);
+                state.dailyMission.missions = shuffled.slice(0, 3);
+
+                // Reset daily stats
+                state.stats.dailySales = 0;
+                state.stats.dailyEarnings = 0;
+                state.stats.dailyMinigames = 0;
+                state.stats.dailyPerfects = 0;
+                state.stats.dailyHappy = 0;
+                state.stats.dailyAngry = 0;
+
+                showEvent('🌅 새로운 하루! 일일 미션이 갱신되었습니다!');
+            }
+        }
+
+        function checkDailyMissions() {
+            state.dailyMission.missions.forEach(mission => {
+                if (!state.dailyMission.completed.includes(mission.id) && mission.check()) {
+                    state.dailyMission.completed.push(mission.id);
+                    state.money += mission.reward;
+                    audio.play('achievement');
+                    showAchievement(`✅ 일일 미션 완료!\n${mission.name}\n보상: ₩${fmt(mission.reward)}`);
+                    createParticles(window.innerWidth / 2, window.innerHeight / 2, '🎯', 8);
+                    updateUI();
+                }
+            });
+        }
+
+        // Check daily missions every 2 seconds
+        setInterval(() => {
+            generateDailyMissions();
+            checkDailyMissions();
+        }, 2000);
+
+        // ============================================================================
+        // RECIPE SYSTEM
+        // ============================================================================
+        function checkRecipes() {
+            RECIPES.forEach(recipe => {
+                if (!state.recipes.unlocked.includes(recipe.id) && recipe.require) {
+                    let canUnlock = true;
+
+                    if (recipe.require.sales && state.stats.totalSales < recipe.require.sales) canUnlock = false;
+                    if (recipe.require.level && state.level < recipe.require.level) canUnlock = false;
+                    if (recipe.require.reputation && state.reputation < recipe.require.reputation) canUnlock = false;
+
+                    if (canUnlock) {
+                        state.recipes.unlocked.push(recipe.id);
+                        state.recipes.discovered++;
+                        audio.play('achievement');
+                        screenShake(10);
+                        showAchievement(`${recipe.emoji} 새 레시피 발견!\n${recipe.name}\n가격 보너스 ${Math.floor((recipe.bonus - 1) * 100)}%!`);
+                        createParticles(window.innerWidth / 2, window.innerHeight / 2, recipe.emoji, 15);
+                    }
+                }
+            });
+        }
+
+        function getRecipeBonus() {
+            let bonus = 1.0;
+            state.recipes.unlocked.forEach(recipeId => {
+                const recipe = RECIPES.find(r => r.id === recipeId);
+                if (recipe && recipe.bonus > bonus) {
+                    bonus = recipe.bonus;
+                }
+            });
+            return bonus;
+        }
+
+        // Check recipes every 5 seconds
+        setInterval(checkRecipes, 5000);
+
+        // ============================================================================
         // UI UPDATES
         // ============================================================================
         function updateUI() {
@@ -2120,7 +2342,86 @@
                 t.classList.toggle('active', i === index);
             });
 
-            if (index === 3) updateUpgradeList();
+            if (index === 3) {
+                updateUpgradeList();
+                updateDailyMissionsUI();
+                updateRecipeUI();
+                updateSeasonUI();
+            }
+        }
+
+        function updateDailyMissionsUI() {
+            const container = document.getElementById('daily-missions');
+            container.innerHTML = '';
+
+            if (state.dailyMission.missions.length === 0) {
+                container.innerHTML = '<div style="color: rgba(255,255,255,0.5);">미션 로딩 중...</div>';
+                return;
+            }
+
+            state.dailyMission.missions.forEach(mission => {
+                const completed = state.dailyMission.completed.includes(mission.id);
+                const div = document.createElement('div');
+                div.style.cssText = 'padding: 8px; background: rgba(0,0,0,0.3); border-radius: 8px; margin-bottom: 8px; border-left: 4px solid ' + (completed ? '#4ecca3' : '#ffd700');
+                div.innerHTML = `
+                    <div style="display: flex; justify-content: space-between; align-items: center;">
+                        <div>
+                            <div style="font-weight: bold;">${completed ? '✅' : '⏳'} ${mission.name}</div>
+                            <div style="font-size: 12px; color: rgba(255,255,255,0.6);">${mission.desc}</div>
+                        </div>
+                        <div style="color: var(--gold); font-weight: bold;">₩${fmt(mission.reward)}</div>
+                    </div>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateRecipeUI() {
+            const container = document.getElementById('recipe-list');
+            container.innerHTML = '';
+
+            document.getElementById('recipe-count').textContent = state.recipes.unlocked.length;
+
+            RECIPES.forEach(recipe => {
+                const unlocked = state.recipes.unlocked.includes(recipe.id);
+                const div = document.createElement('div');
+                div.style.cssText = `
+                    padding: 12px;
+                    background: ${unlocked ? 'linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,140,0,0.2))' : 'rgba(0,0,0,0.3)'};
+                    border-radius: 12px;
+                    border: 2px solid ${unlocked ? 'var(--gold)' : 'rgba(255,255,255,0.1)'};
+                    text-align: center;
+                    min-width: 80px;
+                `;
+                div.innerHTML = `
+                    <div style="font-size: 32px;">${unlocked ? recipe.emoji : '🔒'}</div>
+                    <div style="font-size: 12px; font-weight: bold; margin-top: 4px;">${unlocked ? recipe.name : '???'}</div>
+                    ${unlocked ? `<div style="font-size: 11px; color: var(--gold);">+${Math.floor((recipe.bonus - 1) * 100)}%</div>` : ''}
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateSeasonUI() {
+            const season = SEASONS[state.season.current];
+            document.getElementById('season-emoji').textContent = season.emoji;
+            document.getElementById('season-name').textContent = season.name;
+
+            const bonusText = {
+                quality: '품질 보너스 +50%',
+                customer: '손님 속도 +30%',
+                price: '판매가 +40%',
+                production: '생산 속도 +50%',
+                all: '모든 보너스 +20%'
+            };
+            document.getElementById('season-bonus').textContent = bonusText[season.bonus] || '';
+
+            // Calculate remaining time
+            const elapsed = Date.now() - state.season.startDate;
+            const remaining = state.season.duration - elapsed;
+            const days = Math.floor(remaining / 86400000);
+            const hours = Math.floor((remaining % 86400000) / 3600000);
+            document.getElementById('season-time').textContent = `${days}일 ${hours}시간`;
         }
 
         function floatNumber(text, x, y, color) {
@@ -2165,8 +2466,15 @@
                 priceMultiplier: state.priceMultiplier,
                 qualityMultiplier: state.qualityMultiplier,
                 efficiencyMultiplier: state.efficiencyMultiplier,
+                goldenTouchMultiplier: state.goldenTouchMultiplier,
+                comboMasterBonus: state.comboMasterBonus,
+                expMultiplier: state.expMultiplier,
+                luckyCharmBonus: state.luckyCharmBonus,
                 unlockedAchievements: state.unlockedAchievements,
                 tutorial: state.tutorial,
+                season: state.season,
+                dailyMission: state.dailyMission,
+                recipes: state.recipes,
                 lastSave: Date.now()
             }));
         }
@@ -2181,10 +2489,23 @@
                     if (!data.stats) data.stats = state.stats;
                     if (!data.stats.combo) data.stats.combo = 0;
                     if (!data.stats.maxCombo) data.stats.maxCombo = 0;
+                    if (!data.stats.dailySales) data.stats.dailySales = 0;
+                    if (!data.stats.dailyEarnings) data.stats.dailyEarnings = 0;
+                    if (!data.stats.dailyMinigames) data.stats.dailyMinigames = 0;
+                    if (!data.stats.dailyPerfects) data.stats.dailyPerfects = 0;
+                    if (!data.stats.dailyHappy) data.stats.dailyHappy = 0;
+                    if (!data.stats.dailyAngry) data.stats.dailyAngry = 0;
                     if (!data.unlockedAchievements) data.unlockedAchievements = [];
                     if (!data.tutorial) data.tutorial = { completed: false, step: 0 };
                     if (!data.reputationTier) data.reputationTier = 'none';
                     if (!data.prestige) data.prestige = { level: 0, tokens: 0, totalTokens: 0 };
+                    if (!data.season) data.season = { current: 'spring', startDate: Date.now(), duration: 604800000 };
+                    if (!data.dailyMission) data.dailyMission = { date: new Date().toDateString(), missions: [], completed: [] };
+                    if (!data.recipes) data.recipes = { unlocked: ['classic'], discovered: 0 };
+                    if (!data.goldenTouchMultiplier) data.goldenTouchMultiplier = 1;
+                    if (!data.comboMasterBonus) data.comboMasterBonus = 0;
+                    if (!data.expMultiplier) data.expMultiplier = 1;
+                    if (!data.luckyCharmBonus) data.luckyCharmBonus = 0;
 
                     Object.assign(state, data);
 
@@ -2222,6 +2543,13 @@
         updateUI();
         updateUpgradeList();
         updateReputationTier();
+
+        // Apply season theme
+        const season = SEASONS[state.season.current];
+        document.getElementById('app').style.background = season.theme;
+
+        // Generate daily missions
+        generateDailyMissions();
 
         // Welcome bonus for new players
         const isNewPlayer = state.stats.totalSales === 0 && state.money === 0 && state.level === 1;
