@@ -1,0 +1,1868 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <title>🍫 두쫀쿠 타이쿤 - Dubai Cookie Tycoon</title>
+    <style>
+        :root {
+            /* Dubai Chocolate Identity */
+            --chocolate-dark: #3D2817;
+            --chocolate-milk: #8B5A3C;
+            --pistachio-cream: #A8D5A3;
+            --pistachio-dark: #4A7C4E;
+            --kataifi-gold: #FFD700;
+
+            /* Kitsch Accent */
+            --neon-pink: #FF69B4;
+            --mint-fresh: #98FF98;
+            --cream-white: #FFF8DC;
+            --sparkle-gold: #FFD700;
+
+            /* UI */
+            --ui-bg: rgba(0,0,0,0.85);
+            --ui-border: #FFD700;
+            --success: #4CAF50;
+            --fail: #FF5252;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+            user-select: none;
+        }
+
+        body {
+            font-family: 'Courier New', monospace;
+            background: linear-gradient(135deg, var(--chocolate-dark), var(--chocolate-milk));
+            color: white;
+            overflow: hidden;
+            width: 100vw;
+            height: 100vh;
+            position: fixed;
+        }
+
+        #game-container {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            max-width: 480px;
+            margin: 0 auto;
+            background: var(--chocolate-dark);
+        }
+
+        /* Header HUD */
+        .hud {
+            background: var(--ui-bg);
+            padding: 12px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--kataifi-gold);
+            z-index: 100;
+        }
+
+        .hud-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            font-size: 12px;
+            gap: 2px;
+        }
+
+        .hud-value {
+            font-size: 16px;
+            font-weight: bold;
+            color: var(--kataifi-gold);
+        }
+
+        /* Canvas Layers */
+        .canvas-container {
+            flex: 1;
+            position: relative;
+            overflow: hidden;
+        }
+
+        canvas {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+
+        /* Bottom UI */
+        .bottom-ui {
+            background: var(--ui-bg);
+            padding: 16px;
+            border-top: 3px solid var(--kataifi-gold);
+            display: flex;
+            gap: 8px;
+            z-index: 100;
+        }
+
+        .action-btn {
+            flex: 1;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--neon-pink), var(--pistachio-cream));
+            border: 3px solid var(--kataifi-gold);
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: bold;
+            color: var(--chocolate-dark);
+            cursor: pointer;
+            transition: all 0.2s;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .action-btn:active {
+            transform: scale(0.95);
+        }
+
+        .action-btn::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            left: -50%;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.3), transparent);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0%, 100% { transform: translate(-50%, -50%) scale(0); opacity: 0; }
+            50% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+        }
+
+        /* Modal Base */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.9);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            animation: fadeIn 0.2s;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        .modal-content {
+            background: linear-gradient(135deg, var(--chocolate-milk), var(--chocolate-dark));
+            border: 4px solid var(--kataifi-gold);
+            border-radius: 20px;
+            padding: 24px;
+            max-width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+            animation: slideUp 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(100px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-title {
+            font-size: 24px;
+            font-weight: bold;
+            color: var(--kataifi-gold);
+            text-align: center;
+            margin-bottom: 16px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
+        }
+
+        .modal-text {
+            font-size: 16px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+
+        .modal-btn {
+            width: 100%;
+            padding: 16px;
+            background: linear-gradient(135deg, var(--success), var(--pistachio-dark));
+            border: 3px solid var(--kataifi-gold);
+            border-radius: 12px;
+            font-size: 18px;
+            font-weight: bold;
+            color: white;
+            cursor: pointer;
+            margin-top: 8px;
+        }
+
+        .modal-btn:active {
+            transform: scale(0.98);
+        }
+
+        /* Minigame Area */
+        .minigame-area {
+            background: rgba(0,0,0,0.3);
+            border: 2px solid var(--kataifi-gold);
+            border-radius: 12px;
+            padding: 20px;
+            margin: 16px 0;
+            min-height: 200px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        /* Slice Minigame */
+        .slice-guide {
+            position: absolute;
+            top: 50%;
+            left: 10%;
+            right: 10%;
+            height: 4px;
+            background: rgba(255, 215, 0, 0.5);
+            transform: translateY(-50%);
+        }
+
+        .slice-line {
+            position: absolute;
+            height: 6px;
+            background: var(--kataifi-gold);
+            box-shadow: 0 0 10px var(--kataifi-gold);
+            transition: all 0.1s;
+            pointer-events: none;
+        }
+
+        /* Smash Minigame */
+        .smash-target {
+            position: absolute;
+            width: 48px;
+            height: 48px;
+            font-size: 32px;
+            cursor: pointer;
+            transition: transform 0.1s;
+        }
+
+        .smash-target:active {
+            transform: scale(1.2);
+        }
+
+        .smash-target.smashed {
+            animation: smashEffect 0.3s;
+            pointer-events: none;
+        }
+
+        @keyframes smashEffect {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.5) rotate(180deg); }
+            100% { transform: scale(0); opacity: 0; }
+        }
+
+        /* Temperature Minigame */
+        .temp-meter {
+            width: 100%;
+            height: 40px;
+            background: linear-gradient(90deg,
+                blue 0%,
+                cyan 25%,
+                green 45%,
+                var(--success) 50%,
+                var(--success) 55%,
+                yellow 75%,
+                red 100%
+            );
+            border-radius: 20px;
+            position: relative;
+            margin: 20px 0;
+        }
+
+        .temp-indicator {
+            position: absolute;
+            top: -10px;
+            width: 4px;
+            height: 60px;
+            background: white;
+            box-shadow: 0 0 10px white;
+            transition: left 0.05s linear;
+        }
+
+        .temp-sweet-spot {
+            position: absolute;
+            top: 0;
+            left: 47%;
+            width: 6%;
+            height: 100%;
+            border: 3px dashed var(--kataifi-gold);
+            border-radius: 20px;
+        }
+
+        /* Decoration Minigame */
+        .deco-canvas {
+            width: 100%;
+            height: 200px;
+            background: var(--cream-white);
+            border-radius: 12px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .deco-item {
+            position: absolute;
+            font-size: 24px;
+            cursor: move;
+            user-select: none;
+        }
+
+        .topping-palette {
+            display: flex;
+            gap: 12px;
+            justify-content: center;
+            margin: 12px 0;
+        }
+
+        .topping-btn {
+            width: 48px;
+            height: 48px;
+            font-size: 28px;
+            background: rgba(255,215,0,0.2);
+            border: 2px solid var(--kataifi-gold);
+            border-radius: 8px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .topping-btn:active {
+            transform: scale(0.9);
+        }
+
+        /* Progress Bar */
+        .progress-bar {
+            width: 100%;
+            height: 24px;
+            background: rgba(0,0,0,0.5);
+            border-radius: 12px;
+            overflow: hidden;
+            margin: 12px 0;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--pistachio-dark), var(--pistachio-cream));
+            transition: width 0.3s;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            animation: progressShine 2s infinite;
+        }
+
+        @keyframes progressShine {
+            to { left: 100%; }
+        }
+
+        .progress-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            font-size: 14px;
+            font-weight: bold;
+            color: white;
+            text-shadow: 1px 1px 2px black;
+        }
+
+        /* Quality Badge */
+        .quality-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 8px;
+            font-size: 12px;
+            font-weight: bold;
+            margin: 4px;
+        }
+
+        .quality-normal { background: #888; color: white; }
+        .quality-premium { background: #4169E1; color: white; }
+        .quality-luxury { background: #9370DB; color: white; }
+        .quality-supreme { background: var(--kataifi-gold); color: var(--chocolate-dark); }
+
+        /* Loading Screen */
+        #loading {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--chocolate-dark);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s;
+        }
+
+        #loading.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-logo {
+            font-size: 64px;
+            animation: bounce 1s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+
+        .loading-text {
+            font-size: 24px;
+            color: var(--kataifi-gold);
+            margin-top: 20px;
+        }
+
+        .loading-bar {
+            width: 80%;
+            max-width: 300px;
+            height: 8px;
+            background: rgba(255,215,0,0.2);
+            border-radius: 4px;
+            margin-top: 20px;
+            overflow: hidden;
+        }
+
+        .loading-bar-fill {
+            height: 100%;
+            background: var(--kataifi-gold);
+            width: 0%;
+            animation: loadingProgress 2s ease-out forwards;
+        }
+
+        @keyframes loadingProgress {
+            to { width: 100%; }
+        }
+
+        /* Particle Container */
+        #particles {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 999;
+        }
+
+        .particle {
+            position: absolute;
+            font-size: 20px;
+            animation: particleFly 1s ease-out forwards;
+            pointer-events: none;
+        }
+
+        @keyframes particleFly {
+            0% {
+                transform: translate(0, 0) rotate(0deg) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translate(var(--tx), var(--ty)) rotate(720deg) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Float Number */
+        .float-num {
+            position: fixed;
+            font-size: 24px;
+            font-weight: bold;
+            pointer-events: none;
+            z-index: 998;
+            animation: floatUp 1.5s ease-out forwards;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
+
+        @keyframes floatUp {
+            0% {
+                transform: translateY(0) scale(1);
+                opacity: 1;
+            }
+            100% {
+                transform: translateY(-100px) scale(1.5);
+                opacity: 0;
+            }
+        }
+
+        /* Energy System */
+        .energy-container {
+            display: flex;
+            gap: 4px;
+            align-items: center;
+        }
+
+        .energy-icon {
+            font-size: 16px;
+        }
+
+        .energy-icon.empty {
+            opacity: 0.3;
+        }
+
+        /* Combo Display */
+        .combo-display {
+            position: fixed;
+            top: 80px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 48px;
+            font-weight: bold;
+            color: var(--kataifi-gold);
+            text-shadow: 0 0 20px var(--kataifi-gold), 2px 2px 4px black;
+            z-index: 500;
+            animation: comboScale 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+            pointer-events: none;
+        }
+
+        @keyframes comboScale {
+            0% { transform: translateX(-50%) scale(0); }
+            100% { transform: translateX(-50%) scale(1); }
+        }
+
+        /* Grid Layout Styles */
+        .grid-layout {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 8px;
+            padding: 16px;
+            background: rgba(0,0,0,0.3);
+            border-radius: 12px;
+        }
+
+        .grid-cell {
+            aspect-ratio: 1;
+            background: rgba(255,215,0,0.1);
+            border: 2px dashed rgba(255,215,0,0.3);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            color: rgba(255,255,255,0.5);
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .grid-cell:hover {
+            background: rgba(255,215,0,0.2);
+            border-color: rgba(255,215,0,0.6);
+        }
+
+        .grid-cell.occupied {
+            background: linear-gradient(135deg, var(--pistachio-dark), var(--pistachio-cream));
+            border: 2px solid var(--kataifi-gold);
+            font-size: 24px;
+        }
+
+        /* Tabs */
+        .tabs {
+            display: flex;
+            background: rgba(0,0,0,0.5);
+            border-bottom: 2px solid var(--kataifi-gold);
+        }
+
+        .tab {
+            flex: 1;
+            padding: 12px;
+            text-align: center;
+            font-size: 14px;
+            cursor: pointer;
+            border-bottom: 3px solid transparent;
+            transition: all 0.2s;
+            color: rgba(255,255,255,0.6);
+        }
+
+        .tab.active {
+            color: white;
+            border-bottom-color: var(--kataifi-gold);
+            background: rgba(255,215,0,0.1);
+        }
+
+        .tab-content {
+            display: none;
+            padding: 16px;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: rgba(0,0,0,0.2);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--kataifi-gold);
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Screen -->
+    <div id="loading">
+        <div class="loading-logo">🍫</div>
+        <div class="loading-text">두쫀쿠 타이쿤</div>
+        <div class="loading-bar">
+            <div class="loading-bar-fill"></div>
+        </div>
+    </div>
+
+    <!-- Particles Container -->
+    <div id="particles"></div>
+
+    <!-- Main Game Container -->
+    <div id="game-container">
+        <!-- HUD Header -->
+        <div class="hud">
+            <div class="hud-item">
+                <div>💰</div>
+                <div class="hud-value" id="money">0</div>
+            </div>
+            <div class="hud-item">
+                <div>⚡</div>
+                <div class="energy-container" id="energy-display"></div>
+            </div>
+            <div class="hud-item">
+                <div>🏆</div>
+                <div class="hud-value" id="level">1</div>
+            </div>
+            <div class="hud-item">
+                <div>⭐</div>
+                <div class="hud-value" id="reputation">0</div>
+            </div>
+        </div>
+
+        <!-- Canvas Container (Main Game View) -->
+        <div class="canvas-container">
+            <canvas id="bg-canvas"></canvas>
+            <canvas id="furniture-canvas"></canvas>
+            <canvas id="char-canvas"></canvas>
+            <canvas id="effect-canvas"></canvas>
+            <canvas id="ui-canvas"></canvas>
+        </div>
+
+        <!-- Bottom Action Buttons -->
+        <div class="bottom-ui">
+            <button class="action-btn" onclick="openCookingMenu()">
+                🍳<br>조리하기
+            </button>
+            <button class="action-btn" onclick="openLayoutMenu()">
+                🏪<br>배치하기
+            </button>
+            <button class="action-btn" onclick="openMenuTab()">
+                📋<br>메뉴
+            </button>
+        </div>
+    </div>
+
+    <!-- Cooking Modal -->
+    <div class="modal" id="cooking-modal">
+        <div class="modal-content">
+            <div class="modal-title">🍳 초콜릿 조리</div>
+            <div class="modal-text">어떤 레시피로 만드시겠어요?</div>
+            <div id="recipe-list" style="margin-bottom: 16px;"></div>
+            <button class="modal-btn" onclick="closeCookingModal()">닫기</button>
+        </div>
+    </div>
+
+    <!-- Minigame Modals -->
+    <div class="modal" id="slice-minigame">
+        <div class="modal-content">
+            <div class="modal-title">🌾 카다이프 슬라이싱</div>
+            <div class="modal-text">좌우로 스와이프하여 완벽하게 썰어주세요!</div>
+            <div class="minigame-area" id="slice-area">
+                <div class="slice-guide"></div>
+            </div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="slice-progress" style="width: 0%"></div>
+                <div class="progress-text"><span id="slice-count">0</span> / 3</div>
+            </div>
+            <div class="modal-text" style="margin-top: 12px; font-size: 14px;">
+                난이도: <span id="slice-difficulty">보통</span>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="smash-minigame">
+        <div class="modal-content">
+            <div class="modal-title">🥜 피스타치오 분쇄</div>
+            <div class="modal-text">모든 피스타치오를 빠르게 터치하세요!</div>
+            <div class="minigame-area" id="smash-area"></div>
+            <div class="progress-bar">
+                <div class="progress-fill" id="smash-progress" style="width: 0%"></div>
+                <div class="progress-text"><span id="smash-count">0</span> / 15</div>
+            </div>
+            <div class="modal-text" style="margin-top: 12px; font-size: 14px;">
+                남은 시간: <span id="smash-timer">10.0</span>초
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="temp-minigame">
+        <div class="modal-content">
+            <div class="modal-title">🍫 초콜릿 템퍼링</div>
+            <div class="modal-text">온도계가 녹색 구간에 있을 때 탭하세요!</div>
+            <div class="minigame-area">
+                <div class="temp-meter">
+                    <div class="temp-sweet-spot"></div>
+                    <div class="temp-indicator" id="temp-indicator"></div>
+                </div>
+                <div style="text-align: center; font-size: 32px; margin-top: 20px;">
+                    🌡️ <span id="temp-value">40</span>°C
+                </div>
+            </div>
+            <button class="modal-btn" onclick="checkTemperature()">지금!</button>
+        </div>
+    </div>
+
+    <div class="modal" id="deco-minigame">
+        <div class="modal-content">
+            <div class="modal-title">🎨 데코레이션</div>
+            <div class="modal-text">토핑을 드래그하여 멋지게 꾸며주세요!</div>
+            <div class="topping-palette">
+                <button class="topping-btn" onclick="selectTopping('✨')">✨</button>
+                <button class="topping-btn" onclick="selectTopping('🌰')">🌰</button>
+                <button class="topping-btn" onclick="selectTopping('🍯')">🍯</button>
+                <button class="topping-btn" onclick="selectTopping('💎')">💎</button>
+            </div>
+            <div class="deco-canvas" id="deco-canvas"></div>
+            <button class="modal-btn" onclick="finishDecoration()" style="margin-top: 16px;">완성!</button>
+        </div>
+    </div>
+
+    <!-- Result Modal -->
+    <div class="modal" id="result-modal">
+        <div class="modal-content">
+            <div class="modal-title">🎉 조리 완료!</div>
+            <div class="modal-text" id="result-text"></div>
+            <div style="text-align: center; margin: 20px 0;">
+                <div id="result-quality" class="quality-badge"></div>
+            </div>
+            <div class="modal-text">
+                판매가: <span style="color: var(--kataifi-gold); font-size: 24px; font-weight: bold;" id="result-price">₩0</span>
+            </div>
+            <button class="modal-btn" onclick="sellChocolate()">판매하기</button>
+        </div>
+    </div>
+
+    <!-- Layout Modal -->
+    <div class="modal" id="layout-modal">
+        <div class="modal-content" style="max-width: 95%;">
+            <div class="modal-title">🏪 가게 배치</div>
+            <div class="tabs">
+                <div class="tab active" onclick="switchLayoutTab(0)">장비</div>
+                <div class="tab" onclick="switchLayoutTab(1)">인테리어</div>
+            </div>
+            <div class="tab-content active" id="equipment-tab">
+                <div class="grid-layout" id="equipment-grid"></div>
+            </div>
+            <div class="tab-content" id="interior-tab">
+                <div class="modal-text">Coming Soon!</div>
+            </div>
+            <button class="modal-btn" onclick="closeLayoutModal()">닫기</button>
+        </div>
+    </div>
+
+    <!-- Menu Modal -->
+    <div class="modal" id="menu-modal">
+        <div class="modal-content">
+            <div class="modal-title">📋 메뉴</div>
+            <div class="tabs">
+                <div class="tab active" onclick="switchMenuTab(0)">퀘스트</div>
+                <div class="tab" onclick="switchMenuTab(1)">업적</div>
+                <div class="tab" onclick="switchMenuTab(2)">통계</div>
+            </div>
+            <div class="tab-content active" id="quest-tab">
+                <div id="daily-quest"></div>
+            </div>
+            <div class="tab-content" id="achievement-tab">
+                <div id="achievement-list"></div>
+            </div>
+            <div class="tab-content" id="stats-tab">
+                <div id="stats-display"></div>
+            </div>
+            <button class="modal-btn" onclick="closeMenuModal()">닫기</button>
+        </div>
+    </div>
+
+    <script>
+        "use strict";
+
+        // ============================================================================
+        // GAME STATE
+        // ============================================================================
+        const gameState = {
+            money: 0,
+            energy: 10,
+            maxEnergy: 10,
+            energyRegenRate: 600000, // 10 minutes
+            lastEnergyRegen: Date.now(),
+            level: 1,
+            exp: 0,
+            expNext: 100,
+            reputation: 0,
+
+            combo: 0,
+            maxCombo: 0,
+
+            stats: {
+                totalChocolates: 0,
+                totalEarnings: 0,
+                perfectMakes: 0,
+                recipesDiscovered: 1,
+                vipServed: 0
+            },
+
+            recipes: [
+                { id: 'classic', name: '클래식', unlocked: true, quality: 1.0 }
+            ],
+
+            currentRecipe: null,
+            minigameStage: 0,
+            minigameResults: [],
+
+            layout: {
+                grid: Array(12).fill(null), // 3x4 grid
+                furniture: []
+            },
+
+            dailyQuest: null,
+            achievements: [],
+
+            settings: {
+                soundEnabled: true,
+                hapticEnabled: true
+            }
+        };
+
+        // ============================================================================
+        // CONSTANTS
+        // ============================================================================
+        const RECIPES = [
+            { id: 'classic', name: '클래식 두쫀쿠', emoji: '🍫', basePrice: 10000, unlockLevel: 0 },
+            { id: 'premium', name: '프리미엄 피스타치오', emoji: '🥜', basePrice: 25000, unlockLevel: 5 },
+            { id: 'royal', name: '로얄 골드', emoji: '👑', basePrice: 50000, unlockLevel: 10 },
+            { id: 'diamond', name: '다이아몬드 에디션', emoji: '💎', basePrice: 100000, unlockLevel: 20 }
+        ];
+
+        const QUALITY_TIERS = {
+            normal: { name: '일반', emoji: '⚪', multiplier: 1.0 },
+            premium: { name: '고급', emoji: '🔵', multiplier: 1.5 },
+            luxury: { name: '프리미엄', emoji: '🟣', multiplier: 2.5 },
+            supreme: { name: '최상급', emoji: '🟡', multiplier: 5.0 }
+        };
+
+        const DAILY_QUESTS = [
+            { id: 'make_5', name: '초콜릿 5개 제작', check: () => gameState.stats.totalChocolates >= 5, reward: 10000 },
+            { id: 'perfect_3', name: '퍼펙트 3회 달성', check: () => gameState.stats.perfectMakes >= 3, reward: 15000 },
+            { id: 'combo_10', name: '10 콤보 달성', check: () => gameState.maxCombo >= 10, reward: 20000 }
+        ];
+
+        // ============================================================================
+        // AUDIO ENGINE (Web Audio API)
+        // ============================================================================
+        class AudioEngine {
+            constructor() {
+                this.ctx = null;
+                this.initAudio();
+            }
+
+            initAudio() {
+                try {
+                    const AudioContext = window.AudioContext || window.webkitAudioContext;
+                    this.ctx = new AudioContext();
+                } catch (e) {
+                    console.warn('Web Audio API not supported');
+                }
+            }
+
+            play(type) {
+                if (!gameState.settings.soundEnabled || !this.ctx) return;
+
+                const sounds = {
+                    slice: () => this.playSlice(),
+                    smash: () => this.playSmash(),
+                    temp: () => this.playTemp(),
+                    perfect: () => this.playPerfect(),
+                    coin: () => this.playCoin(),
+                    fail: () => this.playFail()
+                };
+
+                if (sounds[type]) sounds[type]();
+            }
+
+            playSlice() {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(4000, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(2000, this.ctx.currentTime + 0.1);
+
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.15);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.15);
+            }
+
+            playSmash() {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(2500, this.ctx.currentTime);
+
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.05);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.05);
+            }
+
+            playTemp() {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(3000, this.ctx.currentTime);
+
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.3);
+            }
+
+            playPerfect() {
+                const notes = [523, 659, 784, 1047]; // C-E-G-C
+                notes.forEach((freq, i) => {
+                    setTimeout(() => {
+                        const osc = this.ctx.createOscillator();
+                        const gain = this.ctx.createGain();
+
+                        osc.type = 'sine';
+                        osc.frequency.setValueAtTime(freq, this.ctx.currentTime);
+
+                        gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                        gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+
+                        osc.connect(gain);
+                        gain.connect(this.ctx.destination);
+
+                        osc.start();
+                        osc.stop(this.ctx.currentTime + 0.3);
+                    }, i * 100);
+                });
+            }
+
+            playCoin() {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(800, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(1600, this.ctx.currentTime + 0.1);
+
+                gain.gain.setValueAtTime(0.3, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.3);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.3);
+            }
+
+            playFail() {
+                const osc = this.ctx.createOscillator();
+                const gain = this.ctx.createGain();
+
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(200, this.ctx.currentTime);
+                osc.frequency.exponentialRampToValueAtTime(100, this.ctx.currentTime + 0.2);
+
+                gain.gain.setValueAtTime(0.2, this.ctx.currentTime);
+                gain.gain.exponentialRampToValueAtTime(0.01, this.ctx.currentTime + 0.2);
+
+                osc.connect(gain);
+                gain.connect(this.ctx.destination);
+
+                osc.start();
+                osc.stop(this.ctx.currentTime + 0.2);
+            }
+        }
+
+        const audio = new AudioEngine();
+
+        // ============================================================================
+        // CANVAS RENDERER
+        // ============================================================================
+        class CanvasRenderer {
+            constructor() {
+                this.bgCanvas = document.getElementById('bg-canvas');
+                this.furnitureCanvas = document.getElementById('furniture-canvas');
+                this.charCanvas = document.getElementById('char-canvas');
+                this.effectCanvas = document.getElementById('effect-canvas');
+                this.uiCanvas = document.getElementById('ui-canvas');
+
+                this.bgCtx = this.bgCanvas.getContext('2d');
+                this.furnitureCtx = this.furnitureCanvas.getContext('2d');
+                this.charCtx = this.charCanvas.getContext('2d');
+                this.effectCtx = this.effectCanvas.getContext('2d');
+                this.uiCtx = this.uiCanvas.getContext('2d');
+
+                this.resize();
+                window.addEventListener('resize', () => this.resize());
+            }
+
+            resize() {
+                const container = document.querySelector('.canvas-container');
+                const width = container.clientWidth;
+                const height = container.clientHeight;
+
+                [this.bgCanvas, this.furnitureCanvas, this.charCanvas, this.effectCanvas, this.uiCanvas].forEach(canvas => {
+                    canvas.width = width;
+                    canvas.height = height;
+                });
+
+                this.renderBackground();
+            }
+
+            renderBackground() {
+                const ctx = this.bgCtx;
+                const w = this.bgCanvas.width;
+                const h = this.bgCanvas.height;
+
+                // Floor tiles
+                ctx.fillStyle = '#3D2817';
+                ctx.fillRect(0, 0, w, h);
+
+                const tileSize = 32;
+                for (let y = 0; y < h; y += tileSize) {
+                    for (let x = 0; x < w; x += tileSize) {
+                        if ((x / tileSize + y / tileSize) % 2 === 0) {
+                            ctx.fillStyle = '#4A3426';
+                        } else {
+                            ctx.fillStyle = '#3D2817';
+                        }
+                        ctx.fillRect(x, y, tileSize, tileSize);
+                    }
+                }
+            }
+
+            clear(layer) {
+                const ctx = layer === 'char' ? this.charCtx : this.effectCtx;
+                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+            }
+
+            drawPixelChar(x, y, emoji, scale = 1) {
+                const ctx = this.charCtx;
+                ctx.save();
+                ctx.font = `${32 * scale}px Arial`;
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText(emoji, x, y);
+                ctx.restore();
+            }
+        }
+
+        const renderer = new CanvasRenderer();
+
+        // ============================================================================
+        // PARTICLE SYSTEM
+        // ============================================================================
+        function createParticles(x, y, emoji, count = 10) {
+            const container = document.getElementById('particles');
+
+            for (let i = 0; i < count; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                particle.textContent = emoji;
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+
+                const tx = (Math.random() - 0.5) * 200;
+                const ty = (Math.random() - 0.5) * 200 - 50;
+                particle.style.setProperty('--tx', tx + 'px');
+                particle.style.setProperty('--ty', ty + 'px');
+
+                container.appendChild(particle);
+
+                setTimeout(() => particle.remove(), 1000);
+            }
+        }
+
+        function floatNumber(text, x, y, color = '#FFD700') {
+            const div = document.createElement('div');
+            div.className = 'float-num';
+            div.textContent = text;
+            div.style.color = color;
+            div.style.left = x + 'px';
+            div.style.top = y + 'px';
+            document.body.appendChild(div);
+
+            setTimeout(() => div.remove(), 1500);
+        }
+
+        function showCombo(combo) {
+            const existing = document.querySelector('.combo-display');
+            if (existing) existing.remove();
+
+            const div = document.createElement('div');
+            div.className = 'combo-display';
+            div.textContent = `${combo}x COMBO!`;
+            document.body.appendChild(div);
+
+            setTimeout(() => div.remove(), 1000);
+        }
+
+        // ============================================================================
+        // HAPTIC FEEDBACK
+        // ============================================================================
+        function vibrate(pattern) {
+            if (gameState.settings.hapticEnabled && navigator.vibrate) {
+                navigator.vibrate(pattern);
+            }
+        }
+
+        // ============================================================================
+        // UI UPDATES
+        // ============================================================================
+        function updateUI() {
+            document.getElementById('money').textContent = formatMoney(gameState.money);
+            document.getElementById('level').textContent = gameState.level;
+            document.getElementById('reputation').textContent = gameState.reputation;
+            updateEnergyDisplay();
+        }
+
+        function updateEnergyDisplay() {
+            const container = document.getElementById('energy-display');
+            container.innerHTML = '';
+
+            for (let i = 0; i < gameState.maxEnergy; i++) {
+                const icon = document.createElement('span');
+                icon.className = 'energy-icon';
+                icon.textContent = '⚡';
+                if (i >= gameState.energy) {
+                    icon.classList.add('empty');
+                }
+                container.appendChild(icon);
+            }
+        }
+
+        function formatMoney(amount) {
+            if (amount >= 1000000) {
+                return (amount / 1000000).toFixed(1) + 'M';
+            } else if (amount >= 1000) {
+                return (amount / 1000).toFixed(1) + 'K';
+            }
+            return amount.toString();
+        }
+
+        // ============================================================================
+        // COOKING SYSTEM
+        // ============================================================================
+        function openCookingMenu() {
+            if (gameState.energy <= 0) {
+                alert('⚡ 에너지가 부족합니다! 잠시 후 다시 시도하세요.');
+                return;
+            }
+
+            const list = document.getElementById('recipe-list');
+            list.innerHTML = '';
+
+            RECIPES.forEach(recipe => {
+                const unlocked = gameState.level >= recipe.unlockLevel;
+                const div = document.createElement('button');
+                div.className = 'modal-btn';
+                div.style.opacity = unlocked ? '1' : '0.5';
+                div.innerHTML = `${recipe.emoji} ${recipe.name}<br><small>기본가: ₩${formatMoney(recipe.basePrice)}</small>`;
+                div.onclick = () => {
+                    if (unlocked) {
+                        startCooking(recipe);
+                    } else {
+                        alert(`레벨 ${recipe.unlockLevel} 필요!`);
+                    }
+                };
+                list.appendChild(div);
+            });
+
+            document.getElementById('cooking-modal').classList.add('active');
+        }
+
+        function closeCookingModal() {
+            document.getElementById('cooking-modal').classList.remove('active');
+        }
+
+        function startCooking(recipe) {
+            gameState.currentRecipe = recipe;
+            gameState.minigameStage = 0;
+            gameState.minigameResults = [];
+            gameState.energy--;
+            updateUI();
+            closeCookingModal();
+
+            // Start first minigame
+            setTimeout(() => openSliceMinigame(), 300);
+        }
+
+        // ============================================================================
+        // MINIGAME 1: SLICE (Kataifi)
+        // ============================================================================
+        let sliceState = {
+            count: 0,
+            target: 3,
+            touchStartX: 0,
+            touchStartY: 0
+        };
+
+        function openSliceMinigame() {
+            sliceState.count = 0;
+            document.getElementById('slice-count').textContent = '0';
+            document.getElementById('slice-progress').style.width = '0%';
+
+            const area = document.getElementById('slice-area');
+            area.innerHTML = '<div class="slice-guide"></div>';
+
+            // Touch events
+            area.addEventListener('touchstart', handleSliceStart);
+            area.addEventListener('touchmove', handleSliceMove);
+            area.addEventListener('touchend', handleSliceEnd);
+
+            document.getElementById('slice-minigame').classList.add('active');
+        }
+
+        function handleSliceStart(e) {
+            sliceState.touchStartX = e.touches[0].clientX;
+            sliceState.touchStartY = e.touches[0].clientY;
+        }
+
+        function handleSliceMove(e) {
+            const currentX = e.touches[0].clientX;
+            const currentY = e.touches[0].clientY;
+            const deltaX = Math.abs(currentX - sliceState.touchStartX);
+            const deltaY = Math.abs(currentY - sliceState.touchStartY);
+
+            // Show slice line
+            if (deltaX > 50 && deltaX > deltaY) {
+                const line = document.createElement('div');
+                line.className = 'slice-line';
+                line.style.left = Math.min(sliceState.touchStartX, currentX) + 'px';
+                line.style.top = sliceState.touchStartY + 'px';
+                line.style.width = deltaX + 'px';
+                document.getElementById('slice-area').appendChild(line);
+
+                setTimeout(() => line.remove(), 300);
+            }
+        }
+
+        function handleSliceEnd(e) {
+            const endX = e.changedTouches[0].clientX;
+            const deltaX = Math.abs(endX - sliceState.touchStartX);
+
+            if (deltaX > 100) {
+                sliceState.count++;
+                document.getElementById('slice-count').textContent = sliceState.count;
+                document.getElementById('slice-progress').style.width = (sliceState.count / sliceState.target * 100) + '%';
+
+                audio.play('slice');
+                vibrate(150);
+
+                // Particle effect
+                createParticles(window.innerWidth / 2, window.innerHeight / 2, '✨', 20);
+
+                if (sliceState.count >= sliceState.target) {
+                    setTimeout(() => {
+                        completeSliceMinigame('perfect');
+                    }, 500);
+                }
+            }
+        }
+
+        function completeSliceMinigame(result) {
+            document.getElementById('slice-minigame').classList.remove('active');
+            gameState.minigameResults.push(result);
+
+            // Next minigame
+            setTimeout(() => openSmashMinigame(), 300);
+        }
+
+        // ============================================================================
+        // MINIGAME 2: SMASH (Pistachio)
+        // ============================================================================
+        let smashState = {
+            count: 0,
+            target: 15,
+            timeLimit: 10,
+            startTime: 0,
+            interval: null
+        };
+
+        function openSmashMinigame() {
+            smashState.count = 0;
+            smashState.startTime = Date.now();
+
+            document.getElementById('smash-count').textContent = '0';
+            document.getElementById('smash-progress').style.width = '0%';
+
+            const area = document.getElementById('smash-area');
+            area.innerHTML = '';
+
+            // Spawn targets
+            for (let i = 0; i < smashState.target; i++) {
+                const target = document.createElement('div');
+                target.className = 'smash-target';
+                target.textContent = '🥜';
+                target.style.left = (Math.random() * 80 + 10) + '%';
+                target.style.top = (Math.random() * 80 + 10) + '%';
+                target.onclick = () => smashTarget(target);
+                area.appendChild(target);
+            }
+
+            // Timer
+            smashState.interval = setInterval(updateSmashTimer, 100);
+
+            document.getElementById('smash-minigame').classList.add('active');
+        }
+
+        function smashTarget(target) {
+            if (target.classList.contains('smashed')) return;
+
+            target.classList.add('smashed');
+            target.textContent = '💥';
+            smashState.count++;
+
+            document.getElementById('smash-count').textContent = smashState.count;
+            document.getElementById('smash-progress').style.width = (smashState.count / smashState.target * 100) + '%';
+
+            audio.play('smash');
+            vibrate(50);
+
+            if (smashState.count >= smashState.target) {
+                clearInterval(smashState.interval);
+                setTimeout(() => {
+                    completeSmashMinigame('perfect');
+                }, 500);
+            }
+        }
+
+        function updateSmashTimer() {
+            const elapsed = (Date.now() - smashState.startTime) / 1000;
+            const remaining = Math.max(0, smashState.timeLimit - elapsed);
+            document.getElementById('smash-timer').textContent = remaining.toFixed(1);
+
+            if (remaining <= 0) {
+                clearInterval(smashState.interval);
+                completeSmashMinigame('fail');
+            }
+        }
+
+        function completeSmashMinigame(result) {
+            clearInterval(smashState.interval);
+            document.getElementById('smash-minigame').classList.remove('active');
+            gameState.minigameResults.push(result);
+
+            // Next minigame
+            setTimeout(() => openTempMinigame(), 300);
+        }
+
+        // ============================================================================
+        // MINIGAME 3: TEMPERATURE (Chocolate)
+        // ============================================================================
+        let tempState = {
+            temperature: 40,
+            targetMin: 50,
+            targetMax: 55,
+            direction: 1,
+            interval: null
+        };
+
+        function openTempMinigame() {
+            tempState.temperature = 40;
+            tempState.direction = 1;
+
+            document.getElementById('temp-value').textContent = '40';
+            document.getElementById('temp-indicator').style.left = '0%';
+
+            tempState.interval = setInterval(updateTemperature, 50);
+
+            document.getElementById('temp-minigame').classList.add('active');
+        }
+
+        function updateTemperature() {
+            tempState.temperature += tempState.direction * 0.5;
+
+            if (tempState.temperature >= 70) {
+                tempState.direction = -1;
+            } else if (tempState.temperature <= 40) {
+                tempState.direction = 1;
+            }
+
+            const percent = (tempState.temperature - 40) / 30 * 100;
+            document.getElementById('temp-value').textContent = Math.floor(tempState.temperature);
+            document.getElementById('temp-indicator').style.left = percent + '%';
+        }
+
+        function checkTemperature() {
+            clearInterval(tempState.interval);
+
+            const inRange = tempState.temperature >= tempState.targetMin && tempState.temperature <= tempState.targetMax;
+
+            if (inRange) {
+                audio.play('temp');
+                vibrate([50, 30, 50]);
+                floatNumber('PERFECT! 🌡️', window.innerWidth / 2, window.innerHeight / 3, '#4CAF50');
+
+                setTimeout(() => {
+                    completeTempMinigame('perfect');
+                }, 1000);
+            } else {
+                audio.play('fail');
+                vibrate(200);
+                floatNumber('실패...', window.innerWidth / 2, window.innerHeight / 3, '#FF5252');
+
+                setTimeout(() => {
+                    completeTempMinigame('fail');
+                }, 1000);
+            }
+        }
+
+        function completeTempMinigame(result) {
+            document.getElementById('temp-minigame').classList.remove('active');
+            gameState.minigameResults.push(result);
+
+            // Next minigame
+            setTimeout(() => openDecoMinigame(), 300);
+        }
+
+        // ============================================================================
+        // MINIGAME 4: DECORATION
+        // ============================================================================
+        let decoState = {
+            selectedTopping: '✨',
+            toppings: []
+        };
+
+        function openDecoMinigame() {
+            decoState.toppings = [];
+            const canvas = document.getElementById('deco-canvas');
+            canvas.innerHTML = '';
+
+            // Base chocolate
+            const base = document.createElement('div');
+            base.style.cssText = 'width: 80%; height: 80%; margin: 10%; background: linear-gradient(135deg, #8B5A3C, #3D2817); border-radius: 12px; position: relative;';
+            canvas.appendChild(base);
+
+            canvas.onclick = (e) => {
+                const rect = canvas.getBoundingClientRect();
+                const x = e.clientX - rect.left;
+                const y = e.clientY - rect.top;
+
+                const item = document.createElement('div');
+                item.className = 'deco-item';
+                item.textContent = decoState.selectedTopping;
+                item.style.left = x + 'px';
+                item.style.top = y + 'px';
+                canvas.appendChild(item);
+
+                decoState.toppings.push({ emoji: decoState.selectedTopping, x, y });
+
+                audio.play('smash');
+                vibrate(30);
+            };
+
+            document.getElementById('deco-minigame').classList.add('active');
+        }
+
+        function selectTopping(emoji) {
+            decoState.selectedTopping = emoji;
+            vibrate(50);
+        }
+
+        function finishDecoration() {
+            document.getElementById('deco-minigame').classList.remove('active');
+
+            // Evaluate decoration
+            const quality = decoState.toppings.length >= 5 ? 'perfect' : 'good';
+            gameState.minigameResults.push(quality);
+
+            // Show result
+            setTimeout(() => showCookingResult(), 300);
+        }
+
+        // ============================================================================
+        // COOKING RESULT
+        // ============================================================================
+        function showCookingResult() {
+            const perfectCount = gameState.minigameResults.filter(r => r === 'perfect').length;
+            const totalStages = gameState.minigameResults.length;
+
+            let quality = 'normal';
+            if (perfectCount === totalStages) {
+                quality = 'supreme';
+                gameState.combo++;
+                gameState.stats.perfectMakes++;
+                audio.play('perfect');
+                showCombo(gameState.combo);
+            } else if (perfectCount >= totalStages * 0.75) {
+                quality = 'luxury';
+                gameState.combo++;
+            } else if (perfectCount >= totalStages * 0.5) {
+                quality = 'premium';
+                gameState.combo = Math.floor(gameState.combo / 2);
+            } else {
+                quality = 'normal';
+                gameState.combo = 0;
+            }
+
+            gameState.maxCombo = Math.max(gameState.maxCombo, gameState.combo);
+
+            const qualityData = QUALITY_TIERS[quality];
+            const basePrice = gameState.currentRecipe.basePrice;
+            const finalPrice = Math.floor(basePrice * qualityData.multiplier * (1 + gameState.combo * 0.1));
+
+            document.getElementById('result-text').innerHTML = `
+                ${gameState.currentRecipe.emoji} ${gameState.currentRecipe.name}<br>
+                퍼펙트: ${perfectCount}/${totalStages}<br>
+                현재 콤보: ${gameState.combo}x
+            `;
+
+            const badge = document.getElementById('result-quality');
+            badge.textContent = `${qualityData.emoji} ${qualityData.name}`;
+            badge.className = 'quality-badge quality-' + quality;
+
+            document.getElementById('result-price').textContent = '₩' + finalPrice.toLocaleString();
+
+            gameState.currentChocolate = { quality, price: finalPrice };
+
+            document.getElementById('result-modal').classList.add('active');
+        }
+
+        function sellChocolate() {
+            const chocolate = gameState.currentChocolate;
+            gameState.money += chocolate.price;
+            gameState.stats.totalChocolates++;
+            gameState.stats.totalEarnings += chocolate.price;
+
+            const earnedExp = Math.floor(chocolate.price / 1000);
+            gameState.exp += earnedExp;
+
+            if (gameState.exp >= gameState.expNext) {
+                levelUp();
+            }
+
+            audio.play('coin');
+            vibrate([50, 50, 50]);
+            floatNumber('+₩' + chocolate.price.toLocaleString(), window.innerWidth / 2, window.innerHeight / 2, '#FFD700');
+            createParticles(window.innerWidth / 2, window.innerHeight / 2, '💰', 15);
+
+            updateUI();
+            checkDailyQuest();
+
+            document.getElementById('result-modal').classList.remove('active');
+
+            save();
+        }
+
+        function levelUp() {
+            gameState.level++;
+            gameState.exp = 0;
+            gameState.expNext = Math.floor(gameState.expNext * 1.5);
+
+            audio.play('perfect');
+            vibrate([100, 50, 100]);
+            floatNumber('🎉 LEVEL UP!', window.innerWidth / 2, 100, '#FFD700');
+            createParticles(window.innerWidth / 2, 100, '⭐', 30);
+
+            updateUI();
+        }
+
+        // ============================================================================
+        // LAYOUT SYSTEM
+        // ============================================================================
+        function openLayoutMenu() {
+            renderEquipmentGrid();
+            document.getElementById('layout-modal').classList.add('active');
+        }
+
+        function closeLayoutModal() {
+            document.getElementById('layout-modal').classList.remove('active');
+        }
+
+        function switchLayoutTab(index) {
+            const tabs = document.querySelectorAll('#layout-modal .tab');
+            const contents = document.querySelectorAll('#layout-modal .tab-content');
+
+            tabs.forEach((tab, i) => {
+                if (i === index) {
+                    tab.classList.add('active');
+                    contents[i].classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                    contents[i].classList.remove('active');
+                }
+            });
+        }
+
+        function renderEquipmentGrid() {
+            const grid = document.getElementById('equipment-grid');
+            grid.innerHTML = '';
+
+            for (let i = 0; i < 12; i++) {
+                const cell = document.createElement('div');
+                cell.className = 'grid-cell';
+
+                if (gameState.layout.grid[i]) {
+                    cell.classList.add('occupied');
+                    cell.textContent = gameState.layout.grid[i].emoji;
+                } else {
+                    cell.textContent = '+';
+                }
+
+                cell.onclick = () => {
+                    if (!gameState.layout.grid[i]) {
+                        // TODO: Show equipment shop
+                        alert('장비 구매 기능 준비 중!');
+                    }
+                };
+
+                grid.appendChild(cell);
+            }
+        }
+
+        // ============================================================================
+        // MENU SYSTEM
+        // ============================================================================
+        function openMenuTab() {
+            updateDailyQuest();
+            updateAchievements();
+            updateStats();
+            document.getElementById('menu-modal').classList.add('active');
+        }
+
+        function closeMenuModal() {
+            document.getElementById('menu-modal').classList.remove('active');
+        }
+
+        function switchMenuTab(index) {
+            const tabs = document.querySelectorAll('#menu-modal .tab');
+            const contents = document.querySelectorAll('#menu-modal .tab-content');
+
+            tabs.forEach((tab, i) => {
+                if (i === index) {
+                    tab.classList.add('active');
+                    contents[i].classList.add('active');
+                } else {
+                    tab.classList.remove('active');
+                    contents[i].classList.remove('active');
+                }
+            });
+        }
+
+        function updateDailyQuest() {
+            const container = document.getElementById('daily-quest');
+
+            if (!gameState.dailyQuest) {
+                gameState.dailyQuest = DAILY_QUESTS[Math.floor(Math.random() * DAILY_QUESTS.length)];
+            }
+
+            const quest = gameState.dailyQuest;
+            const completed = quest.check();
+
+            container.innerHTML = `
+                <div style="padding: 16px; background: rgba(255,215,0,0.1); border-radius: 12px; border-left: 4px solid var(--kataifi-gold);">
+                    <div style="font-size: 18px; font-weight: bold; margin-bottom: 8px;">
+                        ${completed ? '✅' : '⏳'} ${quest.name}
+                    </div>
+                    <div style="font-size: 14px; color: rgba(255,255,255,0.7); margin-bottom: 8px;">
+                        일일 퀘스트
+                    </div>
+                    <div style="font-size: 16px; color: var(--kataifi-gold);">
+                        보상: ₩${quest.reward.toLocaleString()}
+                    </div>
+                    ${completed && !quest.claimed ? `
+                        <button class="modal-btn" onclick="claimDailyReward()" style="margin-top: 12px;">보상 받기</button>
+                    ` : ''}
+                </div>
+            `;
+        }
+
+        function checkDailyQuest() {
+            if (!gameState.dailyQuest) return;
+
+            if (gameState.dailyQuest.check() && !gameState.dailyQuest.claimed) {
+                updateDailyQuest();
+            }
+        }
+
+        function claimDailyReward() {
+            if (!gameState.dailyQuest || gameState.dailyQuest.claimed) return;
+
+            gameState.money += gameState.dailyQuest.reward;
+            gameState.dailyQuest.claimed = true;
+
+            audio.play('perfect');
+            vibrate([100, 50, 100, 50, 100]);
+            floatNumber('+₩' + gameState.dailyQuest.reward.toLocaleString(), window.innerWidth / 2, window.innerHeight / 2, '#FFD700');
+            createParticles(window.innerWidth / 2, window.innerHeight / 2, '🎁', 20);
+
+            updateUI();
+            updateDailyQuest();
+            save();
+        }
+
+        function updateAchievements() {
+            const container = document.getElementById('achievement-list');
+            container.innerHTML = '<div style="text-align: center; padding: 20px;">업적 시스템 준비 중...</div>';
+        }
+
+        function updateStats() {
+            const container = document.getElementById('stats-display');
+            container.innerHTML = `
+                <div style="padding: 16px; line-height: 1.8;">
+                    <div>💰 총 수익: ₩${gameState.stats.totalEarnings.toLocaleString()}</div>
+                    <div>🍫 총 제작: ${gameState.stats.totalChocolates}개</div>
+                    <div>⭐ 퍼펙트: ${gameState.stats.perfectMakes}회</div>
+                    <div>🔥 최고 콤보: ${gameState.maxCombo}x</div>
+                    <div>📖 레시피: ${gameState.stats.recipesDiscovered}개</div>
+                </div>
+            `;
+        }
+
+        // ============================================================================
+        // ENERGY REGEN
+        // ============================================================================
+        function updateEnergy() {
+            const now = Date.now();
+            const elapsed = now - gameState.lastEnergyRegen;
+
+            if (elapsed >= gameState.energyRegenRate && gameState.energy < gameState.maxEnergy) {
+                gameState.energy++;
+                gameState.lastEnergyRegen = now;
+                updateUI();
+            }
+        }
+
+        // ============================================================================
+        // SAVE/LOAD
+        // ============================================================================
+        function save() {
+            try {
+                localStorage.setItem('dubaiCookieTycoon', JSON.stringify(gameState));
+            } catch (e) {
+                console.error('Save failed:', e);
+            }
+        }
+
+        function load() {
+            try {
+                const saved = localStorage.getItem('dubaiCookieTycoon');
+                if (saved) {
+                    const data = JSON.parse(saved);
+                    Object.assign(gameState, data);
+                }
+            } catch (e) {
+                console.error('Load failed:', e);
+            }
+        }
+
+        // ============================================================================
+        // GAME LOOP
+        // ============================================================================
+        function gameLoop() {
+            updateEnergy();
+            renderer.clear('char');
+            renderer.clear('effect');
+
+            // Render NPCs (placeholder)
+            renderer.drawPixelChar(100, 100, '👨‍🍳', 1);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        // ============================================================================
+        // INITIALIZATION
+        // ============================================================================
+        window.addEventListener('load', () => {
+            load();
+            updateUI();
+
+            setTimeout(() => {
+                document.getElementById('loading').classList.add('hidden');
+                gameLoop();
+            }, 2000);
+
+            // Auto-save every 30 seconds
+            setInterval(save, 30000);
+
+            // Energy regen check every second
+            setInterval(updateEnergy, 1000);
+        });
+
+        // Prevent context menu
+        document.addEventListener('contextmenu', e => e.preventDefault());
+
+        // Prevent zoom
+        let lastTouch = 0;
+        document.addEventListener('touchend', e => {
+            const now = Date.now();
+            if (now - lastTouch <= 300) e.preventDefault();
+            lastTouch = now;
+        }, { passive: false });
+    </script>
+</body>
+</html>
