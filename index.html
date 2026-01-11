@@ -370,6 +370,19 @@
             opacity: 0.5;
         }
 
+        .prestige-btn {
+            transition: all 0.2s;
+        }
+
+        .prestige-btn:active {
+            transform: scale(0.95);
+        }
+
+        .prestige-btn.locked {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
         .upgrade-header {
             display: flex;
             justify-content: space-between;
@@ -828,6 +841,23 @@
 
             <!-- Tab 3: Upgrades -->
             <div id="tab-3" class="tab-content">
+                <!-- Prestige Section -->
+                <div id="prestige-container" style="padding: 16px; margin: 16px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 12px; box-shadow: 0 4px 15px rgba(102,126,234,0.4);">
+                    <div style="font-size: 20px; font-weight: bold; color: white; margin-bottom: 12px; text-align: center;">
+                        👑 프레스티지 시스템
+                    </div>
+                    <div style="display: flex; justify-content: space-around; margin-bottom: 12px; font-size: 14px; color: white;">
+                        <div>💎 토큰: <span id="prestige-tokens">0</span></div>
+                        <div>🏆 프레스티지 레벨: <span id="prestige-level">0</span></div>
+                    </div>
+                    <button id="prestige-btn" class="prestige-btn" onclick="doPrestige()" style="width: 100%; padding: 12px; background: rgba(255,255,255,0.2); border: 2px solid white; border-radius: 8px; color: white; font-weight: bold; font-size: 16px; cursor: pointer; margin-bottom: 12px;">
+                        🔄 프레스티지
+                    </button>
+                    <div style="font-size: 18px; font-weight: bold; color: white; margin: 16px 0 8px 0;">💎 프레스티지 업그레이드</div>
+                    <div id="prestige-upgrade-list" style="display: flex; flex-direction: column; gap: 8px;"></div>
+                </div>
+
+                <div style="padding: 0 16px; margin: 12px 16px; font-size: 18px; font-weight: bold; color: var(--gold);">⚡ 일반 업그레이드</div>
                 <div class="upgrade-list" id="upgrade-list"></div>
 
                 <!-- Daily Missions -->
@@ -1060,7 +1090,8 @@
             prestige: {
                 level: 0,
                 tokens: 0,
-                totalTokens: 0
+                totalTokens: 0,
+                upgrades: {}
             },
 
             season: {
@@ -1109,6 +1140,11 @@
 
         // Initialize upgrades
         CONFIG.upgrades.forEach(u => state.upgrades[u.id] = 0);
+
+        // Initialize prestige upgrades
+        PRESTIGE_UPGRADES.forEach(u => {
+            if (!state.prestige.upgrades[u.id]) state.prestige.upgrades[u.id] = 0;
+        });
 
         // Achievements
         const ACHIEVEMENTS = [
@@ -1187,6 +1223,20 @@
             { id: 'combo_10', name: '10 콤보', desc: '10 콤보 달성', check: () => state.stats.combo >= 10, reward: 10000 },
             { id: 'happy_10', name: '손님 10명 만족', desc: '손님 10명 만족시키기', check: () => state.stats.dailyHappy >= 10, reward: 8000 },
             { id: 'no_angry', name: '완벽한 서비스', desc: '화난 손님 0명', check: () => state.stats.dailyAngry === 0 && state.stats.dailySales > 0, reward: 20000 }
+        ];
+
+        // Prestige Upgrades
+        const PRESTIGE_UPGRADES = [
+            { id: 'prod_boost', name: '⚡ 생산력 강화', desc: '모든 생산 +20%/레벨', cost: 1, max: 5, effect: 'production' },
+            { id: 'money_boost', name: '💰 수익 강화', desc: '모든 수익 +30%/레벨', cost: 1, max: 5, effect: 'money' },
+            { id: 'exp_boost', name: '📚 경험치 강화', desc: '경험치 획득 +50%/레벨', cost: 1, max: 3, effect: 'exp' },
+            { id: 'start_money', name: '🎁 시작 자금', desc: '₩10,000/레벨로 시작', cost: 2, max: 10, effect: 'startMoney' },
+            { id: 'start_level', name: '🌟 시작 레벨', desc: '+5레벨로 시작/레벨', cost: 3, max: 5, effect: 'startLevel' },
+            { id: 'auto_unlock', name: '🤖 자동화 잠금해제', desc: '시작 시 기본 자동화 해금', cost: 5, max: 1, effect: 'autoUnlock' },
+            { id: 'quality_master', name: '⭐ 품질 마스터', desc: '평판 획득 2배/레벨', cost: 2, max: 3, effect: 'quality' },
+            { id: 'lucky_start', name: '🍀 행운의 시작', desc: '모든 레시피 시작 시 해금', cost: 10, max: 1, effect: 'allRecipes' },
+            { id: 'token_generator', name: '💎 토큰 생성기', desc: '판매 100개당 토큰 +1', cost: 15, max: 1, effect: 'tokenGen' },
+            { id: 'ultimate_power', name: '👑 궁극의 힘', desc: '모든 능력치 +100%', cost: 50, max: 1, effect: 'ultimate' }
         ];
 
         // ============================================================================
@@ -1736,13 +1786,18 @@
                 const seasonBonus = getSeasonBonus();
                 const recipeBonus = getRecipeBonus();
 
+                // Get prestige bonuses
+                const moneyBonus = getPrestigeBonus('money');
+                const qualityBonus = getPrestigeBonus('quality');
+                const expBonus = getPrestigeBonus('exp');
+
                 const basePrice = CONFIG.balance.chocolatePrice;
-                const price = Math.floor(basePrice * state.level * state.priceMultiplier * tierPriceBonus * (customer.tipMultiplier || 1) * state.goldenTouchMultiplier * seasonBonus.price * recipeBonus);
-                const rep = Math.floor(10 * state.qualityMultiplier * (tier.bonuses.qualityBonus || 1) * seasonBonus.quality);
+                const price = Math.floor(basePrice * state.level * state.priceMultiplier * tierPriceBonus * (customer.tipMultiplier || 1) * state.goldenTouchMultiplier * seasonBonus.price * recipeBonus * moneyBonus);
+                const rep = Math.floor(10 * state.qualityMultiplier * (tier.bonuses.qualityBonus || 1) * seasonBonus.quality * qualityBonus);
 
                 state.money += price;
                 state.reputation += rep;
-                state.exp += price * 0.1 * state.expMultiplier;
+                state.exp += Math.floor(price * 0.1 * state.expMultiplier * expBonus);
 
                 // Update stats
                 state.stats.totalSales++;
@@ -1751,6 +1806,14 @@
                 state.stats.dailySales++;
                 state.stats.dailyEarnings += price;
                 state.stats.dailyHappy++;
+
+                // Token generator prestige upgrade
+                if (state.prestige.upgrades.token_generator > 0) {
+                    if (state.stats.totalSales % 100 === 0) {
+                        state.prestige.tokens++;
+                        showEvent('💎 토큰 생성기: 토큰 +1!');
+                    }
+                }
 
                 customer.satisfied = true;
                 audio.play('coin');
@@ -1823,6 +1886,228 @@
             else if (effect === 'luckyCharm') state.luckyCharmBonus += 0.5;
         }
 
+        // ============================================================================
+        // PRESTIGE SYSTEM
+        // ============================================================================
+        function getPrestigeBonus(type) {
+            let bonus = 0;
+            PRESTIGE_UPGRADES.forEach(upgrade => {
+                const level = state.prestige.upgrades[upgrade.id] || 0;
+                if (level > 0) {
+                    if (type === 'production' && upgrade.effect === 'production') {
+                        bonus += 0.2 * level;
+                    } else if (type === 'money' && upgrade.effect === 'money') {
+                        bonus += 0.3 * level;
+                    } else if (type === 'exp' && upgrade.effect === 'exp') {
+                        bonus += 0.5 * level;
+                    } else if (type === 'quality' && upgrade.effect === 'quality') {
+                        bonus += 1.0 * level;
+                    } else if (upgrade.effect === 'ultimate' && level > 0) {
+                        bonus += 1.0;
+                    }
+                }
+            });
+            return 1 + bonus;
+        }
+
+        function calculatePrestigeTokens() {
+            // Base tokens from level and reputation
+            const levelTokens = Math.floor(state.level / 10);
+            const repTokens = Math.floor(state.reputation / 500);
+            const salesTokens = Math.floor(state.stats.totalSales / 1000);
+
+            return Math.max(1, levelTokens + repTokens + salesTokens);
+        }
+
+        function canPrestige() {
+            return state.level >= 20 || state.reputation >= 500 || state.stats.totalSales >= 500;
+        }
+
+        function doPrestige() {
+            if (!canPrestige()) {
+                showEvent('❌ 프레스티지 불가능! (레벨 20, 평판 500, 또는 판매 500개 필요)');
+                return;
+            }
+
+            const tokens = calculatePrestigeTokens();
+
+            if (!confirm(`정말 프레스티지하시겠습니까?\n\n💎 획득 토큰: ${tokens}개\n\n⚠️ 레벨, 돈, 업그레이드, 재료가 모두 초기화됩니다.\n프레스티지 업그레이드와 업적은 유지됩니다.`)) {
+                return;
+            }
+
+            // Grant tokens
+            state.prestige.tokens += tokens;
+            state.prestige.totalTokens += tokens;
+            state.prestige.level++;
+
+            // Get start bonuses from prestige upgrades
+            const startMoney = (state.prestige.upgrades.start_money || 0) * 10000;
+            const startLevel = (state.prestige.upgrades.start_level || 0) * 5;
+            const autoUnlock = state.prestige.upgrades.auto_unlock || 0;
+            const allRecipes = state.prestige.upgrades.lucky_start || 0;
+
+            // Reset game state
+            state.money = startMoney;
+            state.level = Math.max(1, startLevel);
+            state.exp = 0;
+            state.expNext = 1000;
+            state.reputation = 0;
+            state.reputationTier = 'none';
+            state.resources = { kataifi: 0, pistachio: 0, spread: 0, dough: 0, finished: 0 };
+            state.stats = {
+                totalSales: 0,
+                totalEarnings: 0,
+                happyCustomers: 0,
+                angryCustomers: 0,
+                minigamesPlayed: 0,
+                perfectMinigames: 0,
+                combo: 0,
+                maxCombo: 0,
+                dailySales: 0,
+                dailyEarnings: 0,
+                dailyMinigames: 0,
+                dailyPerfects: 0,
+                dailyHappy: 0,
+                dailyAngry: 0
+            };
+            state.upgrades = {};
+            CONFIG.upgrades.forEach(u => state.upgrades[u.id] = 0);
+
+            state.customers = [];
+            state.autoProduction = { kataifi: 0, pistachio: 0, spread: 0, dough: 0, assembly: 0 };
+            state.clickPower = 1;
+            state.priceMultiplier = 1;
+            state.qualityMultiplier = 1;
+            state.efficiencyMultiplier = 1;
+            state.goldenTouchMultiplier = 1;
+            state.comboMasterBonus = 0;
+            state.expMultiplier = 1;
+            state.luckyCharmBonus = 0;
+            state.events = [];
+            state.currentEvent = null;
+
+            // Apply auto unlock bonus
+            if (autoUnlock > 0) {
+                state.autoProduction.kataifi = 1;
+                state.autoProduction.pistachio = 1;
+                state.autoProduction.dough = 1;
+                state.upgrades.autoKataifi = 1;
+                state.upgrades.autoPistachio = 1;
+                state.upgrades.autoDough = 1;
+            }
+
+            // Apply all recipes unlock
+            if (allRecipes > 0) {
+                state.recipes.unlocked = ['classic', 'royal', 'ruby', 'galaxy', 'legendary'];
+                state.recipes.discovered = 4;
+            } else {
+                state.recipes.unlocked = ['classic'];
+                state.recipes.discovered = 0;
+            }
+
+            // Achievements and tutorial are kept
+            // Season is kept
+            // Daily missions reset
+            state.dailyMission = {
+                date: new Date().toDateString(),
+                missions: [],
+                completed: [],
+                completedTotal: 0
+            };
+
+            save();
+            updateUI();
+            updateUpgradeList();
+            updateReputationTier();
+            updateChocolateDisplay();
+            generateDailyMissions();
+
+            audio.play('levelup');
+            screenShake(30);
+            showAchievement(`🎊 프레스티지 ${state.prestige.level}!\n💎 ${tokens}개 토큰 획득!`);
+            createParticles(window.innerWidth / 2, window.innerHeight / 2, '💎', 30);
+        }
+
+        function buyPrestigeUpgrade(upgradeId) {
+            const upgrade = PRESTIGE_UPGRADES.find(u => u.id === upgradeId);
+            if (!upgrade) return;
+
+            const currentLevel = state.prestige.upgrades[upgradeId] || 0;
+
+            if (currentLevel >= upgrade.max) {
+                showEvent('✅ 이미 최대 레벨입니다!');
+                return;
+            }
+
+            if (state.prestige.tokens < upgrade.cost) {
+                showEvent('❌ 토큰이 부족합니다!');
+                return;
+            }
+
+            state.prestige.tokens -= upgrade.cost;
+            state.prestige.upgrades[upgradeId] = currentLevel + 1;
+
+            audio.play('coin');
+            save();
+            updatePrestigeUI();
+            updateUI();
+            showEvent(`✨ ${upgrade.name} 구매 완료!`);
+        }
+
+        function updatePrestigeUI() {
+            const container = document.getElementById('prestige-container');
+            if (!container) return;
+
+            const canPres = canPrestige();
+            const tokens = calculatePrestigeTokens();
+
+            // Update prestige button
+            const btn = document.getElementById('prestige-btn');
+            if (btn) {
+                btn.className = `prestige-btn ${canPres ? '' : 'locked'}`;
+                btn.innerHTML = `
+                    🔄 프레스티지 ${state.prestige.level}
+                    <div style="font-size: 12px; margin-top: 4px;">
+                        ${canPres ? `💎 ${tokens}개 토큰 획득` : '레벨 20 필요'}
+                    </div>
+                `;
+            }
+
+            // Update token display
+            const tokenDisplay = document.getElementById('prestige-tokens');
+            if (tokenDisplay) {
+                tokenDisplay.textContent = state.prestige.tokens;
+            }
+
+            // Update prestige upgrade list
+            const list = document.getElementById('prestige-upgrade-list');
+            if (!list) return;
+
+            list.innerHTML = '';
+            PRESTIGE_UPGRADES.forEach(upgrade => {
+                const level = state.prestige.upgrades[upgrade.id] || 0;
+                const maxed = level >= upgrade.max;
+                const canAfford = state.prestige.tokens >= upgrade.cost && !maxed;
+
+                const div = document.createElement('div');
+                div.className = `upgrade-item ${canAfford ? '' : 'locked'}`;
+                div.innerHTML = `
+                    <div class="upgrade-header">
+                        <div class="upgrade-name">${upgrade.name}</div>
+                        <div class="upgrade-level">${level}/${upgrade.max}</div>
+                    </div>
+                    <div class="upgrade-desc">${upgrade.desc}</div>
+                    <div class="upgrade-cost">
+                        ${maxed ? '✅ MAX' : `💎 ${upgrade.cost} 토큰`}
+                    </div>
+                `;
+                if (!maxed) {
+                    div.onclick = () => buyPrestigeUpgrade(upgrade.id);
+                }
+                list.appendChild(div);
+            });
+        }
+
         function updateUpgradeList() {
             const list = document.getElementById('upgrade-list');
             list.innerHTML = '';
@@ -1851,15 +2136,18 @@
         // AUTO PRODUCTION
         // ============================================================================
         setInterval(() => {
+            // Apply prestige production bonus
+            const prodBonus = getPrestigeBonus('production');
+
             // Auto harvest
             if (state.autoProduction.kataifi > 0) {
-                state.resources.kataifi += state.autoProduction.kataifi;
+                state.resources.kataifi += Math.floor(state.autoProduction.kataifi * prodBonus);
             }
             if (state.autoProduction.pistachio > 0) {
-                state.resources.pistachio += state.autoProduction.pistachio;
+                state.resources.pistachio += Math.floor(state.autoProduction.pistachio * prodBonus);
             }
             if (state.autoProduction.dough > 0) {
-                state.resources.dough += state.autoProduction.dough;
+                state.resources.dough += Math.floor(state.autoProduction.dough * prodBonus);
             }
 
             // Auto spread
@@ -2285,6 +2573,14 @@
             document.getElementById('stat-max-combo').textContent = state.stats.maxCombo;
             document.getElementById('stat-achievements').textContent = state.unlockedAchievements.length;
 
+            // Prestige info
+            const prestigeTokensEl = document.getElementById('prestige-tokens');
+            const prestigeLevelEl = document.getElementById('prestige-level');
+            if (prestigeTokensEl) prestigeTokensEl.textContent = state.prestige.tokens;
+            if (prestigeLevelEl) prestigeLevelEl.textContent = state.prestige.level;
+
+            updatePrestigeUI();
+
             // Assembly button
             const req = CONFIG.balance.assemblyRequires;
             const mult = state.efficiencyMultiplier;
@@ -2513,7 +2809,11 @@
                     if (!data.unlockedAchievements) data.unlockedAchievements = [];
                     if (!data.tutorial) data.tutorial = { completed: false, step: 0 };
                     if (!data.reputationTier) data.reputationTier = 'none';
-                    if (!data.prestige) data.prestige = { level: 0, tokens: 0, totalTokens: 0 };
+                    if (!data.prestige) data.prestige = { level: 0, tokens: 0, totalTokens: 0, upgrades: {} };
+                    if (!data.prestige.upgrades) data.prestige.upgrades = {};
+                    PRESTIGE_UPGRADES.forEach(u => {
+                        if (!data.prestige.upgrades[u.id]) data.prestige.upgrades[u.id] = 0;
+                    });
                     if (!data.season) data.season = { current: 'spring', startDate: Date.now(), duration: 604800000, experienced: 1 };
                     if (!data.season.experienced) data.season.experienced = 1;
                     if (!data.dailyMission) data.dailyMission = { date: new Date().toDateString(), missions: [], completed: [], completedTotal: 0 };
@@ -2560,6 +2860,7 @@
         updateUI();
         updateUpgradeList();
         updateReputationTier();
+        updatePrestigeUI();
 
         // Apply season theme
         const season = SEASONS[state.season.current];
