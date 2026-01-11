@@ -319,6 +319,18 @@
             background: rgba(255,255,255,0.1);
         }
 
+        .customer-vip {
+            border: 3px solid #FFD700;
+            background: linear-gradient(135deg, rgba(255,215,0,0.2), rgba(255,140,0,0.2));
+            box-shadow: 0 0 20px rgba(255,215,0,0.4);
+            animation: vipPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes vipPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(255,215,0,0.4); }
+            50% { box-shadow: 0 0 30px rgba(255,215,0,0.8); }
+        }
+
         .customer-emoji {
             font-size: 40px;
         }
@@ -892,10 +904,12 @@
                         <div>🍫 총 판매: <span id="stat-sales">0</span>개</div>
                         <div>😊 만족한 손님: <span id="stat-happy">0</span>명</div>
                         <div>😠 화난 손님: <span id="stat-angry">0</span>명</div>
+                        <div>✨ VIP 서빙: <span id="stat-vip">0</span>명</div>
+                        <div>📦 대량 주문: <span id="stat-bulk">0</span>회</div>
                         <div>🎮 미니게임 플레이: <span id="stat-minigames">0</span>회</div>
                         <div>⭐ 퍼펙트 달성: <span id="stat-perfect">0</span>회</div>
                         <div>🔥 최대 콤보: <span id="stat-max-combo">0</span>x</div>
-                        <div>🏆 업적 달성: <span id="stat-achievements">0</span>/<span id="stat-total-achievements">22</span></div>
+                        <div>🏆 업적 달성: <span id="stat-achievements">0</span>/<span id="stat-total-achievements">26</span></div>
                     </div>
                 </div>
             </div>
@@ -1051,7 +1065,9 @@
                 dailyMinigames: 0,
                 dailyPerfects: 0,
                 dailyHappy: 0,
-                dailyAngry: 0
+                dailyAngry: 0,
+                vipServed: 0,
+                bulkOrders: 0
             },
 
             upgrades: {},
@@ -1169,7 +1185,11 @@
             { id: 'recipe_3', name: '레시피 컬렉터', desc: '3개 레시피 발견', check: () => state.recipes.unlocked.length >= 3, reward: 20000 },
             { id: 'recipe_all', name: '마스터 셰프', desc: '모든 레시피 발견', check: () => state.recipes.unlocked.length >= 5, reward: 100000 },
             { id: 'mission_10', name: '미션 마스터', desc: '일일 미션 10회 완료', check: () => state.dailyMission.completedTotal >= 10, reward: 30000 },
-            { id: 'season_1', name: '사계절 마스터', desc: '4개 시즌 모두 경험', check: () => state.season.experienced >= 4, reward: 40000 }
+            { id: 'season_1', name: '사계절 마스터', desc: '4개 시즌 모두 경험', check: () => state.season.experienced >= 4, reward: 40000 },
+            { id: 'vip_1', name: 'VIP 서비스', desc: 'VIP 손님 첫 서빙', check: () => state.stats.vipServed >= 1, reward: 15000 },
+            { id: 'vip_10', name: 'VIP 전문가', desc: 'VIP 손님 10명 서빙', check: () => state.stats.vipServed >= 10, reward: 50000 },
+            { id: 'vip_50', name: 'VIP 매니저', desc: 'VIP 손님 50명 서빙', check: () => state.stats.vipServed >= 50, reward: 200000 },
+            { id: 'bulk_10', name: '대량 주문 처리', desc: '대량 주문 10회 완료', check: () => state.stats.bulkOrders >= 10, reward: 40000 }
         ];
 
         // Customer personalities
@@ -1182,6 +1202,15 @@
             { emoji: '😋', name: ['문재현', '황미소'], patience: 0.8, tip: 1.1, dialogue: '배고파요!' },
             { emoji: '🤗', name: ['송하늘', '조은별'], patience: 1.5, tip: 1.6, dialogue: '달콤한 게 최고~' },
             { emoji: '😍', name: ['배민준', '오세아'], patience: 1.0, tip: 2.0, dialogue: '사랑해요 피스타치오!' }
+        ];
+
+        // VIP Customer Types (rare, high-value customers)
+        const VIP_CUSTOMER_TYPES = [
+            { emoji: '👑', name: ['왕세자', '공주님'], patience: 2.0, tip: 5.0, dialogue: '왕실 만찬에 쓸 거야!', bulkOrder: [5, 10], isVIP: true, vipTier: 'royal' },
+            { emoji: '💎', name: ['재벌 회장', '상속녀'], patience: 1.5, tip: 4.0, dialogue: '돈은 얼마든지 있어요!', bulkOrder: [3, 8], isVIP: true, vipTier: 'diamond' },
+            { emoji: '🌟', name: ['톱스타', '유명 셰프'], patience: 1.0, tip: 3.5, dialogue: '내 팬들에게 선물할 거예요!', bulkOrder: [5, 15], isVIP: true, vipTier: 'celebrity' },
+            { emoji: '🎭', name: ['아랍 왕족', '석유왕'], patience: 2.5, tip: 8.0, dialogue: '두바이에서 왔습니다!', bulkOrder: [10, 20], isVIP: true, vipTier: 'sheikh' },
+            { emoji: '🏆', name: ['월드클래스 선수', '올림픽 금메달리스트'], patience: 1.2, tip: 3.0, dialogue: '승리의 맛!', bulkOrder: [3, 7], isVIP: true, vipTier: 'champion' }
         ];
 
         // Reputation tiers
@@ -1775,8 +1804,10 @@
         }
 
         function sellChocolate(customer) {
-            if (state.resources.finished > 0) {
-                state.resources.finished--;
+            const requiredAmount = customer.bulkOrder || 1;
+
+            if (state.resources.finished >= requiredAmount) {
+                state.resources.finished -= requiredAmount;
 
                 // Get tier bonuses
                 const tier = REP_TIERS.find(t => t.name === state.reputationTier) || REP_TIERS[0];
@@ -1792,20 +1823,27 @@
                 const expBonus = getPrestigeBonus('exp');
 
                 const basePrice = CONFIG.balance.chocolatePrice;
-                const price = Math.floor(basePrice * state.level * state.priceMultiplier * tierPriceBonus * (customer.tipMultiplier || 1) * state.goldenTouchMultiplier * seasonBonus.price * recipeBonus * moneyBonus);
-                const rep = Math.floor(10 * state.qualityMultiplier * (tier.bonuses.qualityBonus || 1) * seasonBonus.quality * qualityBonus);
+                const bulkBonus = customer.isVIP ? 1.5 : 1; // VIP bulk order bonus
+                const price = Math.floor(basePrice * state.level * state.priceMultiplier * tierPriceBonus * (customer.tipMultiplier || 1) * state.goldenTouchMultiplier * seasonBonus.price * recipeBonus * moneyBonus * requiredAmount * bulkBonus);
+                const rep = Math.floor(10 * state.qualityMultiplier * (tier.bonuses.qualityBonus || 1) * seasonBonus.quality * qualityBonus * (customer.isVIP ? 2 : 1));
 
                 state.money += price;
                 state.reputation += rep;
                 state.exp += Math.floor(price * 0.1 * state.expMultiplier * expBonus);
 
                 // Update stats
-                state.stats.totalSales++;
+                state.stats.totalSales += requiredAmount;
                 state.stats.totalEarnings += price;
                 state.stats.happyCustomers++;
-                state.stats.dailySales++;
+                state.stats.dailySales += requiredAmount;
                 state.stats.dailyEarnings += price;
                 state.stats.dailyHappy++;
+
+                // VIP stats
+                if (customer.isVIP) {
+                    state.stats.vipServed++;
+                    state.stats.bulkOrders++;
+                }
 
                 // Token generator prestige upgrade
                 if (state.prestige.upgrades.token_generator > 0) {
@@ -2195,8 +2233,21 @@
             const interval = CONFIG.balance.customerSpawnInterval / speedBonus;
 
             if (Math.random() < 1000 / interval && state.customers.length < 5) {
-                const type = CUSTOMER_TYPES[Math.floor(Math.random() * CUSTOMER_TYPES.length)];
-                const name = type.name[Math.floor(Math.random() * type.name.length)];
+                // VIP spawn chance based on reputation
+                const vipChance = Math.min(0.3, state.reputation / 5000); // Max 30% at 1500+ reputation
+                const isVIP = Math.random() < vipChance;
+
+                let type, name, bulkOrder = 1;
+
+                if (isVIP) {
+                    type = VIP_CUSTOMER_TYPES[Math.floor(Math.random() * VIP_CUSTOMER_TYPES.length)];
+                    name = type.name[Math.floor(Math.random() * type.name.length)];
+                    const [min, max] = type.bulkOrder;
+                    bulkOrder = Math.floor(Math.random() * (max - min + 1)) + min;
+                } else {
+                    type = CUSTOMER_TYPES[Math.floor(Math.random() * CUSTOMER_TYPES.length)];
+                    name = type.name[Math.floor(Math.random() * type.name.length)];
+                }
 
                 state.customers.push({
                     name: name,
@@ -2207,8 +2258,17 @@
                     tipMultiplier: type.tip,
                     satisfied: false,
                     x: Math.random() * 300 + 50,
-                    y: Math.random() * 100 + 100
+                    y: Math.random() * 100 + 100,
+                    isVIP: isVIP,
+                    vipTier: type.vipTier || null,
+                    bulkOrder: bulkOrder
                 });
+
+                if (isVIP) {
+                    showEvent(`✨ VIP 손님 도착! ${name}님이 ${bulkOrder}개 주문!`);
+                    audio.play('levelup');
+                }
+
                 updateCustomerUI();
             }
         }, 100);
@@ -2237,14 +2297,17 @@
             state.customers.forEach(c => {
                 const pct = Math.max(0, c.patience / c.maxPatience * 100);
                 const displayEmoji = c.satisfied ? '😊' : (pct < 30 ? '😠' : pct < 60 ? '😐' : c.emoji);
+                const vipClass = c.isVIP ? 'customer-vip' : '';
+                const bulkText = c.bulkOrder > 1 ? `<span style="color: #FFD700; font-weight: bold;">x${c.bulkOrder}개 주문</span>` : '';
 
                 const div = document.createElement('div');
-                div.className = 'customer';
+                div.className = `customer ${vipClass}`;
                 div.innerHTML = `
                     <div class="customer-emoji">${displayEmoji}</div>
                     <div class="customer-info">
-                        <div class="customer-name">${c.name}</div>
+                        <div class="customer-name">${c.isVIP ? '✨ ' : ''}${c.name}${c.isVIP ? ' ✨' : ''}</div>
                         <div style="font-size: 11px; color: rgba(255,255,255,0.6); margin-bottom: 2px;">${c.dialogue}</div>
+                        ${bulkText ? `<div style="font-size: 12px; margin-bottom: 2px;">${bulkText}</div>` : ''}
                         <div class="patience-bar">
                             <div class="patience-fill" style="width: ${pct}%"></div>
                         </div>
@@ -2568,6 +2631,8 @@
             document.getElementById('stat-sales').textContent = state.stats.totalSales;
             document.getElementById('stat-happy').textContent = state.stats.happyCustomers;
             document.getElementById('stat-angry').textContent = state.stats.angryCustomers;
+            document.getElementById('stat-vip').textContent = state.stats.vipServed;
+            document.getElementById('stat-bulk').textContent = state.stats.bulkOrders;
             document.getElementById('stat-minigames').textContent = state.stats.minigamesPlayed;
             document.getElementById('stat-perfect').textContent = state.stats.perfectMinigames;
             document.getElementById('stat-max-combo').textContent = state.stats.maxCombo;
@@ -2806,6 +2871,8 @@
                     if (!data.stats.dailyPerfects) data.stats.dailyPerfects = 0;
                     if (!data.stats.dailyHappy) data.stats.dailyHappy = 0;
                     if (!data.stats.dailyAngry) data.stats.dailyAngry = 0;
+                    if (!data.stats.vipServed) data.stats.vipServed = 0;
+                    if (!data.stats.bulkOrders) data.stats.bulkOrders = 0;
                     if (!data.unlockedAchievements) data.unlockedAchievements = [];
                     if (!data.tutorial) data.tutorial = { completed: false, step: 0 };
                     if (!data.reputationTier) data.reputationTier = 'none';
