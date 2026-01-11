@@ -1053,36 +1053,66 @@
         // ============================================================================
         class CanvasRenderer {
             constructor() {
-                this.bgCanvas = document.getElementById('bg-canvas');
-                this.furnitureCanvas = document.getElementById('furniture-canvas');
-                this.charCanvas = document.getElementById('char-canvas');
-                this.effectCanvas = document.getElementById('effect-canvas');
-                this.uiCanvas = document.getElementById('ui-canvas');
+                this.bgCanvas = null;
+                this.furnitureCanvas = null;
+                this.charCanvas = null;
+                this.effectCanvas = null;
+                this.uiCanvas = null;
+                this.initialized = false;
+            }
 
-                this.bgCtx = this.bgCanvas.getContext('2d');
-                this.furnitureCtx = this.furnitureCanvas.getContext('2d');
-                this.charCtx = this.charCanvas.getContext('2d');
-                this.effectCtx = this.effectCanvas.getContext('2d');
-                this.uiCtx = this.uiCanvas.getContext('2d');
+            init() {
+                try {
+                    this.bgCanvas = document.getElementById('bg-canvas');
+                    this.furnitureCanvas = document.getElementById('furniture-canvas');
+                    this.charCanvas = document.getElementById('char-canvas');
+                    this.effectCanvas = document.getElementById('effect-canvas');
+                    this.uiCanvas = document.getElementById('ui-canvas');
 
-                this.resize();
-                window.addEventListener('resize', () => this.resize());
+                    if (!this.bgCanvas) {
+                        console.error('Canvas elements not found!');
+                        return false;
+                    }
+
+                    this.bgCtx = this.bgCanvas.getContext('2d');
+                    this.furnitureCtx = this.furnitureCanvas.getContext('2d');
+                    this.charCtx = this.charCanvas.getContext('2d');
+                    this.effectCtx = this.effectCanvas.getContext('2d');
+                    this.uiCtx = this.uiCanvas.getContext('2d');
+
+                    this.resize();
+                    window.addEventListener('resize', () => this.resize());
+
+                    this.initialized = true;
+                    return true;
+                } catch (e) {
+                    console.error('Canvas init error:', e);
+                    return false;
+                }
             }
 
             resize() {
+                if (!this.initialized) return;
+
                 const container = document.querySelector('.canvas-container');
+                if (!container) return;
+
                 const width = container.clientWidth;
                 const height = container.clientHeight;
 
                 [this.bgCanvas, this.furnitureCanvas, this.charCanvas, this.effectCanvas, this.uiCanvas].forEach(canvas => {
-                    canvas.width = width;
-                    canvas.height = height;
+                    if (canvas) {
+                        canvas.width = width;
+                        canvas.height = height;
+                    }
                 });
 
                 this.renderBackground();
             }
 
             renderBackground() {
+                if (!this.initialized || !this.bgCtx) return;
+
                 const ctx = this.bgCtx;
                 const w = this.bgCanvas.width;
                 const h = this.bgCanvas.height;
@@ -1105,11 +1135,17 @@
             }
 
             clear(layer) {
+                if (!this.initialized) return;
+
                 const ctx = layer === 'char' ? this.charCtx : this.effectCtx;
-                ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                if (ctx && ctx.canvas) {
+                    ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+                }
             }
 
             drawPixelChar(x, y, emoji, scale = 1) {
+                if (!this.initialized || !this.charCtx) return;
+
                 const ctx = this.charCtx;
                 ctx.save();
                 ctx.font = `${32 * scale}px Arial`;
@@ -1838,19 +1874,46 @@
         // INITIALIZATION
         // ============================================================================
         window.addEventListener('load', () => {
-            load();
-            updateUI();
+            try {
+                console.log('🍫 게임 초기화 시작...');
 
-            setTimeout(() => {
-                document.getElementById('loading').classList.add('hidden');
-                gameLoop();
-            }, 2000);
+                // Canvas 초기화
+                if (!renderer.init()) {
+                    console.error('Canvas 초기화 실패!');
+                    alert('게임 로딩 실패! 페이지를 새로고침해주세요.');
+                    return;
+                }
 
-            // Auto-save every 30 seconds
-            setInterval(save, 30000);
+                console.log('✅ Canvas 초기화 완료');
 
-            // Energy regen check every second
-            setInterval(updateEnergy, 1000);
+                // 게임 상태 로드
+                load();
+                updateUI();
+
+                console.log('✅ 게임 상태 로드 완료');
+
+                // 로딩 화면 숨기기
+                setTimeout(() => {
+                    const loading = document.getElementById('loading');
+                    if (loading) {
+                        loading.classList.add('hidden');
+                        console.log('✅ 로딩 화면 숨김');
+                    }
+                    gameLoop();
+                    console.log('✅ 게임 루프 시작');
+                }, 1500); // 2초 -> 1.5초로 단축
+
+                // Auto-save every 30 seconds
+                setInterval(save, 30000);
+
+                // Energy regen check every second
+                setInterval(updateEnergy, 1000);
+
+                console.log('🎮 게임 초기화 완료!');
+            } catch (e) {
+                console.error('초기화 오류:', e);
+                alert('게임 로딩 중 오류가 발생했습니다: ' + e.message);
+            }
         });
 
         // Prevent context menu
