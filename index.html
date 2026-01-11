@@ -727,6 +727,7 @@
             <div class="hud-item money">💰 <span id="money">0</span></div>
             <div class="hud-item">Lv. <span id="level">1</span></div>
             <div class="hud-item">⭐ <span id="reputation">0</span><span id="tier-badge"></span></div>
+            <div class="hud-item" id="combo-display" style="display: none; color: #ff8800;">🔥 <span id="combo">0</span>x</div>
         </div>
 
         <div class="tabs">
@@ -832,7 +833,8 @@
                         <div>😠 화난 손님: <span id="stat-angry">0</span>명</div>
                         <div>🎮 미니게임 플레이: <span id="stat-minigames">0</span>회</div>
                         <div>⭐ 퍼펙트 달성: <span id="stat-perfect">0</span>회</div>
-                        <div>🏆 업적 달성: <span id="stat-achievements">0</span>/<span id="stat-total-achievements">15</span></div>
+                        <div>🔥 최대 콤보: <span id="stat-max-combo">0</span>x</div>
+                        <div>🏆 업적 달성: <span id="stat-achievements">0</span>/<span id="stat-total-achievements">18</span></div>
                     </div>
                 </div>
             </div>
@@ -947,7 +949,11 @@
                 { id: 'price', name: '💰 판매가 상승', desc: '가격 +25%', baseCost: 3000, mult: 1.5, effect: 'priceBoost' },
                 { id: 'customerSpeed', name: '⚡ 손님 속도', desc: '스폰 속도 +20%', baseCost: 2500, mult: 1.4, effect: 'customerSpeed' },
                 { id: 'quality', name: '⭐ 품질 개선', desc: '평판 획득 +50%', baseCost: 5000, mult: 1.6, effect: 'qualityBoost' },
-                { id: 'efficiency', name: '⚙️ 효율 향상', desc: '재료 소모 -10%', baseCost: 8000, mult: 1.7, effect: 'efficiency' }
+                { id: 'efficiency', name: '⚙️ 효율 향상', desc: '재료 소모 -10%', baseCost: 8000, mult: 1.7, effect: 'efficiency' },
+                { id: 'goldenTouch', name: '🌟 황금 손길', desc: '모든 수익 +20%', baseCost: 15000, mult: 2.0, effect: 'goldenTouch' },
+                { id: 'comboMaster', name: '🔥 콤보 마스터', desc: '콤보 보너스 +1배', baseCost: 20000, mult: 2.2, effect: 'comboMaster' },
+                { id: 'expBoost', name: '📈 경험치 부스트', desc: '경험치 획득 +30%', baseCost: 12000, mult: 1.8, effect: 'expBoost' },
+                { id: 'luckyCharm', name: '🍀 행운의 부적', desc: '이벤트 확률 +50%', baseCost: 25000, mult: 2.5, effect: 'luckyCharm' }
             ]
         };
 
@@ -976,7 +982,9 @@
                 happyCustomers: 0,
                 angryCustomers: 0,
                 minigamesPlayed: 0,
-                perfectMinigames: 0
+                perfectMinigames: 0,
+                combo: 0,
+                maxCombo: 0
             },
 
             upgrades: {},
@@ -995,6 +1003,10 @@
             priceMultiplier: 1,
             qualityMultiplier: 1,
             efficiencyMultiplier: 1,
+            goldenTouchMultiplier: 1,
+            comboMasterBonus: 0,
+            expMultiplier: 1,
+            luckyCharmBonus: 0,
 
             lastSave: Date.now(),
             achievements: [],
@@ -1006,8 +1018,26 @@
             },
 
             events: [],
-            currentEvent: null
+            currentEvent: null,
+
+            prestige: {
+                level: 0,
+                tokens: 0,
+                totalTokens: 0
+            }
         };
+
+        // Combo multiplier bonus
+        function getComboMultiplier() {
+            const combo = state.stats.combo;
+            let baseMult = 1;
+            if (combo >= 20) baseMult = 5;
+            else if (combo >= 15) baseMult = 4;
+            else if (combo >= 10) baseMult = 3;
+            else if (combo >= 5) baseMult = 2;
+
+            return baseMult + state.comboMasterBonus;
+        }
 
         // Minigame state
         const minigameState = {
@@ -1040,7 +1070,10 @@
             { id: 'minigame_10', name: '게임 매니아', desc: '미니게임 10회', check: () => state.stats.minigamesPlayed >= 10, reward: 5000 },
             { id: 'perfect_5', name: '완벽주의자', desc: '퍼펙트 5회', check: () => state.stats.perfectMinigames >= 5, reward: 10000 },
             { id: 'reputation_100', name: '평판 상승', desc: '평판 100 달성', check: () => state.reputation >= 100, reward: 10000 },
-            { id: 'reputation_500', name: '명성 확립', desc: '평판 500 달성', check: () => state.reputation >= 500, reward: 50000 }
+            { id: 'reputation_500', name: '명성 확립', desc: '평판 500 달성', check: () => state.reputation >= 500, reward: 50000 },
+            { id: 'combo_5', name: '콤보 초보', desc: '5 콤보 달성', check: () => state.stats.maxCombo >= 5, reward: 5000 },
+            { id: 'combo_10', name: '콤보 마스터', desc: '10 콤보 달성', check: () => state.stats.maxCombo >= 10, reward: 15000 },
+            { id: 'combo_20', name: '콤보 신', desc: '20 콤보 달성', check: () => state.stats.maxCombo >= 20, reward: 50000 }
         ];
 
         // Customer personalities
@@ -1329,14 +1362,28 @@
                 if (minigameState.kataifiProgress >= 10) {
                     // Perfect!
                     clearInterval(minigameState.heatInterval);
-                    state.resources.kataifi += 10 * state.clickPower;
+
+                    // Combo system
+                    state.stats.combo++;
+                    state.stats.maxCombo = Math.max(state.stats.maxCombo, state.stats.combo);
+                    const comboMult = getComboMultiplier();
+
+                    state.resources.kataifi += 10 * state.clickPower * comboMult;
                     state.stats.minigamesPlayed++;
                     state.stats.perfectMinigames++;
                     audio.play('perfect');
                     screenShake(8);
                     closeMinigame();
-                    createParticles(window.innerWidth / 2, window.innerHeight / 2, '🌾', 10);
-                    floatNumber('PERFECT! 🌾', window.innerWidth / 2, window.innerHeight / 2, '#FFD700');
+                    createParticles(window.innerWidth / 2, window.innerHeight / 2, '🌾', 10 * comboMult);
+
+                    let msg = 'PERFECT! 🌾';
+                    if (state.stats.combo > 1) msg += ` ${state.stats.combo}x COMBO!`;
+                    floatNumber(msg, window.innerWidth / 2, window.innerHeight / 2, '#FFD700');
+
+                    if (state.stats.combo >= 5 && state.stats.combo % 5 === 0) {
+                        showEvent(`🔥 ${state.stats.combo} 콤보! ${comboMult}배 보너스 적용 중!`);
+                    }
+
                     checkAchievements();
                     updateUI();
                 }
@@ -1344,6 +1391,13 @@
                 audio.play('fail');
                 minigameState.kataifiProgress = Math.max(0, minigameState.kataifiProgress - 1);
                 document.getElementById('kataifi-mg-progress').textContent = minigameState.kataifiProgress;
+
+                // Break combo on failure
+                if (state.stats.combo > 0) {
+                    floatNumber('COMBO BROKEN!', window.innerWidth / 2, window.innerHeight / 3, '#ff4444');
+                    state.stats.combo = 0;
+                    updateUI();
+                }
             }
         }
 
@@ -1376,14 +1430,27 @@
 
             if (minigameState.pistachioProgress >= 15) {
                 setTimeout(() => {
-                    state.resources.pistachio += 15 * state.clickPower;
+                    // Combo system
+                    state.stats.combo++;
+                    state.stats.maxCombo = Math.max(state.stats.maxCombo, state.stats.combo);
+                    const comboMult = getComboMultiplier();
+
+                    state.resources.pistachio += 15 * state.clickPower * comboMult;
                     state.stats.minigamesPlayed++;
                     state.stats.perfectMinigames++;
                     audio.play('perfect');
                     screenShake(8);
                     closeMinigame();
-                    createParticles(window.innerWidth / 2, window.innerHeight / 2, '🥜', 15);
-                    floatNumber('PERFECT! 🥜', window.innerWidth / 2, window.innerHeight / 2, '#7CB342');
+                    createParticles(window.innerWidth / 2, window.innerHeight / 2, '🥜', 15 * comboMult);
+
+                    let msg = 'PERFECT! 🥜';
+                    if (state.stats.combo > 1) msg += ` ${state.stats.combo}x COMBO!`;
+                    floatNumber(msg, window.innerWidth / 2, window.innerHeight / 2, '#7CB342');
+
+                    if (state.stats.combo >= 5 && state.stats.combo % 5 === 0) {
+                        showEvent(`🔥 ${state.stats.combo} 콤보! ${comboMult}배 보너스 적용 중!`);
+                    }
+
                     checkAchievements();
                     updateUI();
                 }, 300);
@@ -1417,14 +1484,28 @@
 
                 if (minigameState.spreadProgress >= 100) {
                     stopSwirl();
-                    state.resources.spread += 5 * state.clickPower;
+
+                    // Combo system
+                    state.stats.combo++;
+                    state.stats.maxCombo = Math.max(state.stats.maxCombo, state.stats.combo);
+                    const comboMult = getComboMultiplier();
+
+                    state.resources.spread += 5 * state.clickPower * comboMult;
                     state.stats.minigamesPlayed++;
                     state.stats.perfectMinigames++;
                     audio.play('perfect');
                     screenShake(8);
                     closeMinigame();
-                    createParticles(window.innerWidth / 2, window.innerHeight / 2, '🍯', 8);
-                    floatNumber('PERFECT! 🍯', window.innerWidth / 2, window.innerHeight / 2, '#FFD700');
+                    createParticles(window.innerWidth / 2, window.innerHeight / 2, '🍯', 8 * comboMult);
+
+                    let msg = 'PERFECT! 🍯';
+                    if (state.stats.combo > 1) msg += ` ${state.stats.combo}x COMBO!`;
+                    floatNumber(msg, window.innerWidth / 2, window.innerHeight / 2, '#FFD700');
+
+                    if (state.stats.combo >= 5 && state.stats.combo % 5 === 0) {
+                        showEvent(`🔥 ${state.stats.combo} 콤보! ${comboMult}배 보너스 적용 중!`);
+                    }
+
                     checkAchievements();
                     updateUI();
                 }
@@ -1469,18 +1550,37 @@
             clearInterval(minigameState.doughInterval);
 
             if (perfect) {
-                state.resources.dough += 5 * state.clickPower;
+                // Combo system
+                state.stats.combo++;
+                state.stats.maxCombo = Math.max(state.stats.maxCombo, state.stats.combo);
+                const comboMult = getComboMultiplier();
+
+                state.resources.dough += 5 * state.clickPower * comboMult;
                 state.stats.minigamesPlayed++;
                 state.stats.perfectMinigames++;
                 audio.play('perfect');
                 screenShake(8);
-                createParticles(window.innerWidth / 2, window.innerHeight / 2, '🍪', 8);
-                floatNumber('PERFECT! 🍪', window.innerWidth / 2, window.innerHeight / 2, '#D4A574');
+                createParticles(window.innerWidth / 2, window.innerHeight / 2, '🍪', 8 * comboMult);
+
+                let msg = 'PERFECT! 🍪';
+                if (state.stats.combo > 1) msg += ` ${state.stats.combo}x COMBO!`;
+                floatNumber(msg, window.innerWidth / 2, window.innerHeight / 2, '#D4A574');
+
+                if (state.stats.combo >= 5 && state.stats.combo % 5 === 0) {
+                    showEvent(`🔥 ${state.stats.combo} 콤보! ${comboMult}배 보너스 적용 중!`);
+                }
+
                 checkAchievements();
             } else {
                 state.resources.dough += Math.ceil(2 * state.clickPower);
                 state.stats.minigamesPlayed++;
                 audio.play('success');
+
+                // Break combo on non-perfect
+                if (state.stats.combo > 0) {
+                    floatNumber('COMBO BROKEN!', window.innerWidth / 2, window.innerHeight / 3, '#ff4444');
+                    state.stats.combo = 0;
+                }
             }
 
             closeMinigame();
@@ -1534,12 +1634,12 @@
                 const tierPriceBonus = tier.bonuses.priceBonus || 1;
 
                 const basePrice = CONFIG.balance.chocolatePrice;
-                const price = Math.floor(basePrice * state.level * state.priceMultiplier * tierPriceBonus * (customer.tipMultiplier || 1));
+                const price = Math.floor(basePrice * state.level * state.priceMultiplier * tierPriceBonus * (customer.tipMultiplier || 1) * state.goldenTouchMultiplier);
                 const rep = Math.floor(10 * state.qualityMultiplier * (tier.bonuses.qualityBonus || 1));
 
                 state.money += price;
                 state.reputation += rep;
-                state.exp += price * 0.1;
+                state.exp += price * 0.1 * state.expMultiplier;
 
                 // Update stats
                 state.stats.totalSales++;
@@ -1611,6 +1711,10 @@
             else if (effect === 'customerSpeed') {}  // Handled in spawn logic
             else if (effect === 'qualityBoost') state.qualityMultiplier *= 1.5;
             else if (effect === 'efficiency') state.efficiencyMultiplier *= 0.9;
+            else if (effect === 'goldenTouch') state.goldenTouchMultiplier *= 1.2;
+            else if (effect === 'comboMaster') state.comboMasterBonus++;
+            else if (effect === 'expBoost') state.expMultiplier *= 1.3;
+            else if (effect === 'luckyCharm') state.luckyCharmBonus += 0.5;
         }
 
         function updateUpgradeList() {
@@ -1827,7 +1931,8 @@
 
         // Trigger random events every 2-5 minutes
         setInterval(() => {
-            if (Math.random() < 0.3) triggerRandomEvent();
+            const baseChance = 0.3 + state.luckyCharmBonus;
+            if (Math.random() < baseChance) triggerRandomEvent();
         }, 120000);
 
         function showEvent(message) {
@@ -1924,6 +2029,15 @@
             document.getElementById('dough-count').textContent = state.resources.dough;
             document.getElementById('finished-count').textContent = state.resources.finished;
 
+            // Combo display
+            const comboEl = document.getElementById('combo-display');
+            if (state.stats.combo > 0) {
+                comboEl.style.display = 'flex';
+                document.getElementById('combo').textContent = state.stats.combo;
+            } else {
+                comboEl.style.display = 'none';
+            }
+
             // Stats
             document.getElementById('stat-earnings').textContent = fmt(state.stats.totalEarnings);
             document.getElementById('stat-sales').textContent = state.stats.totalSales;
@@ -1931,6 +2045,7 @@
             document.getElementById('stat-angry').textContent = state.stats.angryCustomers;
             document.getElementById('stat-minigames').textContent = state.stats.minigamesPlayed;
             document.getElementById('stat-perfect').textContent = state.stats.perfectMinigames;
+            document.getElementById('stat-max-combo').textContent = state.stats.maxCombo;
             document.getElementById('stat-achievements').textContent = state.unlockedAchievements.length;
 
             // Assembly button
@@ -2064,9 +2179,12 @@
 
                     // Merge with defaults for backward compatibility
                     if (!data.stats) data.stats = state.stats;
+                    if (!data.stats.combo) data.stats.combo = 0;
+                    if (!data.stats.maxCombo) data.stats.maxCombo = 0;
                     if (!data.unlockedAchievements) data.unlockedAchievements = [];
                     if (!data.tutorial) data.tutorial = { completed: false, step: 0 };
                     if (!data.reputationTier) data.reputationTier = 'none';
+                    if (!data.prestige) data.prestige = { level: 0, tokens: 0, totalTokens: 0 };
 
                     Object.assign(state, data);
 
