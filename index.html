@@ -1051,6 +1051,16 @@
                 finished: 0
             },
 
+            // Material quality tracking
+            quality: {
+                kataifi: { normal: 0, premium: 0, luxury: 0, supreme: 0 },
+                pistachio: { normal: 0, premium: 0, luxury: 0, supreme: 0 },
+                dough: { normal: 0, premium: 0, luxury: 0, supreme: 0 }
+            },
+
+            // Finished chocolate quality queue
+            chocolateQuality: [],
+
             stats: {
                 totalSales: 0,
                 totalEarnings: 0,
@@ -1142,6 +1152,33 @@
             return baseMult + state.comboMasterBonus;
         }
 
+        // Get quality tier based on combo
+        function getQualityFromCombo() {
+            const combo = state.stats.combo;
+            if (combo >= 15) return 'supreme'; // 최상급
+            if (combo >= 10) return 'luxury';   // 프리미엄
+            if (combo >= 5) return 'premium';   // 고급
+            return 'normal';  // 일반
+        }
+
+        // Add quality materials
+        function addQualityMaterial(type, amount, isPerfect) {
+            const quality = isPerfect ? getQualityFromCombo() : 'normal';
+
+            if (!state.quality[type]) {
+                state.quality[type] = { normal: 0, premium: 0, luxury: 0, supreme: 0 };
+            }
+
+            state.quality[type][quality] += amount;
+            state.resources[type] += amount;
+
+            // Show quality notification for high quality materials
+            if (quality !== 'normal') {
+                const tier = QUALITY_TIERS[quality];
+                floatNumber(`${tier.emoji} ${tier.name} ${type}!`, window.innerWidth / 2, 150, '#FFD700');
+            }
+        }
+
         // Minigame state
         const minigameState = {
             active: null,
@@ -1189,7 +1226,23 @@
             { id: 'vip_1', name: 'VIP 서비스', desc: 'VIP 손님 첫 서빙', check: () => state.stats.vipServed >= 1, reward: 15000 },
             { id: 'vip_10', name: 'VIP 전문가', desc: 'VIP 손님 10명 서빙', check: () => state.stats.vipServed >= 10, reward: 50000 },
             { id: 'vip_50', name: 'VIP 매니저', desc: 'VIP 손님 50명 서빙', check: () => state.stats.vipServed >= 50, reward: 200000 },
-            { id: 'bulk_10', name: '대량 주문 처리', desc: '대량 주문 10회 완료', check: () => state.stats.bulkOrders >= 10, reward: 40000 }
+            { id: 'bulk_10', name: '대량 주문 처리', desc: '대량 주문 10회 완료', check: () => state.stats.bulkOrders >= 10, reward: 40000 },
+            { id: 'quality_premium', name: '고급 제조', desc: '고급 이상 재료 100개 획득', check: () => {
+                let total = 0;
+                ['kataifi', 'pistachio', 'dough'].forEach(type => {
+                    if (state.quality[type]) {
+                        total += (state.quality[type].premium || 0) + (state.quality[type].luxury || 0) + (state.quality[type].supreme || 0);
+                    }
+                });
+                return total >= 100;
+            }, reward: 25000 },
+            { id: 'quality_supreme', name: '최상급 장인', desc: '최상급 재료 10개 획득', check: () => {
+                let total = 0;
+                ['kataifi', 'pistachio', 'dough'].forEach(type => {
+                    if (state.quality[type]) total += (state.quality[type].supreme || 0);
+                });
+                return total >= 10;
+            }, reward: 100000 }
         ];
 
         // Customer personalities
@@ -1267,6 +1320,14 @@
             { id: 'token_generator', name: '💎 토큰 생성기', desc: '판매 100개당 토큰 +1', cost: 15, max: 1, effect: 'tokenGen' },
             { id: 'ultimate_power', name: '👑 궁극의 힘', desc: '모든 능력치 +100%', cost: 50, max: 1, effect: 'ultimate' }
         ];
+
+        // Quality Tiers
+        const QUALITY_TIERS = {
+            normal: { name: '일반', emoji: '⚪', priceBonus: 1.0, repBonus: 1.0, minScore: 0 },
+            premium: { name: '고급', emoji: '🔵', priceBonus: 1.5, repBonus: 1.3, minScore: 1 },
+            luxury: { name: '프리미엄', emoji: '🟣', priceBonus: 2.5, repBonus: 2.0, minScore: 2 },
+            supreme: { name: '최상급', emoji: '🟡', priceBonus: 5.0, repBonus: 3.0, minScore: 3 }
+        };
 
         // ============================================================================
         // AUDIO ENGINE
@@ -1538,7 +1599,10 @@
                     state.stats.maxCombo = Math.max(state.stats.maxCombo, state.stats.combo);
                     const comboMult = getComboMultiplier();
 
-                    state.resources.kataifi += 10 * state.clickPower * comboMult;
+                    // Add quality materials
+                    const amount = 10 * state.clickPower * comboMult;
+                    addQualityMaterial('kataifi', amount, true);
+
                     state.stats.minigamesPlayed++;
                     state.stats.perfectMinigames++;
                     state.stats.dailyMinigames++;
@@ -1607,7 +1671,10 @@
                     state.stats.maxCombo = Math.max(state.stats.maxCombo, state.stats.combo);
                     const comboMult = getComboMultiplier();
 
-                    state.resources.pistachio += 15 * state.clickPower * comboMult;
+                    // Add quality materials
+                    const amount = 15 * state.clickPower * comboMult;
+                    addQualityMaterial('pistachio', amount, true);
+
                     state.stats.minigamesPlayed++;
                     state.stats.perfectMinigames++;
                     state.stats.dailyMinigames++;
@@ -1731,7 +1798,10 @@
                 state.stats.maxCombo = Math.max(state.stats.maxCombo, state.stats.combo);
                 const comboMult = getComboMultiplier();
 
-                state.resources.dough += 5 * state.clickPower * comboMult;
+                // Add quality materials
+                const amount = 5 * state.clickPower * comboMult;
+                addQualityMaterial('dough', amount, true);
+
                 state.stats.minigamesPlayed++;
                 state.stats.perfectMinigames++;
                 state.stats.dailyMinigames++;
@@ -1777,6 +1847,33 @@
         // GAME ACTIONS
         // ============================================================================
 
+        // Consume materials with quality tracking
+        function consumeQualityMaterial(type, amount) {
+            let remaining = amount;
+            let totalQualityScore = 0;
+            const qualities = ['supreme', 'luxury', 'premium', 'normal'];
+            const qualityScores = { supreme: 3, luxury: 2, premium: 1, normal: 0 };
+
+            // Consume from highest quality first
+            for (const quality of qualities) {
+                if (!state.quality[type]) break;
+
+                const available = state.quality[type][quality] || 0;
+                const toConsume = Math.min(remaining, available);
+
+                if (toConsume > 0) {
+                    state.quality[type][quality] -= toConsume;
+                    totalQualityScore += toConsume * qualityScores[quality];
+                    remaining -= toConsume;
+                }
+
+                if (remaining === 0) break;
+            }
+
+            state.resources[type] -= amount;
+            return totalQualityScore / amount; // Average quality score
+        }
+
         function assembleChocolate() {
             const req = CONFIG.balance.assemblyRequires;
             const mult = state.efficiencyMultiplier;
@@ -1791,10 +1888,31 @@
                 state.resources.kataifi >= needs.kataifi &&
                 state.resources.spread >= needs.spread) {
 
-                state.resources.dough -= needs.dough;
-                state.resources.kataifi -= needs.kataifi;
+                // Consume materials and track quality
+                const doughQuality = consumeQualityMaterial('dough', needs.dough);
+                const kataifiQuality = consumeQualityMaterial('kataifi', needs.kataifi);
+
+                // Spread uses pistachio, so consume it
                 state.resources.spread -= needs.spread;
+
+                // Calculate average quality (dough + kataifi)
+                const avgQuality = (doughQuality + kataifiQuality) / 2;
+
+                // Determine chocolate quality tier
+                let chocolateQualityTier = 'normal';
+                if (avgQuality >= 2.5) chocolateQualityTier = 'supreme';
+                else if (avgQuality >= 1.5) chocolateQualityTier = 'luxury';
+                else if (avgQuality >= 0.5) chocolateQualityTier = 'premium';
+
+                // Add to finished chocolates with quality
                 state.resources.finished++;
+                state.chocolateQuality.push(chocolateQualityTier);
+
+                // Show quality notification
+                if (chocolateQualityTier !== 'normal') {
+                    const tier = QUALITY_TIERS[chocolateQualityTier];
+                    floatNumber(`${tier.emoji} ${tier.name} 초콜릿!`, window.innerWidth / 2, window.innerHeight / 2, '#FFD700');
+                }
 
                 audio.play('success');
                 createParticles(window.innerWidth / 2, window.innerHeight / 2, '🍫', 5);
@@ -1808,6 +1926,17 @@
 
             if (state.resources.finished >= requiredAmount) {
                 state.resources.finished -= requiredAmount;
+
+                // Get chocolate quality bonus (average of chocolates sold)
+                let totalQualityBonus = 0;
+                let avgChocolateQuality = 'normal';
+
+                for (let i = 0; i < requiredAmount; i++) {
+                    const chocolateQuality = state.chocolateQuality.shift() || 'normal';
+                    const qualityTier = QUALITY_TIERS[chocolateQuality];
+                    totalQualityBonus += qualityTier.priceBonus;
+                }
+                const chocolateQualityBonus = totalQualityBonus / requiredAmount;
 
                 // Get tier bonuses
                 const tier = REP_TIERS.find(t => t.name === state.reputationTier) || REP_TIERS[0];
@@ -1824,8 +1953,8 @@
 
                 const basePrice = CONFIG.balance.chocolatePrice;
                 const bulkBonus = customer.isVIP ? 1.5 : 1; // VIP bulk order bonus
-                const price = Math.floor(basePrice * state.level * state.priceMultiplier * tierPriceBonus * (customer.tipMultiplier || 1) * state.goldenTouchMultiplier * seasonBonus.price * recipeBonus * moneyBonus * requiredAmount * bulkBonus);
-                const rep = Math.floor(10 * state.qualityMultiplier * (tier.bonuses.qualityBonus || 1) * seasonBonus.quality * qualityBonus * (customer.isVIP ? 2 : 1));
+                const price = Math.floor(basePrice * state.level * state.priceMultiplier * tierPriceBonus * (customer.tipMultiplier || 1) * state.goldenTouchMultiplier * seasonBonus.price * recipeBonus * moneyBonus * requiredAmount * bulkBonus * chocolateQualityBonus);
+                const rep = Math.floor(10 * state.qualityMultiplier * (tier.bonuses.qualityBonus || 1) * seasonBonus.quality * qualityBonus * (customer.isVIP ? 2 : 1) * chocolateQualityBonus);
 
                 state.money += price;
                 state.reputation += rep;
@@ -2177,15 +2306,18 @@
             // Apply prestige production bonus
             const prodBonus = getPrestigeBonus('production');
 
-            // Auto harvest
+            // Auto harvest (normal quality only)
             if (state.autoProduction.kataifi > 0) {
-                state.resources.kataifi += Math.floor(state.autoProduction.kataifi * prodBonus);
+                const amount = Math.floor(state.autoProduction.kataifi * prodBonus);
+                addQualityMaterial('kataifi', amount, false);
             }
             if (state.autoProduction.pistachio > 0) {
-                state.resources.pistachio += Math.floor(state.autoProduction.pistachio * prodBonus);
+                const amount = Math.floor(state.autoProduction.pistachio * prodBonus);
+                addQualityMaterial('pistachio', amount, false);
             }
             if (state.autoProduction.dough > 0) {
-                state.resources.dough += Math.floor(state.autoProduction.dough * prodBonus);
+                const amount = Math.floor(state.autoProduction.dough * prodBonus);
+                addQualityMaterial('dough', amount, false);
             }
 
             // Auto spread
@@ -2873,6 +3005,14 @@
                     if (!data.stats.dailyAngry) data.stats.dailyAngry = 0;
                     if (!data.stats.vipServed) data.stats.vipServed = 0;
                     if (!data.stats.bulkOrders) data.stats.bulkOrders = 0;
+                    if (!data.quality) {
+                        data.quality = {
+                            kataifi: { normal: 0, premium: 0, luxury: 0, supreme: 0 },
+                            pistachio: { normal: 0, premium: 0, luxury: 0, supreme: 0 },
+                            dough: { normal: 0, premium: 0, luxury: 0, supreme: 0 }
+                        };
+                    }
+                    if (!data.chocolateQuality) data.chocolateQuality = [];
                     if (!data.unlockedAchievements) data.unlockedAchievements = [];
                     if (!data.tutorial) data.tutorial = { completed: false, step: 0 };
                     if (!data.reputationTier) data.reputationTier = 'none';
