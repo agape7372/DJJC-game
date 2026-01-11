@@ -897,6 +897,12 @@
                     </div>
                 </div>
 
+                <!-- Story Quest -->
+                <div style="padding: 16px; margin-top: 20px; background: linear-gradient(135deg, rgba(138,43,226,0.3), rgba(75,0,130,0.3)); border-radius: 12px; margin: 16px; border: 2px solid rgba(138,43,226,0.5);">
+                    <div style="font-size: 18px; font-weight: bold; color: var(--gold); margin-bottom: 12px;">📖 스토리 퀘스트</div>
+                    <div id="current-quest" style="font-size: 14px;"></div>
+                </div>
+
                 <div style="padding: 16px; margin-top: 20px; background: rgba(0,0,0,0.4); border-radius: 12px; margin: 16px;">
                     <div style="font-size: 18px; font-weight: bold; color: var(--gold); margin-bottom: 12px;">📊 통계</div>
                     <div style="font-size: 14px; line-height: 1.8;">
@@ -1137,6 +1143,11 @@
             recipes: {
                 unlocked: ['classic'],
                 discovered: 0
+            },
+
+            quests: {
+                current: 0,
+                completed: []
             }
         };
 
@@ -1328,6 +1339,25 @@
             luxury: { name: '프리미엄', emoji: '🟣', priceBonus: 2.5, repBonus: 2.0, minScore: 2 },
             supreme: { name: '최상급', emoji: '🟡', priceBonus: 5.0, repBonus: 3.0, minScore: 3 }
         };
+
+        // Story Quests
+        const STORY_QUESTS = [
+            { id: 'quest_1', title: '첫 시작', desc: '초콜릿 5개 판매', check: () => state.stats.totalSales >= 5, reward: { money: 5000 }, story: '당신의 초콜릿 가게가 조금씩 알려지기 시작했습니다!' },
+            { id: 'quest_2', title: '명성 쌓기', desc: '평판 50 달성', check: () => state.reputation >= 50, reward: { money: 10000 }, story: '사람들이 당신의 초콜릿을 찾기 시작했습니다!' },
+            { id: 'quest_3', title: '자동화의 시작', desc: '자동화 업그레이드 구매', check: () => state.upgrades.autoKataifi > 0 || state.upgrades.autoPistachio > 0, reward: { money: 15000 }, story: '효율적인 생산 시스템을 갖추었습니다!' },
+            { id: 'quest_4', title: '완벽한 기술', desc: '퍼펙트 미니게임 10회', check: () => state.stats.perfectMinigames >= 10, reward: { money: 20000 }, story: '당신은 진정한 장인이 되어가고 있습니다!' },
+            { id: 'quest_5', title: 'VIP의 등장', desc: 'VIP 손님 서빙', check: () => state.stats.vipServed >= 1, reward: { money: 30000 }, story: '유명인들도 당신의 초콜릿을 찾기 시작했습니다!' },
+            { id: 'quest_6', title: '품질 장인', desc: '고급 이상 재료 20개', check: () => {
+                let total = 0;
+                ['kataifi', 'pistachio', 'dough'].forEach(type => {
+                    if (state.quality[type]) {
+                        total += (state.quality[type].premium || 0) + (state.quality[type].luxury || 0) + (state.quality[type].supreme || 0);
+                    }
+                });
+                return total >= 20;
+            }, reward: { money: 40000 }, story: '최고 품질의 재료로 명품 초콜릿을 만들 수 있게 되었습니다!' },
+            { id: 'quest_7', title: '레전드 달성', desc: '레벨 20 달성', check: () => state.level >= 20, reward: { money: 100000 }, story: '당신은 이제 두바이 초콜릿계의 전설입니다!' }
+        ];
 
         // ============================================================================
         // AUDIO ENGINE
@@ -1525,6 +1555,25 @@
                     showAchievement(`🏆 ${ach.name}\n${ach.desc}\n보상: ₩${fmt(ach.reward)}`);
                 }
             });
+        }
+
+        function checkQuests() {
+            if (state.quests.current >= STORY_QUESTS.length) return;
+
+            const quest = STORY_QUESTS[state.quests.current];
+            if (quest && quest.check() && !state.quests.completed.includes(quest.id)) {
+                state.quests.completed.push(quest.id);
+                state.quests.current++;
+
+                // Grant rewards
+                if (quest.reward.money) {
+                    state.money += quest.reward.money;
+                }
+
+                audio.play('achievement');
+                showAchievement(`📖 퀘스트 완료!\n${quest.title}\n\n${quest.story}\n\n보상: ₩${fmt(quest.reward.money)}`);
+                updateUI();
+            }
         }
 
         // ============================================================================
@@ -2777,6 +2826,7 @@
             if (prestigeLevelEl) prestigeLevelEl.textContent = state.prestige.level;
 
             updatePrestigeUI();
+            checkQuests();
 
             // Assembly button
             const req = CONFIG.balance.assemblyRequires;
@@ -3013,6 +3063,7 @@
                         };
                     }
                     if (!data.chocolateQuality) data.chocolateQuality = [];
+                    if (!data.quests) data.quests = { current: 0, completed: [] };
                     if (!data.unlockedAchievements) data.unlockedAchievements = [];
                     if (!data.tutorial) data.tutorial = { completed: false, step: 0 };
                     if (!data.reputationTier) data.reputationTier = 'none';
